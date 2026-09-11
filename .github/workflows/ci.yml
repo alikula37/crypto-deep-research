@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Python 3.11 kurulumu
+        run: uv python install 3.11
+      - name: Bagimliliklari kur
+        run: uv sync --extra dev --python 3.11
+      - name: Lint
+        run: uv run ruff check src tests
+      - name: Testler
+        env:
+          CDR_EMBEDDINGS_ENABLED: "false"
+        run: uv run pytest -q
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Bagimliliklari kur
+        run: npm ci || npm install
+      - name: Derle
+        run: npm run build
