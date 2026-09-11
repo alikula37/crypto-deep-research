@@ -96,6 +96,47 @@ cd web && npm install && npm run dev    # http://localhost:5173
 
 ---
 
+## Docker ile Çalıştırma
+
+Docker Desktop veya Colima ile çalışır. Veriler `./data` altında kalıcıdır
+(SQLite, raporlar, promptlar, vektör deposu, embedding önbelleği).
+
+```bash
+# İmajı derle ve web UI + API'yi başlat
+docker compose build
+docker compose up -d          # http://127.0.0.1:8000
+docker compose logs -f
+docker compose down
+```
+
+CLI komutları konteynerde:
+
+```bash
+docker compose run --rm app cdr snapshot bitcoin
+docker compose run --rm app cdr analyze bitcoin -t technical,news
+docker compose run --rm app cdr deep-research bitcoin --platform claude
+docker compose exec app cdr search "ETF akislari" --coin bitcoin
+```
+
+MCP server (stdio) konteynerde:
+
+```bash
+docker run -i --rm -v "$PWD/data:/data" crypto-deep-research:latest /app/.venv/bin/cdr mcp
+```
+
+Colima kurulumu (Docker Desktop alternatifi, hesap gerektirmez):
+
+```bash
+brew install colima docker docker-compose
+colima start --cpu 4 --memory 6 --disk 40
+brew services start colima     # açılışta otomatik başlat (opsiyonel)
+```
+
+Not: Embedding modeli ilk RAG kullanımında indirilir ve `./data/fastembed` altında
+saklanır (~2GB); sonraki çalıştırmalarda yeniden indirilmez.
+
+---
+
 ## MCP Entegrasyonu
 
 MCP server `uv run cdr mcp` komutuyla stdio üzerinden çalışır. Claude Desktop için
