@@ -259,10 +259,14 @@ korunacak şekilde ayarlanmıştır.
 ## Geliştirme
 
 ```bash
-uv run pytest -q            # testler
-uv run ruff check src tests # lint
-cd web && npm run build     # web derleme
+uv run pytest -q                # Python testleri
+uv run ruff check src tests     # lint
+cd web && npm test              # web birim testleri (Vitest)
+cd web && npm run build         # web derleme
 ```
+
+Bağımlılık güncellemeleri Dependabot ile haftalık açılır; CI yeşil olduğunda
+otomatik olarak squash ile birleştirilir (`dependabot-auto-merge` iş akışı).
 
 CI: GitHub Actions (`ruff` + `pytest` + web build).
 

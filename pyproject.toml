@@ -1,6 +1,6 @@
 [project]
 name = "crypto-deep-research"
-version = "0.1.0"
+version = "0.2.0"
 description = "Kripto paralar için yerel RAG + 66 maddelik deep research ve context yönetim sistemi"
 readme = "README.md"
 requires-python = ">=3.10"

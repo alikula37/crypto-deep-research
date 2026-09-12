@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Crypto Deep Research",
     description="Kripto paralar için yerel RAG + 66 maddelik deep research sistemi",
-    version="0.1.0",
+    version="0.2.0",
 )
 app.add_middleware(
     CORSMiddleware,

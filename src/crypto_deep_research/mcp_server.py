@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from typing import Any
 
 from mcp.server.mcpserver import MCPServer
@@ -12,6 +13,7 @@ from crypto_deep_research.analysis.engine import run_analyses
 from crypto_deep_research.config import get_settings
 from crypto_deep_research.deep_research.engine import DeepResearchEngine
 from crypto_deep_research.deep_research.registry import registry_summary
+from crypto_deep_research.models import Kline
 from crypto_deep_research.providers.registry import build_providers
 from crypto_deep_research.rag.engine import RAGEngine
 from crypto_deep_research.storage.db import Database
@@ -23,7 +25,7 @@ server = MCPServer(
         "deep research araçlari sunar. Skorlar -1 (negatif) ile +1 (pozitif) arasındadir; "
         "yatırım tavsiyesi değildir."
     ),
-    version="0.1.0",
+    version="0.2.0",
 )
 
 
@@ -92,6 +94,59 @@ async def run_analysis(
         )
         results = await run_analyses(ctx, [analysis])
         return results[0].model_dump(mode="json") if results else {"error": "analiz yok"}
+    finally:
+        await providers.aclose()
+
+
+@server.tool()
+async def get_price_chart(
+    coin: str, timeframe: str = "1d", limit: int = 200
+) -> dict[str, Any]:
+    """Timeframe bazlı OHLCV mum verisi döndürür (grafik/araçlar için).
+
+    timeframe: 15m, 30m, 1h, 4h, 1d, 1w. Yedek olarak CoinGecko kapanış serisi kullanılır.
+    """
+    settings, db, providers = _context()
+    try:
+        ref = await providers.coingecko.resolve(coin)
+        limit = min(max(limit, 30), 1000)
+        klines = await providers.exchange.klines(ref.symbol, timeframe, limit)
+        source = "Binance"
+        if not klines:
+            days_map = {"15m": 1, "30m": 1, "1h": 7, "4h": 14, "1d": 90, "1w": 365}
+            chart = await providers.coingecko.market_chart(
+                ref.id, days=days_map.get(timeframe, 90)
+            )
+            prices = [pair for pair in chart.get("prices") or [] if pair and pair[1]]
+            klines = [
+                Kline(
+                    ts=datetime.fromtimestamp(pair[0] / 1000, tz=timezone.utc),
+                    open=float(pair[1]),
+                    high=float(pair[1]),
+                    low=float(pair[1]),
+                    close=float(pair[1]),
+                    volume=0.0,
+                )
+                for pair in prices[-limit:]
+            ]
+            source = "CoinGecko (kapanış fiyatları)"
+        return {
+            "coin": ref.model_dump(),
+            "timeframe": timeframe,
+            "source": source,
+            "count": len(klines),
+            "candles": [
+                {
+                    "t": kline.ts.isoformat(),
+                    "o": kline.open,
+                    "h": kline.high,
+                    "l": kline.low,
+                    "c": kline.close,
+                    "v": kline.volume,
+                }
+                for kline in klines
+            ],
+        }
     finally:
         await providers.aclose()
 

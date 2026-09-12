@@ -95,7 +95,9 @@ async def analyze_ath_atl(ctx: AnalysisContext) -> AnalysisResult:
         else f"Fiyat {fmt_price(price)}; ATH/ATL verisi kısmi."
     )
     if percentile is not None:
-        summary += f" Yerel 500 mum aralık konumu: %{percentile * 100:.0f}."
+        summary += (
+            f" Yerel {data.get('kline_days', 0)} mum aralık konumu: %{percentile * 100:.0f}."
+        )
 
     return ctx.result(
         "ath_atl",

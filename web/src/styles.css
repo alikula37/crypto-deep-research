@@ -295,3 +295,11 @@ button.accent { background: var(--accent-2); border-color: var(--accent-2); colo
   .markdown th { background: #eee; }
   .card { break-inside: avoid; border-color: #ccc; background: #fff; color: #111; }
 }
+
+/* Grafik: hacim, tooltip, isaret */
+.chart-volume { fill: rgba(76, 141, 255, 0.22); }
+.chart-tooltip-box { fill: var(--bg-soft); stroke: var(--border); stroke-width: 1; }
+.chart-tooltip-text { fill: var(--text); font-size: 10px; }
+.chart-tooltip-text.up { fill: var(--green); }
+.chart-tooltip-text.down { fill: var(--red); }
+.chart-dot { fill: var(--accent); stroke: var(--bg); stroke-width: 1.5; }

@@ -3,7 +3,9 @@ import { formatAxisDate, formatDateTime, num, pct, price } from "./format.js";
 
 const TIMEFRAMES = ["15m", "30m", "1h", "4h", "1d", "1w"];
 const HEIGHT = 280;
-const PADDING = { top: 16, right: 74, bottom: 26, left: 10 };
+const PADDING = { top: 16, right: 78, bottom: 26, left: 10 };
+const TOOLTIP_WIDTH = 176;
+const TOOLTIP_HEIGHT = 92;
 
 export default function PriceChart({ coin, defaultTimeframe = "1d" }) {
   const [timeframe, setTimeframe] = useState(defaultTimeframe);
@@ -58,6 +60,7 @@ export default function PriceChart({ coin, defaultTimeframe = "1d" }) {
     const min = Math.min(...lows);
     const span = max - min || max * 0.01 || 1;
     const xStep = plotWidth / candles.length;
+    const bodyWidth = Math.max(1, xStep * 0.65);
     const x = (index) => PADDING.left + index * xStep + xStep / 2;
     const y = (value) => PADDING.top + ((max - value) / span) * plotHeight;
     const lineOnly = candles.every(
@@ -70,7 +73,27 @@ export default function PriceChart({ coin, defaultTimeframe = "1d" }) {
       const value = min + (span * index) / 4;
       return { value, y: y(value) };
     });
-    return { plotWidth, plotHeight, max, min, x, y, xStep, lineOnly, linePath, gridLines };
+    const volumes = candles.map((candle) => candle.v || 0);
+    const maxVolume = Math.max(...volumes, 0);
+    const hasVolume = maxVolume > 0;
+    const volumeHeight = plotHeight * 0.16;
+    const yVolume = (value) =>
+      HEIGHT - PADDING.bottom - (maxVolume ? (value / maxVolume) * volumeHeight : 0);
+    return {
+      plotWidth,
+      plotHeight,
+      max,
+      min,
+      x,
+      y,
+      xStep,
+      bodyWidth,
+      lineOnly,
+      linePath,
+      gridLines,
+      hasVolume,
+      yVolume,
+    };
   }, [candles, width]);
 
   const stats = useMemo(() => {
@@ -92,6 +115,17 @@ export default function PriceChart({ coin, defaultTimeframe = "1d" }) {
     const index = Math.min(candles.length - 1, Math.max(0, Math.floor(xPos / view.xStep)));
     setHoverIndex(index);
   };
+
+  const tooltip = useMemo(() => {
+    if (!view || !hovered || hoverIndex === null) return null;
+    const tx = Math.min(
+      Math.max(PADDING.left, view.x(hoverIndex) + 12),
+      width - PADDING.right - TOOLTIP_WIDTH
+    );
+    const ty = Math.max(PADDING.top, view.y(hovered.c) - TOOLTIP_HEIGHT - 12);
+    const change = hovered.o ? (hovered.c / hovered.o - 1) * 100 : 0;
+    return { tx, ty, change };
+  }, [hovered, hoverIndex, view, width]);
 
   return (
     <div className="card chart-card" ref={containerRef}>
@@ -141,10 +175,25 @@ export default function PriceChart({ coin, defaultTimeframe = "1d" }) {
                 className="chart-grid"
               />
               <text x={width - PADDING.right + 6} y={line.y + 4} className="chart-axis">
-                {price(line.value)}
+                {num(line.value, 3)}
               </text>
             </g>
           ))}
+
+          {view.hasVolume &&
+            candles.map((candle, index) => {
+              const top = view.yVolume(candle.v || 0);
+              return (
+                <rect
+                  key={`vol-${candle.t}`}
+                  x={view.x(index) - view.bodyWidth / 2}
+                  y={top}
+                  width={view.bodyWidth}
+                  height={Math.max(0.5, HEIGHT - PADDING.bottom - top)}
+                  className="chart-volume"
+                />
+              );
+            })}
 
           {view.lineOnly && <path d={view.linePath} className="chart-line" />}
 
@@ -154,7 +203,6 @@ export default function PriceChart({ coin, defaultTimeframe = "1d" }) {
               const bodyTop = view.y(Math.max(candle.o, candle.c));
               const bodyBottom = view.y(Math.min(candle.o, candle.c));
               const bodyHeight = Math.max(1, bodyBottom - bodyTop);
-              const bodyWidth = Math.max(1, view.xStep * 0.65);
               return (
                 <g key={candle.t} className={rising ? "candle-up" : "candle-down"}>
                   <line
@@ -165,9 +213,9 @@ export default function PriceChart({ coin, defaultTimeframe = "1d" }) {
                     className="candle-wick"
                   />
                   <rect
-                    x={view.x(index) - bodyWidth / 2}
+                    x={view.x(index) - view.bodyWidth / 2}
                     y={bodyTop}
-                    width={bodyWidth}
+                    width={view.bodyWidth}
                     height={bodyHeight}
                     className="candle-body"
                   />
@@ -189,7 +237,7 @@ export default function PriceChart({ coin, defaultTimeframe = "1d" }) {
               </text>
             ))}
 
-          {hovered && (
+          {hovered && hoverIndex !== null && (
             <g>
               <line
                 x1={view.x(hoverIndex)}
@@ -205,6 +253,41 @@ export default function PriceChart({ coin, defaultTimeframe = "1d" }) {
                 y2={view.y(hovered.c)}
                 className="chart-crosshair"
               />
+              <circle cx={view.x(hoverIndex)} cy={view.y(hovered.c)} r={3.5} className="chart-dot" />
+            </g>
+          )}
+
+          {tooltip && hovered && (
+            <g>
+              <rect
+                x={tooltip.tx}
+                y={tooltip.ty}
+                width={TOOLTIP_WIDTH}
+                height={TOOLTIP_HEIGHT}
+                rx={8}
+                className="chart-tooltip-box"
+              />
+              <text x={tooltip.tx + 10} y={tooltip.ty + 17} className="chart-tooltip-text">
+                {formatDateTime(hovered.t)}
+              </text>
+              <text x={tooltip.tx + 10} y={tooltip.ty + 34} className="chart-tooltip-text">
+                A {price(hovered.o)} · Y {price(hovered.h)}
+              </text>
+              <text x={tooltip.tx + 10} y={tooltip.ty + 51} className="chart-tooltip-text">
+                D {price(hovered.l)} · K {price(hovered.c)}
+              </text>
+              <text
+                x={tooltip.tx + 10}
+                y={tooltip.ty + 68}
+                className={`chart-tooltip-text ${tooltip.change >= 0 ? "up" : "down"}`}
+              >
+                Değişim {pct(tooltip.change, { signed: true })}
+              </text>
+              {hovered.v ? (
+                <text x={tooltip.tx + 10} y={tooltip.ty + 85} className="chart-tooltip-text">
+                  Hacim {num(hovered.v, 4)}
+                </text>
+              ) : null}
             </g>
           )}
         </svg>
@@ -219,7 +302,8 @@ export default function PriceChart({ coin, defaultTimeframe = "1d" }) {
           </span>
         ) : (
           <span className="muted">
-            {source ? `Kaynak: ${source}` : ""} {stats ? `· En yüksek ${price(stats.high)} · En düşük ${price(stats.low)}` : ""}
+            {source ? `Kaynak: ${source}` : ""}{" "}
+            {stats ? `· En yüksek ${price(stats.high)} · En düşük ${price(stats.low)}` : ""}
           </span>
         )}
       </div>

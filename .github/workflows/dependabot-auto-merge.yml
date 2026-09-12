@@ -1,0 +1,32 @@
+name: Dependabot auto-merge
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'pull_request'
+    steps:
+      - name: Dependabot PR'ini bul ve squash ile birleştir
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          pr_number=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open \
+            --json number,headRefName,author \
+            --jq ".[] | select(.headRefName == \"$HEAD_BRANCH\") | select(.author.login == \"dependabot[bot]\") | .number")
+          if [ -n "$pr_number" ]; then
+            gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
+          else
+            echo "Bu dal icin acik dependabot PR'i yok: $HEAD_BRANCH"
+          fi
