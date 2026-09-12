@@ -1,12 +1,12 @@
-# Bitcoin (BTC) - Kripto Deep Research Raporu
+# Bitcoin (BTC) - Kripto Araştırma Raporu
 
-- **Tarih:** 12.09.2026 08:54 UTC
-- **Fiyat:** $77.344
+- **Tarih:** 12.09.2026 11:07 UTC
+- **Fiyat:** $77.316
 - **Timeframe:** 1d | **Geçmiş penceresi:** 365 gün
-- **Ağırlıklı skor:** +0,08
-- **Yükseliş / Düşüş olasılığı:** %53.4 / %46.6
-- **Beklenen aralık:** $75.091,87 – $79.638,53
-- **66 madde:** 58 tam, 6 kısmi, 2 veri yok (63 madde skorlandı)
+- **Ağırlıklı skor:** +0,01
+- **Yükseliş / Düşüş olasılığı:** %50.5 / %49.5
+- **Beklenen aralık:** $75.115,97 – $79.523,12
+- **Araştırma:** 66 kriter · 49 tam, 3 kısmi, 14 veri yok (47 kriter skorlandı)
 
 > Bu rapor otomatik üretilmiştir ve yatırım tavsiyesi değildir. Skorlar veri ağırlıklı
 > tahminlerdir; kesinlik iddiası taşımaz.
@@ -15,34 +15,34 @@
 
 | Analiz | Durum | Skor | Güven | Özet |
 | --- | --- | --- | --- | --- |
-| Teknik Analiz | Tam | +0,19 | 1.00 | Fiyat $77.368,74; RSI 55,3, MACD histogram -751. En yakın destek $76.401, en yakın direnç $78.204,33. Mum formasyonları: Üç beyaz asker (yükseliş). |
-| Likidasyon Haritası ve Türev Piyasalar | Tam | +0,00 | 0.35 | Fiyat $77.344. En yakın likidasyon seviyeleri: $76.570,56 (long 100x), $78.117,44 (short 100x), $75.797,12 (long 50x), $78.890,88 (short 50x). |
-| Balina Alım-Satım / Toplam Arz | Tam | +0,00 | 0.22 | 2 büyük transfer tarandı. Borsaya giriş 0 BTC, çıkış 0 BTC. Stablecoin arzı 7 günlük değişimi -%0,0. |
-| Tüm Borsalardaki Hacimler | Tam | +0,00 | 0.60 | 24s toplam hacim ~$35,4B. En büyük borsalar: BTCC ($3,64B), CoinUp.io ($2,67B), Pionex ($2,36B), Binance ($2,16B) |
+| Teknik Analiz | Tam | +0,19 | 0.85 | Fiyat $77.310,52; RSI 55,2, MACD histogram -755. En yakın destek $76.401, en yakın direnç $78.204,33. Mum formasyonları: Üç beyaz asker (yükseliş). |
+| Likidasyon Haritası ve Türev Piyasalar | Tam | +0,00 | 0.35 | Fiyat $77.316. En yakın likidasyon seviyeleri: $76.542,84 (long 100x), $78.089,16 (short 100x), $75.769,68 (long 50x), $78.862,32 (short 50x). |
+| Balina Alım-Satım / Toplam Arz | Kısmi | — | 0.00 | Son bloklarda eşiği aşan büyük transfer bulunamadı; yön sinyali üretilemedi (bu, sıfır akış anlamına gelmez, örneklem sınırlıdır). |
+| Tüm Borsalardaki Hacimler | Tam | +0,00 | 0.60 | 24s toplam hacim ~$34,5B. En büyük borsalar: BTCC ($3,53B), CoinUp.io ($2,59B), Pionex ($2,29B), Binance ($2,1B) |
 | Gelirler, Fee'ler ve Mcap Oranı | Tam | -0,30 | 0.40 | Günlük fee $241,4K (yıllık ~$88,1M); fee/mcap getirisi %0,01 |
-| Son Haberler ve Sentiment Skorları | Tam | +0,01 | 0.30 | 24s 15 haber incelendi; ortalama sentiment 0.01 (pozitif 5, negatif 6). 72s ortalama: -0.08. |
-| Geçmiş Mcap / Güncel Mcap Oranı | Tam | +0,21 | 0.80 | Güncel mcap $1,55T; 30 gün mcap oranı ×1,22 (+%22,0), 365 günlük yüzdelik %50, zirveden uzaklık -%37,5. |
-| BTC/ETH Paritesi ve Direnç Mesafesi | Tam | -0,05 | 0.70 | Coin/BTC oranı 0,03277; 30g +%10,3; BTC dominance %58.2. |
-| USD Bazlı ATH ve ATL Mesafesi | Tam | +0,00 | 0.90 | Fiyat $77.344. ATH'e uzaklık -%38,7, ATL'e uzaklık >%9.999. Yerel 500 mum aralık konumu: %29. |
+| Son Haberler ve Sentiment Skorları | Tam | -0,08 | 0.24 | 24s 12 haber incelendi; ortalama sentiment -0.03 (pozitif 4, negatif 5). 72s ortalama: -0.12. |
+| Geçmiş Mcap / Güncel Mcap Oranı | Tam | +0,21 | 0.80 | Güncel mcap $1,55T; 30 gün mcap oranı ×1,22 (+%22,0), 365 günlük yüzdelik %50, zirveden uzaklık -%37,6. |
+| BTC/ETH Paritesi ve Direnç Mesafesi | Tam | -0,05 | 0.70 | Coin/BTC oranı 0,03276; 30g +%10,3; BTC dominance %58.2. |
+| USD Bazlı ATH ve ATL Mesafesi | Tam | +0,00 | 0.90 | Fiyat $77.316. ATH'e uzaklık -%38,7, ATL'e uzaklık >%9.999. Yerel 500 mum aralık konumu: %29. |
 | Coinler Arasi Mcap Sıralaması | Tam | +0,30 | 0.80 | Güncel sıralama #1. Top 100 mcap yüzdeliği %100. |
 
 ### Teknik Analiz
 
-Fiyat $77.368,74; RSI 55,3, MACD histogram -751. En yakın destek $76.401, en yakın direnç $78.204,33. Mum formasyonları: Üç beyaz asker (yükseliş).
+Fiyat $77.310,52; RSI 55,2, MACD histogram -755. En yakın destek $76.401, en yakın direnç $78.204,33. Mum formasyonları: Üç beyaz asker (yükseliş).
 
 **Nedenler:**
-- RSI 55.3 nötr
+- RSI 55.2 nötr
 - MACD negatif ve zayıflıyor
 - Fiyat 200 EMA üzerinde (uzun trend pozitif)
 - Fiyat 50 EMA üzerinde (orta trend pozitif)
-- Direnç bölgesine çok yakın (%1.08)
-- Destek bölgesine çok yakın (%1.27)
+- Direnç bölgesine çok yakın (%1.16)
+- Destek bölgesine çok yakın (%1.19)
 
 **Kaynaklar:** Binance
 
 ### Likidasyon Haritası ve Türev Piyasalar
 
-Fiyat $77.344. En yakın likidasyon seviyeleri: $76.570,56 (long 100x), $78.117,44 (short 100x), $75.797,12 (long 50x), $78.890,88 (short 50x).
+Fiyat $77.316. En yakın likidasyon seviyeleri: $76.542,84 (long 100x), $78.089,16 (short 100x), $75.769,68 (long 50x), $78.862,32 (short 50x).
 
 **Nedenler:**
 - Gerçek likidasyon geçmişi için Coinalyze anahtari yok; seviyeler OI tahmini
@@ -51,19 +51,19 @@ Fiyat $77.344. En yakın likidasyon seviyeleri: $76.570,56 (long 100x), $78.117,
 
 ### Balina Alım-Satım / Toplam Arz
 
-2 büyük transfer tarandı. Borsaya giriş 0 BTC, çıkış 0 BTC. Stablecoin arzı 7 günlük değişimi -%0,0.
+Son bloklarda eşiği aşan büyük transfer bulunamadı; yön sinyali üretilemedi (bu, sıfır akış anlamına gelmez, örneklem sınırlıdır).
 
 **Nedenler:**
-- Transfer yönü etiketlenemedi; hacim volatilite göstergesi olarak kullanıldı
+- Stablecoin arzı 7 günde %-0.04 (bilgi amaçlı; akış skoru 62. maddede)
 
 **Kaynaklar:** DefiLlama Stablecoins, blockchain.com
 
 ### Tüm Borsalardaki Hacimler
 
-24s toplam hacim ~$35,4B. En büyük borsalar: BTCC ($3,64B), CoinUp.io ($2,67B), Pionex ($2,36B), Binance ($2,16B)
+24s toplam hacim ~$34,5B. En büyük borsalar: BTCC ($3,53B), CoinUp.io ($2,59B), Pionex ($2,29B), Binance ($2,1B)
 
 **Nedenler:**
-- Borsalar arasi fiyat tutarli (sapma %0.005)
+- Borsalar arasi fiyat tutarli (sapma %0.000)
 - Binance/OKX/Bybit hacimleri doğrulandi
 
 **Kaynaklar:** Binance, Bybit, CoinGecko, OKX
@@ -79,17 +79,17 @@ Günlük fee $241,4K (yıllık ~$88,1M); fee/mcap getirisi %0,01
 
 ### Son Haberler ve Sentiment Skorları
 
-24s 15 haber incelendi; ortalama sentiment 0.01 (pozitif 5, negatif 6). 72s ortalama: -0.08.
+24s 12 haber incelendi; ortalama sentiment -0.03 (pozitif 4, negatif 5). 72s ortalama: -0.12.
 
 **Nedenler:**
-- 24s haber sentiment nötr (0.01)
+- 24s haber sentiment nötr (-0.03)
 - Haber yazilma hızı arttı (son 6s önceki 6s'in 2.0x): volatilite riski
 
 **Kaynaklar:** CryptoPanic, GDELT, RSS (CoinDesk/Cointelegraph/Decrypt/The Block)
 
 ### Geçmiş Mcap / Güncel Mcap Oranı
 
-Güncel mcap $1,55T; 30 gün mcap oranı ×1,22 (+%22,0), 365 günlük yüzdelik %50, zirveden uzaklık -%37,5.
+Güncel mcap $1,55T; 30 gün mcap oranı ×1,22 (+%22,0), 365 günlük yüzdelik %50, zirveden uzaklık -%37,6.
 
 **Nedenler:**
 - Mcap 365 günlük aralıkta %50. yüzdelikte
@@ -99,7 +99,7 @@ Güncel mcap $1,55T; 30 gün mcap oranı ×1,22 (+%22,0), 365 günlük yüzdelik
 
 ### BTC/ETH Paritesi ve Direnç Mesafesi
 
-Coin/BTC oranı 0,03277; 30g +%10,3; BTC dominance %58.2.
+Coin/BTC oranı 0,03276; 30g +%10,3; BTC dominance %58.2.
 
 **Nedenler:**
 - ETH/BTC yükseliyor (%10.3): BTC'den ETH'e rotasyon
@@ -110,7 +110,7 @@ Coin/BTC oranı 0,03277; 30g +%10,3; BTC dominance %58.2.
 
 ### USD Bazlı ATH ve ATL Mesafesi
 
-Fiyat $77.344. ATH'e uzaklık -%38,7, ATL'e uzaklık >%9.999. Yerel 500 mum aralık konumu: %29.
+Fiyat $77.316. ATH'e uzaklık -%38,7, ATL'e uzaklık >%9.999. Yerel 500 mum aralık konumu: %29.
 
 **Kaynaklar:** Binance, CoinGecko
 
@@ -124,85 +124,85 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 
 **Kaynaklar:** CoinGecko
 
-## 66 Maddelik Araştırma Tablosu
+## Araştırma Bulguları (66 Kriter)
 
-| # | Madde | Durum | Skor | Güven | Özet |
+| # | Kriter | Durum | Skor | Güven | Özet |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Teknik Analiz | Tam | +0,19 | 1.00 | Fiyat $77.368,74; RSI 55,3, MACD histogram -751. En yakın destek $76.401, en yakın direnç $78.204,33. Mum formasyonları: Üç beyaz asker (yükseliş). |
+| 1 | Teknik Analiz | Tam | +0,19 | 0.85 | Fiyat $77.310,52; RSI 55,2, MACD histogram -755. En yakın destek $76.401, en yakın direnç $78.204,33. Mum formasyonları: Üç beyaz asker (yükseliş). |
 | 2 | Temel Analiz | Tam | +0,29 | 0.70 | FDV/mcap 1.0; dolaşım %100.0; piyasa sıralaması #1. |
-| 3 | Piyasa Duyarlılığı | Tam | +0,00 | 0.80 | Duyarlılık: Türev piyasa skoru +0.00; Haber skoru +0.01 |
-| 4 | Sosyal Medya ve Haberler | Tam | +0,01 | 0.30 | 24s 15 haber incelendi; ortalama sentiment 0.01 (pozitif 5, negatif 6). 72s ortalama: -0.08. |
-| 5 | Türev Piyasalar | Tam | +0,00 | 0.35 | Fiyat $77.344. En yakın likidasyon seviyeleri: $76.570,56 (long 100x), $78.117,44 (short 100x), $75.797,12 (long 50x), $78.890,88 (short 50x). |
+| 3 | Piyasa Duyarlılığı | Tam | -0,02 | 0.80 | Duyarlılık: Türev piyasa skoru +0.00; Haber skoru -0.08 |
+| 4 | Sosyal Medya ve Haberler | Tam | -0,08 | 0.24 | 24s 12 haber incelendi; ortalama sentiment -0.03 (pozitif 4, negatif 5). 72s ortalama: -0.12. |
+| 5 | Türev Piyasalar | Tam | +0,00 | 0.35 | Fiyat $77.316. En yakın likidasyon seviyeleri: $76.542,84 (long 100x), $78.089,16 (short 100x), $75.769,68 (long 50x), $78.862,32 (short 50x). |
 | 6 | Yatırımcı Davranışları | Tam | +0,07 | 0.60 | Yatırımcı davranisi: Aktif adres değişimi %5.2; İşlem sayısı değişimi %12.6 |
-| 7 | İndikatörler | Tam | +0,19 | 1.00 | Fiyat $77.368,74; RSI 55,3, MACD histogram -751. En yakın destek $76.401, en yakın direnç $78.204,33. Mum formasyonları: Üç beyaz asker (yükseliş). |
-| 8 | Sektörel Analiz | Tam | +0,04 | 0.50 | Sektör 'Smart Contract Platform': 24s mcap değişimi +%0,5. |
-| 9 | Regülasyon ve Yasal Durum | Tam | -0,76 | 0.35 | 4 ilgili haber bulundu; ortalama sentiment -0.38. |
-| 10 | Global Jeopolitik Olaylar | Tam | -0,02 | 0.35 | 4 ilgili haber bulundu; ortalama sentiment -0.01. |
-| 11 | Teknolojik İlerlemeler | Tam | +0,00 | 0.50 | Teknoloji: GitHub: 90157 yıldız, son push 2026-09-11 |
-| 12 | Şirket Haberleri | Tam | +0,64 | 0.33 | 3 ilgili haber bulundu; ortalama sentiment 0.32. |
+| 7 | İndikatörler | Tam | +0,19 | 0.85 | Fiyat $77.310,52; RSI 55,2, MACD histogram -755. En yakın destek $76.401, en yakın direnç $78.204,33. Mum formasyonları: Üç beyaz asker (yükseliş). |
+| 8 | Sektörel Analiz | Tam | -0,06 | 0.50 | Sektör 'Smart Contract Platform': sektör 24s +%1,3, coin 24s +%0,5 (göreli fark -%0,8). |
+| 9 | Regülasyon ve Yasal Durum | Veri yok | — | 0.00 | Son 7 günde 'sec, securities and exchange, lawsuit' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi. |
+| 10 | Global Jeopolitik Olaylar | Veri yok | — | 0.00 | Son 7 günde 'war, sanction, geopolitic' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi. |
+| 11 | Teknolojik İlerlemeler | Tam | +0,00 | 0.50 | Teknoloji: GitHub: 90157 yıldız, son push 2026-09-12 |
+| 12 | Şirket Haberleri | Tam | +0,33 | 0.28 | Son 7 günde 1 ilgili haber bulundu; ortalama sentiment 0.96 (örneklem küçük olduğu için skor sönümlendi). |
 | 13 | Makroekonomik Faktörler | Tam | -0,15 | 0.55 | Makro: ABD 10Y getirisi yükseliyor: likidite baskısı |
-| 14 | Mum Formasyonları | Tam | +0,19 | 1.00 | Mum formasyonları: Üç beyaz asker (yükseliş) |
-| 15 | Grafik Formasyonları | Tam | +0,19 | 1.00 | Grafik formasyonları: belirgin formasyon yok |
-| 16 | Fibonacci | Tam | +0,19 | 1.00 | Fibonacci seviyeleri: 0.0=$82.850, 0.236=$76.938,24, 0.382=$73.280,97, 0.5=$70.325,1, 0.618=$67.369,22, 0.786=$63.160,85 |
+| 14 | Mum Formasyonları | Tam | +0,19 | 0.85 | Mum formasyonları: Üç beyaz asker (yükseliş) |
+| 15 | Grafik Formasyonları | Tam | +0,19 | 0.85 | Grafik formasyonları: belirgin formasyon yok |
+| 16 | Fibonacci | Tam | +0,19 | 0.85 | Fibonacci seviyeleri: 0.0=$82.850, 0.236=$76.938,24, 0.382=$73.280,97, 0.5=$70.325,1, 0.618=$67.369,22, 0.786=$63.160,85 |
 | 17 | TradingView | Tam | +0,19 | 0.60 | Teknik derecelendirme vekili: Alis (skor +0.19). |
-| 18 | Hacim | Tam | +0,00 | 0.60 | 24s toplam hacim ~$35,4B. En büyük borsalar: BTCC ($3,64B), CoinUp.io ($2,67B), Pionex ($2,36B), Binance ($2,16B) |
-| 19 | En Güçlü Destek ve Direnç Noktaları | Tam | +0,19 | 1.00 | Destekler: $76.401, $74.317,14, $67.360,66 / Dirençler: $78.204,33, $79.479,24, $82.277,05 |
-| 20 | Güncel Yapay Zeka Tahmini | Veri yok | — | 0.00 | Ücretsiz ve doğrulanabilir bir AI tahmin API'si yok. OpenRouter anahtari girilirse LLM tahmini eklenebilir. |
-| 21 | Fraktal Modeller | Tam | +0,00 | 0.50 | Fraktal: rastgele yuruyus; Hurst=0.493, 30g trend %21.9. |
-| 22 | Twitter, Reddit ve Haber Makalelerindeki Duygu Analizleri | Tam | -0,05 | 0.60 | Duygu analizi: Haber sentiment +0.01; Fear & Greed 63 (Greed) |
-| 23 | Python | Tam | +0,00 | 0.20 | Veri hatti: 10 tam, 0 kısmi, 0 hatalı analiz; 12 farkli kaynak. |
+| 18 | Hacim | Tam | +0,00 | 0.60 | 24s toplam hacim ~$34,5B. En büyük borsalar: BTCC ($3,53B), CoinUp.io ($2,59B), Pionex ($2,29B), Binance ($2,1B) |
+| 19 | En Güçlü Destek ve Direnç Noktaları | Tam | +0,19 | 0.85 | Destekler: $76.401, $74.317,14, $67.360,66 / Dirençler: $78.204,33, $79.479,24, $82.277,05 |
+| 20 | Güncel Yapay Zeka Tahmini | Veri yok | — | 0.00 | Skora katılmaz (ağırlık 0). OpenRouter anahtarı girilirse LLM tahmini eklenebilir. |
+| 21 | Fraktal Modeller | Tam | +0,00 | 0.50 | Fraktal: rastgele yuruyus; Hurst=0.493, 30g trend %21.8. |
+| 22 | Twitter, Reddit ve Haber Makalelerindeki Duygu Analizleri | Tam | -0,09 | 0.60 | Duygu analizi: Haber sentiment -0.03; Fear & Greed 63 (Greed) |
+| 23 | Python | Tam | — | 0.00 | Veri hatti: 9 tam, 1 kısmi, 0 hatalı analiz; 12 farkli kaynak. |
 | 24 | Tarihsel Benzerlikler | Tam | +0,71 | 0.45 | En benzer 8 tarihsel pencerede 10 günlük ortalama getiri %4.77 (pozitif oran %75). |
-| 25 | Astrolojiyle Finansal Piyasalar Arasında İlişki Kuran Araştırmalar | Veri yok | — | 0.00 | Bilimsel geçerliligi olan veri kaynağı yok; nötr kabul edilir ve ağırlığı ihmal edilir. |
-| 26 | Google Trends Aramalarındaki Yoğunluk | Tam | -0,22 | 0.35 | Arama ilgisi 7 günlük ortalamada %-27.5 azaldı. |
-| 27 | Bitcoin ATM'lerinde İşlem Hacmi | Tam | -0,71 | 0.30 | 2 ilgili haber bulundu; ortalama sentiment -0.35. |
+| 25 | Astrolojiyle Finansal Piyasalar Arasında İlişki Kuran Araştırmalar | Veri yok | — | 0.00 | Skora katılmaz (ağırlık 0); bilimsel geçerliliği yok. |
+| 26 | Google Trends Aramalarındaki Yoğunluk | Tam | -0,21 | 0.35 | Arama ilgisi 7 günlük ortalamada %-26.9 azaldı. |
+| 27 | Bitcoin ATM'lerinde İşlem Hacmi | Tam | -0,33 | 0.28 | Son 7 günde 1 ilgili haber bulundu; ortalama sentiment -0.71 (örneklem küçük olduğu için skor sönümlendi). |
 | 28 | Bitcoin Madenciliği Elektrik Tüketimi | Tam | +0,00 | 0.40 | Madencilik/enerji: Hashrate 30g %+10.2; Madenci geliri 30g %+42.9; Petrol 30g %+20.1 |
-| 29 | Sektör Liderlerinin Tweet'leri | Tam | +0,94 | 0.35 | 4 ilgili haber bulundu; ortalama sentiment 0.47. |
+| 29 | Sektör Liderlerinin Tweet'leri | Veri yok | — | 0.00 | Son 7 günde 'musk, saylor, tweet' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi. |
 | 30 | Kitle Psikolojisi | Tam | -0,15 | 0.60 | Kitle psikolojisi: Acgozluluk bölgesi (63) |
-| 31 | Balinaların Kararları | Tam | +0,00 | 0.22 | 2 büyük transfer tarandı. Borsaya giriş 0 BTC, çıkış 0 BTC. Stablecoin arzı 7 günlük değişimi -%0,0. |
-| 32 | Balina İzleme ve Cüzdan Hareketleri | Tam | +0,00 | 0.22 | 2 büyük transfer tarandı. Borsaya giriş 0 BTC, çıkış 0 BTC. Stablecoin arzı 7 günlük değişimi -%0,0. |
-| 33 | Kültürel Etkinlikler | Tam | +0,00 | 0.28 | 1 ilgili haber bulundu; ortalama sentiment 0.00. |
+| 31 | Balinaların Kararları | Kısmi | — | 0.00 | Son bloklarda eşiği aşan büyük transfer bulunamadı; yön sinyali üretilemedi (bu, sıfır akış anlamına gelmez, örneklem sınırlıdır). |
+| 32 | Balina İzleme ve Cüzdan Hareketleri | Kısmi | — | 0.00 | Son bloklarda eşiği aşan büyük transfer bulunamadı; yön sinyali üretilemedi (bu, sıfır akış anlamına gelmez, örneklem sınırlıdır). |
+| 33 | Kültürel Etkinlikler | Veri yok | — | 0.00 | Son 7 günde 'conference, summit, festival' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi. |
 | 34 | Haberlerin Yazılma Hızı | Tam | +0,00 | 0.40 | Haber hızı: son 6s 2 haber, önceki 6s 1 (oran 2.0). |
 | 35 | Bilimsel Deneysel Modeller | Tam | +0,00 | 0.45 | EWMA volatilite %2.02; 30g dagilim yüzdeliği %56; ATR %2,8. |
-| 36 | Mevsimsel Etkiler | Tam | +0,01 | 0.30 | September ayi tarihsel ortalama günlük getirisi %0.092. |
-| 37 | Ekonometrik Modeller | Tam | +0,48 | 0.56 | 90 günlük log-lineer trend: günlük %0.295 (R2=0.64). |
+| 36 | Mevsimsel Etkiler | Tam | +0,01 | 0.30 | September ayi tarihsel ortalama günlük getirisi %0.091. |
+| 37 | Ekonometrik Modeller | Tam | +0,21 | 0.34 | 90 günlük getiri trendi: günlük ortalama %+0.180, t-istatistiği +0.90 (istatistiksel anlamlılık göstergesi). |
 | 38 | Zincir Dışı (Off-chain) Veriler | Tam | +0,00 | 0.70 | Off-chain veriler: Hacim skoru +0.00; Türev skoru +0.00 |
 | 39 | Korelasyon Analizi | Tam | +0,01 | 0.50 | Korelasyon: DXY korelasyonu -0.08; S&P korelasyonu -0.02 |
-| 40 | Hedge Fon ve Kurumsal Raporlar | Kısmi | +0,00 | 0.10 | Son 7 günde 'hedge fund, institutional, etf' ile ilgili haber bulunamadı (nötr). |
-| 41 | Yerel Ekonomik Faktörler | Tam | -1,00 | 0.28 | 1 ilgili haber bulundu; ortalama sentiment -0.96. |
-| 42 | Kara Para Aklama Karşıtı (AML) Verileri | Kısmi | +0,00 | 0.10 | Son 7 günde 'aml, money laundering, compliance' ile ilgili haber bulunamadı (nötr). |
+| 40 | Hedge Fon ve Kurumsal Raporlar | Veri yok | — | 0.00 | Son 7 günde 'hedge fund, institutional, etf inflow' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi. |
+| 41 | Yerel Ekonomik Faktörler | Veri yok | — | 0.00 | Son 7 günde 'türkiye, turkiye, lira' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi. |
+| 42 | Kara Para Aklama Karşıtı (AML) Verileri | Veri yok | — | 0.00 | Son 7 günde 'aml, money laundering, financial crime' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi. |
 | 43 | Alternatif Varlıkların Performansı | Tam | +0,10 | 0.40 | Alternatif varlıkların 30g ortalama getirisi %3.10. |
-| 44 | Volatilite Endeksleri | Tam | +0,00 | 0.50 | Volatilite: Deribit DVOL (BTC) 36.9, 7g değişim -0.4 |
-| 45 | Çapraz Zincir (Cross-chain) Verileri | Kısmi | — | 0.10 | Bridge verisi alınamadı. |
-| 46 | Medya Manipulasyonu ve Propaganda | Tam | +0,00 | 0.35 | Medya analizi: 25 haber, tekrar oranı %0.0, sentiment sapması 0.53. |
-| 47 | Sentetik Kıyaslama | Tam | +0,07 | 0.60 | Sentetik skor +0.073; 3 analiz pozitif, 1 negatif. |
-| 48 | Psikolojik Destek ve Direnç Seviyeleri | Tam | -0,05 | 0.40 | Psikolojik seviyeler: destek $77.000, direnç $77.500. |
+| 44 | Volatilite Endeksleri | Tam | +0,00 | 0.50 | Volatilite: nötr seviyeler |
+| 45 | Çapraz Zincir (Cross-chain) Verileri | Tam | -0,13 | 0.45 | Bitcoin zinciri TVL $4,18B; 7 günlük değişim -%3,2, 30 günlük +%21,5. |
+| 46 | Medya Manipulasyonu ve Propaganda | Tam | — | 0.00 | Medya analizi: 26 haber, tekrar oranı %0.0, sentiment sapması 0.53. |
+| 47 | Sentetik Kıyaslama | Tam | +0,07 | 0.60 | Sentetik skor +0.070; 3 analiz pozitif, 1 negatif. |
+| 48 | Psikolojik Destek ve Direnç Seviyeleri | Tam | -0,15 | 0.40 | Psikolojik seviyeler: destek $77.000, direnç $77.500. |
 | 49 | Enerji Maliyetleri | Tam | -0,08 | 0.40 | Enerji maliyetleri: Petrol 30g +%20,1; Hashrate 30g %+10.2; Madenci geliri 30g %+42.9 |
 | 50 | Makro Risk Faktörleri | Tam | +0,24 | 0.55 | Makro risk: VIX 15.8: makro stres düşük; DXY 30g %-0.9 |
-| 51 | Topluluk Yönetim Kararları | Kısmi | +0,00 | 0.10 | Son 7 günde 'governance, proposal, vote' ile ilgili haber bulunamadı (nötr). |
-| 52 | Ülkelerin Bitcoin Hakkındaki Güncel Kararları | Kısmi | +0,00 | 0.10 | Son 7 günde 'reserve, legal tender, government' ile ilgili haber bulunamadı (nötr). |
-| 53 | Halk Olayları ve Güvenlik Riskleri | Tam | -0,92 | 0.40 | 6 ilgili haber bulundu; ortalama sentiment -0.46. |
-| 54 | Vergi Mevzuatı Değişiklikleri | Tam | +0,07 | 0.40 | 6 ilgili haber bulundu; ortalama sentiment 0.04. |
-| 55 | Fiziksel Dünya ile Bitcoin Etkileşimi | Tam | -0,49 | 0.33 | 3 ilgili haber bulundu; ortalama sentiment -0.25. |
+| 51 | Topluluk Yönetim Kararları | Veri yok | — | 0.00 | Son 7 günde 'governance, proposal, vote' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi. |
+| 52 | Ülkelerin Bitcoin Hakkındaki Güncel Kararları | Veri yok | — | 0.00 | Son 7 günde 'legal tender, bitcoin reserve, national reserve' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi. |
+| 53 | Halk Olayları ve Güvenlik Riskleri | Tam | -1,00 | 0.40 | Son 7 günde 6 ilgili haber bulundu; ortalama sentiment -0.60. |
+| 54 | Vergi Mevzuatı Değişiklikleri | Veri yok | — | 0.00 | Son 7 günde 'tax, taxation, irs' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi. |
+| 55 | Fiziksel Dünya ile Bitcoin Etkileşimi | Tam | -0,49 | 0.30 | Son 7 günde 2 ilgili haber bulundu; ortalama sentiment -0.37 (örneklem küçük olduğu için skor sönümlendi). |
 | 56 | Blockchain Verilerinde Anomaliler | Tam | +0,00 | 0.40 | Anomali taraması: belirgin anomali yok |
-| 57 | Duygu Analizi ile Satış Baskısı Tespiti | Tam | +0,40 | 0.45 | Satış baskısı: Alis tarafi derinligi baskın: alım baskısı |
+| 57 | Duygu Analizi ile Satış Baskısı Tespiti | Kısmi | — | 0.10 | Satış baskısı sinyali kısmi. |
 | 58 | Uluslararası Sermaye Akışlarının Kriptoya Etkisi | Tam | +0,05 | 0.50 | Sermaye akışları: Stablecoin arzı 7g %-0.04%; DXY 30g %-0.9 |
 | 59 | Kripto Cüzdanlarının Büyüme Oranı | Tam | +0,02 | 0.45 | Cüzdan büyümesi: Yeni adres oluşumu 90 günlük dönemde %+1.3 değişti |
-| 60 | Özel Şirketlerin Blockchain Projeleri | Tam | +0,64 | 0.33 | 3 ilgili haber bulundu; ortalama sentiment 0.32. |
-| 61 | Akıllı Kontrat Analizleri | Tam | -0,37 | 0.70 | Akıllı kontratlar: 4 güvenlik/denetim haberi, sentiment -0.46; Güvenlik haberleri negatif: teknoloji riski |
+| 60 | Özel Şirketlerin Blockchain Projeleri | Veri yok | — | 0.00 | Son 7 günde 'enterprise blockchain, consortium, blockchain project' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi. |
+| 61 | Akıllı Kontrat Analizleri | Tam | -0,48 | 0.70 | Akıllı kontratlar: 3 güvenlik/denetim haberi, sentiment -0.60; Güvenlik haberleri negatif: teknoloji riski |
 | 62 | Stablecoin Rezerv Hareketleri | Tam | -0,01 | 0.55 | Stablecoin toplam arzı $311,8B; 7 günlük değişim -%0,0. |
-| 63 | Merkez Bankalarının Kriptoya Bakışı | Tam | +0,18 | 0.35 | 4 ilgili haber bulundu; ortalama sentiment 0.09. |
+| 63 | Merkez Bankalarının Kriptoya Bakışı | Tam | +0,18 | 0.35 | Son 7 günde 4 ilgili haber bulundu; ortalama sentiment 0.09. |
 | 64 | Büyük Çaplı Madencilik Taşınmaları | Tam | +0,00 | 0.40 | Madencilik/enerji: Hashrate 30g %+10.2; Madenci geliri 30g %+42.9; Petrol 30g %+20.1 Ilgili haber: 0 (sentiment +0.00). |
-| 65 | Açık Blockchain Patentleri | Kısmi | +0,00 | 0.10 | Son 7 günde 'patent, filing, intellectual property' ile ilgili haber bulunamadı (nötr). |
-| 66 | Bitcoin Dominance | Tam | +0,14 | 0.50 | Bitcoin dominance %58.2; ETH %11.6. Toplam mcap 24s %-2.0 |
+| 65 | Borsa Listeleme ve Vadeli İşlem Duyuruları | Veri yok | — | 0.00 | Son 7 günde 'listing, delisting, perpetual futures' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi. |
+| 66 | Bitcoin Dominance | Tam | +0,15 | 0.50 | Bitcoin dominance %58.2; ETH %11.6. Toplam mcap 24s %-1.8 |
 
-## Madde Detayları
+## Kriter Detayları
 
 ### 1. Teknik Analiz
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,19 / 1.00
-- **Özet:** Fiyat $77.368,74; RSI 55,3, MACD histogram -751. En yakın destek $76.401, en yakın direnç $78.204,33. Mum formasyonları: Üç beyaz asker (yükseliş).
-- **Nedenler:** RSI 55.3 nötr; MACD negatif ve zayıflıyor; Fiyat 200 EMA üzerinde (uzun trend pozitif); Fiyat 50 EMA üzerinde (orta trend pozitif); Direnç bölgesine çok yakın (%1.08); Destek bölgesine çok yakın (%1.27)
+- **Skor / Güven:** +0,19 / 0.85
+- **Özet:** Fiyat $77.310,52; RSI 55,2, MACD histogram -755. En yakın destek $76.401, en yakın direnç $78.204,33. Mum formasyonları: Üç beyaz asker (yükseliş).
+- **Nedenler:** RSI 55.2 nötr; MACD negatif ve zayıflıyor; Fiyat 200 EMA üzerinde (uzun trend pozitif); Fiyat 50 EMA üzerinde (orta trend pozitif); Direnç bölgesine çok yakın (%1.16); Destek bölgesine çok yakın (%1.19)
 - **Kaynaklar:** Binance
 
 ### 2. Temel Analiz
@@ -216,24 +216,24 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 ### 3. Piyasa Duyarlılığı
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,00 / 0.80
-- **Özet:** Duyarlılık: Türev piyasa skoru +0.00; Haber skoru +0.01
-- **Nedenler:** Türev piyasa skoru +0.00; Haber skoru +0.01
+- **Skor / Güven:** -0,02 / 0.80
+- **Özet:** Duyarlılık: Türev piyasa skoru +0.00; Haber skoru -0.08
+- **Nedenler:** Türev piyasa skoru +0.00; Haber skoru -0.08
 - **Kaynaklar:** Binance Futures, alternative.me Fear & Greed
 
 ### 4. Sosyal Medya ve Haberler
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,01 / 0.30
-- **Özet:** 24s 15 haber incelendi; ortalama sentiment 0.01 (pozitif 5, negatif 6). 72s ortalama: -0.08.
-- **Nedenler:** 24s haber sentiment nötr (0.01); Haber yazilma hızı arttı (son 6s önceki 6s'in 2.0x): volatilite riski
+- **Skor / Güven:** -0,08 / 0.24
+- **Özet:** 24s 12 haber incelendi; ortalama sentiment -0.03 (pozitif 4, negatif 5). 72s ortalama: -0.12.
+- **Nedenler:** 24s haber sentiment nötr (-0.03); Haber yazilma hızı arttı (son 6s önceki 6s'in 2.0x): volatilite riski
 - **Kaynaklar:** CryptoPanic, GDELT, RSS (CoinDesk/Cointelegraph/Decrypt/The Block)
 
 ### 5. Türev Piyasalar
 
 - **Durum:** Tam
 - **Skor / Güven:** +0,00 / 0.35
-- **Özet:** Fiyat $77.344. En yakın likidasyon seviyeleri: $76.570,56 (long 100x), $78.117,44 (short 100x), $75.797,12 (long 50x), $78.890,88 (short 50x).
+- **Özet:** Fiyat $77.316. En yakın likidasyon seviyeleri: $76.542,84 (long 100x), $78.089,16 (short 100x), $75.769,68 (long 50x), $78.862,32 (short 50x).
 - **Nedenler:** Gerçek likidasyon geçmişi için Coinalyze anahtari yok; seviyeler OI tahmini
 - **Kaynaklar:** Binance Futures, Coinalyze
 - **Uyarılar:** Coinalyze anahtari yok: likidasyon geçmişi sınırlı.
@@ -249,46 +249,46 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 ### 7. İndikatörler
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,19 / 1.00
-- **Özet:** Fiyat $77.368,74; RSI 55,3, MACD histogram -751. En yakın destek $76.401, en yakın direnç $78.204,33. Mum formasyonları: Üç beyaz asker (yükseliş).
-- **Nedenler:** RSI 55.3 nötr; MACD negatif ve zayıflıyor; Fiyat 200 EMA üzerinde (uzun trend pozitif); Fiyat 50 EMA üzerinde (orta trend pozitif); Direnç bölgesine çok yakın (%1.08); Destek bölgesine çok yakın (%1.27)
+- **Skor / Güven:** +0,19 / 0.85
+- **Özet:** Fiyat $77.310,52; RSI 55,2, MACD histogram -755. En yakın destek $76.401, en yakın direnç $78.204,33. Mum formasyonları: Üç beyaz asker (yükseliş).
+- **Nedenler:** RSI 55.2 nötr; MACD negatif ve zayıflıyor; Fiyat 200 EMA üzerinde (uzun trend pozitif); Fiyat 50 EMA üzerinde (orta trend pozitif); Direnç bölgesine çok yakın (%1.16); Destek bölgesine çok yakın (%1.19)
 - **Kaynaklar:** Binance
 
 ### 8. Sektörel Analiz
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,04 / 0.50
-- **Özet:** Sektör 'Smart Contract Platform': 24s mcap değişimi +%0,5.
+- **Skor / Güven:** -0,06 / 0.50
+- **Özet:** Sektör 'Smart Contract Platform': sektör 24s +%1,3, coin 24s +%0,5 (göreli fark -%0,8).
 - **Kaynaklar:** CoinGecko Categories
 
 ### 9. Regülasyon ve Yasal Durum
 
-- **Durum:** Tam
-- **Skor / Güven:** -0,76 / 0.35
-- **Özet:** 4 ilgili haber bulundu; ortalama sentiment -0.38.
-- **Kaynaklar:** CryptoPanic, GDELT, RSS haber kaynakları
+- **Durum:** Veri yok
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son 7 günde 'sec, securities and exchange, lawsuit' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi.
+- **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 10. Global Jeopolitik Olaylar
 
-- **Durum:** Tam
-- **Skor / Güven:** -0,02 / 0.35
-- **Özet:** 4 ilgili haber bulundu; ortalama sentiment -0.01.
-- **Kaynaklar:** CryptoPanic, GDELT, RSS haber kaynakları
+- **Durum:** Veri yok
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son 7 günde 'war, sanction, geopolitic' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi.
+- **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 11. Teknolojik İlerlemeler
 
 - **Durum:** Tam
 - **Skor / Güven:** +0,00 / 0.50
-- **Özet:** Teknoloji: GitHub: 90157 yıldız, son push 2026-09-11
-- **Nedenler:** GitHub: 90157 yıldız, son push 2026-09-11
+- **Özet:** Teknoloji: GitHub: 90157 yıldız, son push 2026-09-12
+- **Nedenler:** GitHub: 90157 yıldız, son push 2026-09-12
 - **Kaynaklar:** CoinGecko, GitHub API
 
 ### 12. Şirket Haberleri
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,64 / 0.33
-- **Özet:** 3 ilgili haber bulundu; ortalama sentiment 0.32.
-- **Kaynaklar:** CryptoPanic, GDELT, RSS haber kaynakları
+- **Skor / Güven:** +0,33 / 0.28
+- **Özet:** Son 7 günde 1 ilgili haber bulundu; ortalama sentiment 0.96 (örneklem küçük olduğu için skor sönümlendi).
+- **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 13. Makroekonomik Faktörler
 
@@ -301,25 +301,25 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 ### 14. Mum Formasyonları
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,19 / 1.00
+- **Skor / Güven:** +0,19 / 0.85
 - **Özet:** Mum formasyonları: Üç beyaz asker (yükseliş)
-- **Nedenler:** RSI 55.3 nötr; MACD negatif ve zayıflıyor; Fiyat 200 EMA üzerinde (uzun trend pozitif); Fiyat 50 EMA üzerinde (orta trend pozitif); Direnç bölgesine çok yakın (%1.08); Destek bölgesine çok yakın (%1.27)
+- **Nedenler:** RSI 55.2 nötr; MACD negatif ve zayıflıyor; Fiyat 200 EMA üzerinde (uzun trend pozitif); Fiyat 50 EMA üzerinde (orta trend pozitif); Direnç bölgesine çok yakın (%1.16); Destek bölgesine çok yakın (%1.19)
 - **Kaynaklar:** Binance
 
 ### 15. Grafik Formasyonları
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,19 / 1.00
+- **Skor / Güven:** +0,19 / 0.85
 - **Özet:** Grafik formasyonları: belirgin formasyon yok
-- **Nedenler:** RSI 55.3 nötr; MACD negatif ve zayıflıyor; Fiyat 200 EMA üzerinde (uzun trend pozitif); Fiyat 50 EMA üzerinde (orta trend pozitif); Direnç bölgesine çok yakın (%1.08); Destek bölgesine çok yakın (%1.27)
+- **Nedenler:** RSI 55.2 nötr; MACD negatif ve zayıflıyor; Fiyat 200 EMA üzerinde (uzun trend pozitif); Fiyat 50 EMA üzerinde (orta trend pozitif); Direnç bölgesine çok yakın (%1.16); Destek bölgesine çok yakın (%1.19)
 - **Kaynaklar:** Binance
 
 ### 16. Fibonacci
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,19 / 1.00
+- **Skor / Güven:** +0,19 / 0.85
 - **Özet:** Fibonacci seviyeleri: 0.0=$82.850, 0.236=$76.938,24, 0.382=$73.280,97, 0.5=$70.325,1, 0.618=$67.369,22, 0.786=$63.160,85
-- **Nedenler:** RSI 55.3 nötr; MACD negatif ve zayıflıyor; Fiyat 200 EMA üzerinde (uzun trend pozitif); Fiyat 50 EMA üzerinde (orta trend pozitif); Direnç bölgesine çok yakın (%1.08); Destek bölgesine çok yakın (%1.27)
+- **Nedenler:** RSI 55.2 nötr; MACD negatif ve zayıflıyor; Fiyat 200 EMA üzerinde (uzun trend pozitif); Fiyat 50 EMA üzerinde (orta trend pozitif); Direnç bölgesine çok yakın (%1.16); Destek bölgesine çok yakın (%1.19)
 - **Kaynaklar:** Binance
 
 ### 17. TradingView
@@ -334,46 +334,46 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 
 - **Durum:** Tam
 - **Skor / Güven:** +0,00 / 0.60
-- **Özet:** 24s toplam hacim ~$35,4B. En büyük borsalar: BTCC ($3,64B), CoinUp.io ($2,67B), Pionex ($2,36B), Binance ($2,16B)
-- **Nedenler:** Borsalar arasi fiyat tutarli (sapma %0.005); Binance/OKX/Bybit hacimleri doğrulandi
+- **Özet:** 24s toplam hacim ~$34,5B. En büyük borsalar: BTCC ($3,53B), CoinUp.io ($2,59B), Pionex ($2,29B), Binance ($2,1B)
+- **Nedenler:** Borsalar arasi fiyat tutarli (sapma %0.000); Binance/OKX/Bybit hacimleri doğrulandi
 - **Kaynaklar:** Binance, Bybit, CoinGecko, OKX
 
 ### 19. En Güçlü Destek ve Direnç Noktaları
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,19 / 1.00
+- **Skor / Güven:** +0,19 / 0.85
 - **Özet:** Destekler: $76.401, $74.317,14, $67.360,66 | Dirençler: $78.204,33, $79.479,24, $82.277,05
-- **Nedenler:** RSI 55.3 nötr; MACD negatif ve zayıflıyor; Fiyat 200 EMA üzerinde (uzun trend pozitif); Fiyat 50 EMA üzerinde (orta trend pozitif); Direnç bölgesine çok yakın (%1.08); Destek bölgesine çok yakın (%1.27)
+- **Nedenler:** RSI 55.2 nötr; MACD negatif ve zayıflıyor; Fiyat 200 EMA üzerinde (uzun trend pozitif); Fiyat 50 EMA üzerinde (orta trend pozitif); Direnç bölgesine çok yakın (%1.16); Destek bölgesine çok yakın (%1.19)
 - **Kaynaklar:** Binance
 
 ### 20. Güncel Yapay Zeka Tahmini
 
 - **Durum:** Veri yok
 - **Skor / Güven:** — / 0.00
-- **Özet:** Ücretsiz ve doğrulanabilir bir AI tahmin API'si yok. OpenRouter anahtari girilirse LLM tahmini eklenebilir.
+- **Özet:** Skora katılmaz (ağırlık 0). OpenRouter anahtarı girilirse LLM tahmini eklenebilir.
 - **Uyarılar:** Veri yok: ağırlıklı ortalamaya dahil edilmedi.
 
 ### 21. Fraktal Modeller
 
 - **Durum:** Tam
 - **Skor / Güven:** +0,00 / 0.50
-- **Özet:** Fraktal: rastgele yuruyus; Hurst=0.493, 30g trend %21.9.
+- **Özet:** Fraktal: rastgele yuruyus; Hurst=0.493, 30g trend %21.8.
 - **Nedenler:** Hurst 0.49: belirgin rejim yok
 - **Kaynaklar:** Yerel hesaplama (R/S analizi)
 
 ### 22. Twitter, Reddit ve Haber Makalelerindeki Duygu Analizleri
 
 - **Durum:** Tam
-- **Skor / Güven:** -0,05 / 0.60
-- **Özet:** Duygu analizi: Haber sentiment +0.01; Fear & Greed 63 (Greed)
-- **Nedenler:** Haber sentiment +0.01; Fear & Greed 63 (Greed)
+- **Skor / Güven:** -0,09 / 0.60
+- **Özet:** Duygu analizi: Haber sentiment -0.03; Fear & Greed 63 (Greed)
+- **Nedenler:** Haber sentiment -0.03; Fear & Greed 63 (Greed)
 - **Kaynaklar:** Haber RSS + CryptoPanic, Reddit, alternative.me
 
 ### 23. Python
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,00 / 0.20
-- **Özet:** Veri hatti: 10 tam, 0 kısmi, 0 hatalı analiz; 12 farkli kaynak.
+- **Skor / Güven:** — / 0.00
+- **Özet:** Veri hatti: 9 tam, 1 kısmi, 0 hatalı analiz; 12 farkli kaynak.
 - **Kaynaklar:** Pipeline metrigi
 
 ### 24. Tarihsel Benzerlikler
@@ -387,22 +387,22 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 
 - **Durum:** Veri yok
 - **Skor / Güven:** — / 0.00
-- **Özet:** Bilimsel geçerliligi olan veri kaynağı yok; nötr kabul edilir ve ağırlığı ihmal edilir.
+- **Özet:** Skora katılmaz (ağırlık 0); bilimsel geçerliliği yok.
 - **Uyarılar:** Veri yok: ağırlıklı ortalamaya dahil edilmedi.
 
 ### 26. Google Trends Aramalarındaki Yoğunluk
 
 - **Durum:** Tam
-- **Skor / Güven:** -0,22 / 0.35
-- **Özet:** Arama ilgisi 7 günlük ortalamada %-27.5 azaldı.
+- **Skor / Güven:** -0,21 / 0.35
+- **Özet:** Arama ilgisi 7 günlük ortalamada %-26.9 azaldı.
 - **Kaynaklar:** Google Trends
 
 ### 27. Bitcoin ATM'lerinde İşlem Hacmi
 
 - **Durum:** Tam
-- **Skor / Güven:** -0,71 / 0.30
-- **Özet:** 2 ilgili haber bulundu; ortalama sentiment -0.35.
-- **Kaynaklar:** CryptoPanic, GDELT, RSS haber kaynakları
+- **Skor / Güven:** -0,33 / 0.28
+- **Özet:** Son 7 günde 1 ilgili haber bulundu; ortalama sentiment -0.71 (örneklem küçük olduğu için skor sönümlendi).
+- **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 28. Bitcoin Madenciliği Elektrik Tüketimi
 
@@ -410,14 +410,14 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 - **Skor / Güven:** +0,00 / 0.40
 - **Özet:** Madencilik/enerji: Hashrate 30g %+10.2; Madenci geliri 30g %+42.9; Petrol 30g %+20.1
 - **Nedenler:** Hashrate 30g %+10.2; Madenci geliri 30g %+42.9; Petrol 30g %+20.1
-- **Kaynaklar:** Blockchain.com, mempool.space, yfinance (petrol)
+- **Kaynaklar:** Blockchain.com, yfinance (petrol)
 
 ### 29. Sektör Liderlerinin Tweet'leri
 
-- **Durum:** Tam
-- **Skor / Güven:** +0,94 / 0.35
-- **Özet:** 4 ilgili haber bulundu; ortalama sentiment 0.47.
-- **Kaynaklar:** CryptoPanic, GDELT, RSS haber kaynakları
+- **Durum:** Veri yok
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son 7 günde 'musk, saylor, tweet' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi.
+- **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 30. Kitle Psikolojisi
 
@@ -429,26 +429,28 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 
 ### 31. Balinaların Kararları
 
-- **Durum:** Tam
-- **Skor / Güven:** +0,00 / 0.22
-- **Özet:** 2 büyük transfer tarandı. Borsaya giriş 0 BTC, çıkış 0 BTC. Stablecoin arzı 7 günlük değişimi -%0,0.
-- **Nedenler:** Transfer yönü etiketlenemedi; hacim volatilite göstergesi olarak kullanıldı
+- **Durum:** Kısmi
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son bloklarda eşiği aşan büyük transfer bulunamadı; yön sinyali üretilemedi (bu, sıfır akış anlamına gelmez, örneklem sınırlıdır).
+- **Nedenler:** Stablecoin arzı 7 günde %-0.04 (bilgi amaçlı; akış skoru 62. maddede)
 - **Kaynaklar:** DefiLlama Stablecoins, blockchain.com
+- **Uyarılar:** Bu çalıştırmada balina yön sinyali yok; madde ağırlıklı ortalamaya dahil edilmedi.
 
 ### 32. Balina İzleme ve Cüzdan Hareketleri
 
-- **Durum:** Tam
-- **Skor / Güven:** +0,00 / 0.22
-- **Özet:** 2 büyük transfer tarandı. Borsaya giriş 0 BTC, çıkış 0 BTC. Stablecoin arzı 7 günlük değişimi -%0,0.
-- **Nedenler:** Transfer yönü etiketlenemedi; hacim volatilite göstergesi olarak kullanıldı
+- **Durum:** Kısmi
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son bloklarda eşiği aşan büyük transfer bulunamadı; yön sinyali üretilemedi (bu, sıfır akış anlamına gelmez, örneklem sınırlıdır).
+- **Nedenler:** Stablecoin arzı 7 günde %-0.04 (bilgi amaçlı; akış skoru 62. maddede)
 - **Kaynaklar:** DefiLlama Stablecoins, blockchain.com
+- **Uyarılar:** Bu çalıştırmada balina yön sinyali yok; madde ağırlıklı ortalamaya dahil edilmedi.
 
 ### 33. Kültürel Etkinlikler
 
-- **Durum:** Tam
-- **Skor / Güven:** +0,00 / 0.28
-- **Özet:** 1 ilgili haber bulundu; ortalama sentiment 0.00.
-- **Kaynaklar:** CryptoPanic, GDELT, RSS haber kaynakları
+- **Durum:** Veri yok
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son 7 günde 'conference, summit, festival' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi.
+- **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 34. Haberlerin Yazılma Hızı
 
@@ -469,16 +471,16 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 
 - **Durum:** Tam
 - **Skor / Güven:** +0,01 / 0.30
-- **Özet:** September ayi tarihsel ortalama günlük getirisi %0.092.
+- **Özet:** September ayi tarihsel ortalama günlük getirisi %0.091.
 - **Kaynaklar:** CoinGecko, Yerel hesaplama
 - **Uyarılar:** Mevsimsellik zayıf bir istatistiksel sinyaldır; tek başına kullanılmamalıdır.
 
 ### 37. Ekonometrik Modeller
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,48 / 0.56
-- **Özet:** 90 günlük log-lineer trend: günlük %0.295 (R2=0.64).
-- **Kaynaklar:** Yerel hesaplama (log-lineer regresyon)
+- **Skor / Güven:** +0,21 / 0.34
+- **Özet:** 90 günlük getiri trendi: günlük ortalama %+0.180, t-istatistiği +0.90 (istatistiksel anlamlılık göstergesi).
+- **Kaynaklar:** Yerel hesaplama (getiri t-istatistigi)
 
 ### 38. Zincir Dışı (Off-chain) Veriler
 
@@ -498,23 +500,23 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 
 ### 40. Hedge Fon ve Kurumsal Raporlar
 
-- **Durum:** Kısmi
-- **Skor / Güven:** +0,00 / 0.10
-- **Özet:** Son 7 günde 'hedge fund, institutional, etf' ile ilgili haber bulunamadı (nötr).
+- **Durum:** Veri yok
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son 7 günde 'hedge fund, institutional, etf inflow' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi.
 - **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 41. Yerel Ekonomik Faktörler
 
-- **Durum:** Tam
-- **Skor / Güven:** -1,00 / 0.28
-- **Özet:** 1 ilgili haber bulundu; ortalama sentiment -0.96.
-- **Kaynaklar:** CryptoPanic, GDELT, RSS haber kaynakları
+- **Durum:** Veri yok
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son 7 günde 'türkiye, turkiye, lira' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi.
+- **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 42. Kara Para Aklama Karşıtı (AML) Verileri
 
-- **Durum:** Kısmi
-- **Skor / Güven:** +0,00 / 0.10
-- **Özet:** Son 7 günde 'aml, money laundering, compliance' ile ilgili haber bulunamadı (nötr).
+- **Durum:** Veri yok
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son 7 günde 'aml, money laundering, financial crime' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi.
 - **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 43. Alternatif Varlıkların Performansı
@@ -528,37 +530,37 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 
 - **Durum:** Tam
 - **Skor / Güven:** +0,00 / 0.50
-- **Özet:** Volatilite: Deribit DVOL (BTC) 36.9, 7g değişim -0.4
-- **Nedenler:** Deribit DVOL (BTC) 36.9, 7g değişim -0.4
+- **Özet:** Volatilite: nötr seviyeler
 - **Kaynaklar:** Deribit DVOL, yfinance VIX
 
 ### 45. Çapraz Zincir (Cross-chain) Verileri
 
-- **Durum:** Kısmi
-- **Skor / Güven:** — / 0.10
-- **Özet:** Bridge verisi alınamadı.
+- **Durum:** Tam
+- **Skor / Güven:** -0,13 / 0.45
+- **Özet:** Bitcoin zinciri TVL $4,18B; 7 günlük değişim -%3,2, 30 günlük +%21,5.
+- **Kaynaklar:** DefiLlama Chains
 
 ### 46. Medya Manipulasyonu ve Propaganda
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,00 / 0.35
-- **Özet:** Medya analizi: 25 haber, tekrar oranı %0.0, sentiment sapması 0.53.
-- **Kaynaklar:** CryptoPanic, Haber RSS
+- **Skor / Güven:** — / 0.00
+- **Özet:** Medya analizi: 26 haber, tekrar oranı %0.0, sentiment sapması 0.53.
+- **Kaynaklar:** Haber RSS
 - **Uyarılar:** Haber sentiment dagilimi çok genis: celiskili anlatilar
 
 ### 47. Sentetik Kıyaslama
 
 - **Durum:** Tam
 - **Skor / Güven:** +0,07 / 0.60
-- **Özet:** Sentetik skor +0.073; 3 analiz pozitif, 1 negatif.
+- **Özet:** Sentetik skor +0.070; 3 analiz pozitif, 1 negatif.
 - **Kaynaklar:** Sentetik kıyaslama (pipeline)
 
 ### 48. Psikolojik Destek ve Direnç Seviyeleri
 
 - **Durum:** Tam
-- **Skor / Güven:** -0,05 / 0.40
+- **Skor / Güven:** -0,15 / 0.40
 - **Özet:** Psikolojik seviyeler: destek $77.000, direnç $77.500.
-- **Nedenler:** Yuvarlak sayı direnci $77.500 çok yakın (mesafe %0,2); Yuvarlak sayı desteği $77.000 çok yakın
+- **Nedenler:** Yuvarlak sayı direnci $77.500 çok yakın (mesafe %0,2): kısa vadeli tavan riski
 - **Kaynaklar:** Yerel hesaplama (yuvarlak sayılar)
 
 ### 49. Enerji Maliyetleri
@@ -567,7 +569,7 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 - **Skor / Güven:** -0,08 / 0.40
 - **Özet:** Enerji maliyetleri: Petrol 30g +%20,1; Hashrate 30g %+10.2; Madenci geliri 30g %+42.9
 - **Nedenler:** Petrol 30g +%20,1; Hashrate 30g %+10.2; Madenci geliri 30g %+42.9; Petrol 30g %+20.1
-- **Kaynaklar:** Blockchain.com, mempool.space, yfinance (enerji), yfinance (petrol)
+- **Kaynaklar:** Blockchain.com, yfinance (enerji), yfinance (petrol)
 
 ### 50. Makro Risk Faktörleri
 
@@ -579,38 +581,38 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 
 ### 51. Topluluk Yönetim Kararları
 
-- **Durum:** Kısmi
-- **Skor / Güven:** +0,00 / 0.10
-- **Özet:** Son 7 günde 'governance, proposal, vote' ile ilgili haber bulunamadı (nötr).
+- **Durum:** Veri yok
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son 7 günde 'governance, proposal, vote' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi.
 - **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 52. Ülkelerin Bitcoin Hakkındaki Güncel Kararları
 
-- **Durum:** Kısmi
-- **Skor / Güven:** +0,00 / 0.10
-- **Özet:** Son 7 günde 'reserve, legal tender, government' ile ilgili haber bulunamadı (nötr).
+- **Durum:** Veri yok
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son 7 günde 'legal tender, bitcoin reserve, national reserve' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi.
 - **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 53. Halk Olayları ve Güvenlik Riskleri
 
 - **Durum:** Tam
-- **Skor / Güven:** -0,92 / 0.40
-- **Özet:** 6 ilgili haber bulundu; ortalama sentiment -0.46.
-- **Kaynaklar:** CryptoPanic, GDELT, RSS haber kaynakları
+- **Skor / Güven:** -1,00 / 0.40
+- **Özet:** Son 7 günde 6 ilgili haber bulundu; ortalama sentiment -0.60.
+- **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 54. Vergi Mevzuatı Değişiklikleri
 
-- **Durum:** Tam
-- **Skor / Güven:** +0,07 / 0.40
-- **Özet:** 6 ilgili haber bulundu; ortalama sentiment 0.04.
-- **Kaynaklar:** CryptoPanic, GDELT, RSS haber kaynakları
+- **Durum:** Veri yok
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son 7 günde 'tax, taxation, irs' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi.
+- **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 55. Fiziksel Dünya ile Bitcoin Etkileşimi
 
 - **Durum:** Tam
-- **Skor / Güven:** -0,49 / 0.33
-- **Özet:** 3 ilgili haber bulundu; ortalama sentiment -0.25.
-- **Kaynaklar:** CryptoPanic, GDELT, RSS haber kaynakları
+- **Skor / Güven:** -0,49 / 0.30
+- **Özet:** Son 7 günde 2 ilgili haber bulundu; ortalama sentiment -0.37 (örneklem küçük olduğu için skor sönümlendi).
+- **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 56. Blockchain Verilerinde Anomaliler
 
@@ -621,11 +623,9 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 
 ### 57. Duygu Analizi ile Satış Baskısı Tespiti
 
-- **Durum:** Tam
-- **Skor / Güven:** +0,40 / 0.45
-- **Özet:** Satış baskısı: Alis tarafi derinligi baskın: alım baskısı
-- **Nedenler:** Alis tarafi derinligi baskın: alım baskısı
-- **Kaynaklar:** Binance order book, Coinalyze, Haber RSS
+- **Durum:** Kısmi
+- **Skor / Güven:** — / 0.10
+- **Özet:** Satış baskısı sinyali kısmi.
 
 ### 58. Uluslararası Sermaye Akışlarının Kriptoya Etkisi
 
@@ -645,17 +645,17 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 
 ### 60. Özel Şirketlerin Blockchain Projeleri
 
-- **Durum:** Tam
-- **Skor / Güven:** +0,64 / 0.33
-- **Özet:** 3 ilgili haber bulundu; ortalama sentiment 0.32.
-- **Kaynaklar:** CryptoPanic, GDELT, RSS haber kaynakları
+- **Durum:** Veri yok
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son 7 günde 'enterprise blockchain, consortium, blockchain project' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi.
+- **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 61. Akıllı Kontrat Analizleri
 
 - **Durum:** Tam
-- **Skor / Güven:** -0,37 / 0.70
-- **Özet:** Akıllı kontratlar: 4 güvenlik/denetim haberi, sentiment -0.46; Güvenlik haberleri negatif: teknoloji riski
-- **Nedenler:** 4 güvenlik/denetim haberi, sentiment -0.46; Güvenlik haberleri negatif: teknoloji riski
+- **Skor / Güven:** -0,48 / 0.70
+- **Özet:** Akıllı kontratlar: 3 güvenlik/denetim haberi, sentiment -0.60; Güvenlik haberleri negatif: teknoloji riski
+- **Nedenler:** 3 güvenlik/denetim haberi, sentiment -0.60; Güvenlik haberleri negatif: teknoloji riski
 - **Kaynaklar:** DefiLlama, Haber RSS
 
 ### 62. Stablecoin Rezerv Hareketleri
@@ -670,8 +670,8 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 
 - **Durum:** Tam
 - **Skor / Güven:** +0,18 / 0.35
-- **Özet:** 4 ilgili haber bulundu; ortalama sentiment 0.09.
-- **Kaynaklar:** CryptoPanic, GDELT, RSS haber kaynakları
+- **Özet:** Son 7 günde 4 ilgili haber bulundu; ortalama sentiment 0.09.
+- **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 64. Büyük Çaplı Madencilik Taşınmaları
 
@@ -679,28 +679,27 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 - **Skor / Güven:** +0,00 / 0.40
 - **Özet:** Madencilik/enerji: Hashrate 30g %+10.2; Madenci geliri 30g %+42.9; Petrol 30g %+20.1 Ilgili haber: 0 (sentiment +0.00).
 - **Nedenler:** Hashrate 30g %+10.2; Madenci geliri 30g %+42.9; Petrol 30g %+20.1
-- **Kaynaklar:** Blockchain.com, mempool.space, yfinance (petrol)
+- **Kaynaklar:** Blockchain.com, yfinance (petrol)
 
-### 65. Açık Blockchain Patentleri
+### 65. Borsa Listeleme ve Vadeli İşlem Duyuruları
 
-- **Durum:** Kısmi
-- **Skor / Güven:** +0,00 / 0.10
-- **Özet:** Son 7 günde 'patent, filing, intellectual property' ile ilgili haber bulunamadı (nötr).
+- **Durum:** Veri yok
+- **Skor / Güven:** — / 0.00
+- **Özet:** Son 7 günde 'listing, delisting, perpetual futures' ile ilgili haber bulunamadı; bu kriter skora dahil edilmedi.
 - **Kaynaklar:** GDELT, RSS haber kaynakları
 
 ### 66. Bitcoin Dominance
 
 - **Durum:** Tam
-- **Skor / Güven:** +0,14 / 0.50
-- **Özet:** Bitcoin dominance %58.2; ETH %11.6. Toplam mcap 24s %-2.0
-- **Nedenler:** BTC dominance %58.2; Toplam mcap 24s %-2.0
+- **Skor / Güven:** +0,15 / 0.50
+- **Özet:** Bitcoin dominance %58.2; ETH %11.6. Toplam mcap 24s %-1.8
+- **Nedenler:** BTC dominance %58.2; Toplam mcap 24s %-1.8
 - **Kaynaklar:** CoinGecko Global
 
 ## Kullanılan Kaynaklar
 
 - Binance
 - Binance Futures
-- Binance order book
 - Blockchair
 - Bybit
 - CoinGecko
@@ -709,6 +708,7 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 - Coinalyze
 - CryptoPanic
 - DefiLlama
+- DefiLlama Chains
 - DefiLlama Stablecoins
 - Deribit DVOL
 - FRED
@@ -727,7 +727,7 @@ Güncel sıralama #1. Top 100 mcap yüzdeliği %100.
 - Yerel hesaplama (EWMA/GARCH yaklaşımi)
 - Yerel hesaplama (R/S analizi)
 - Yerel hesaplama (TradingView vekili)
-- Yerel hesaplama (log-lineer regresyon)
+- Yerel hesaplama (getiri t-istatistigi)
 - Yerel hesaplama (tarihsel benzerlik)
 - Yerel hesaplama (yuvarlak sayılar)
 - alternative.me
@@ -751,9 +751,12 @@ Harici AI'a verilecek prompt aynı isimli `_prompt.txt` dosyasındadır.
 - Her madde veri + kaynak + güven ile raporlanır; verisi olmayan maddeler ortalamaya
   dahil edilmez ve raporda açıkça işaretlenir.
 - Skorlar -1 (güçlü negatif) ile +1 (güçlü pozitif) arasındadır; ağırlıklı ortalama
-  güven katsayısı ile hesaplanır.
+  güven katsayısıyla, aynı modülü paylaşan kriterler tek sinyal sayılarak hesaplanır.
+- Kısmi veriyle değerlendirilen kriterler yarım ağırlıkla katkı verir.
 - Sayılar tr-TR biçiminde gösterilir (binlik ayracı nokta, ondalık virgül).
 
-> Not: 66 maddenin 58 tanesi tam, 6 tanesi kısmi veriyle değerlendirildi; 2 madde için doğrulanabilir ücretsiz veri bulunamadı ve ortalamaya dahil edilmedi.
+> Not: 66 kriterin 49 tanesi tam, 3 tanesi kısmi veriyle değerlendirildi; 14 madde için doğrulanabilir ücretsiz veri bulunamadı ve ortalamaya dahil edilmedi.
+> Not: Aynı analiz modülünü paylaşan kriterler skorlamada tek sinyal olarak (en yüksek ağırlıkla) sayılır.
+> Not: Kısmi veriyle değerlendirilen kriterler yarım ağırlıkla katkı verir.
 > Not: Skorlar veri kaynaklarının ağırlıklı ortalamasıdır; kesin fiyat tahmini değildir.
 > Not: Yatırım tavsiyesi değildir.
