@@ -146,3 +146,10 @@ export function formatAxisDate(value, timeframe = "1d") {
   }
   return date.toLocaleDateString("tr-TR", { day: "2-digit", month: "2-digit", year: "2-digit" });
 }
+
+export function formatDuration(seconds) {
+  const total = Math.max(0, Math.floor(seconds || 0));
+  const minutes = Math.floor(total / 60);
+  const rest = total % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(rest).padStart(2, "0")}`;
+}

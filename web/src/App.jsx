@@ -3,16 +3,16 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api } from "./api.js";
 import PriceChart from "./PriceChart.jsx";
-import { DASH, formatDateTime, money, pct, price, priceRange, score } from "./format.js";
+import { DASH, formatDateTime, formatDuration, money, pct, price, priceRange, score } from "./format.js";
 
 const TIMEFRAMES = ["15m", "30m", "1h", "4h", "1d", "1w"];
 const TABS = [
-  { id: "overview", label: "Analizler" },
-  { id: "items", label: "66 Madde" },
+  { id: "overview", label: "Genel Bakış" },
+  { id: "findings", label: "Araştırma Bulguları" },
   { id: "report", label: "Rapor" },
-  { id: "prompt", label: "Prompt" },
-  { id: "rag", label: "RAG Arama" },
-  { id: "history", label: "Geçmiş" },
+  { id: "prompt", label: "Prompt Çıktısı" },
+  { id: "rag", label: "Kaynak Arama" },
+  { id: "history", label: "Rapor Arşivi" },
 ];
 
 function scoreColor(value) {
@@ -23,7 +23,7 @@ function scoreColor(value) {
 }
 
 function Badge({ status }) {
-  const labels = { ok: "Tam", partial: "Kısmi", no_data: "Veri yok", error: "Hata" };
+  const labels = { ok: "Tam", partial: "Kısmi", no_data: "Veri Yok", error: "Hata" };
   return <span className={`badge badge-${status}`}>{labels[status] || status}</span>;
 }
 
@@ -62,16 +62,16 @@ function SnapshotCard({ data }) {
     ["24s", pct(s.change_24h_pct, { signed: true })],
     ["7g", pct(s.change_7d_pct, { signed: true })],
     ["30g", pct(s.change_30d_pct, { signed: true })],
-    ["ATH uzaklık", pct(s.ath_change_pct)],
-    ["ATL uzaklık", pct(s.atl_change_pct)],
-    ["BTC dominance", g?.btc_dominance != null ? `%${g.btc_dominance.toFixed(1)}` : DASH],
-    ["ETH dominance", g?.eth_dominance != null ? `%${g.eth_dominance.toFixed(1)}` : DASH],
-    ["Toplam mcap", money(g?.total_market_cap_usd)],
+    ["ATH uzaklığı", pct(s.ath_change_pct)],
+    ["ATL uzaklığı", pct(s.atl_change_pct)],
+    ["BTC dominansı", g?.btc_dominance != null ? `%${g.btc_dominance.toFixed(1)}` : DASH],
+    ["ETH dominansı", g?.eth_dominance != null ? `%${g.eth_dominance.toFixed(1)}` : DASH],
+    ["Toplam piyasa değeri", money(g?.total_market_cap_usd)],
   ];
   return (
     <div
       className="snapshot-grid"
-      title={`Tam değerler: fiyat ${s.price_usd} USD · mcap ${s.market_cap_usd} USD`}
+      title={`Tam değerler: fiyat ${s.price_usd} USD · piyasa değeri ${s.market_cap_usd} USD`}
     >
       {stats.map(([label, value]) => (
         <div className="stat" key={label}>
@@ -111,7 +111,7 @@ function AnalysisCard({ result }) {
         <div className="card-meta">
           <Badge status={result.status} />
           <ScorePill value={result.score} />
-          <span className="confidence">güven {(result.confidence ?? 0).toFixed(2)}</span>
+          <span className="confidence">Güven {(result.confidence ?? 0).toFixed(2)}</span>
         </div>
       </div>
       <p className="summary">{result.summary}</p>
@@ -133,7 +133,7 @@ function AnalysisCard({ result }) {
   );
 }
 
-function ItemsTable({ items }) {
+function FindingsTable({ items }) {
   const [filter, setFilter] = useState("all");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("order");
@@ -150,13 +150,9 @@ function ItemsTable({ items }) {
           (item.summary || "").toLowerCase().includes(needle)
       );
     }
-    if (sort === "score-desc") {
-      list = [...list].sort((a, b) => (b.score ?? -99) - (a.score ?? -99));
-    } else if (sort === "score-asc") {
-      list = [...list].sort((a, b) => (a.score ?? 99) - (b.score ?? 99));
-    } else if (sort === "confidence") {
-      list = [...list].sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0));
-    }
+    if (sort === "score-desc") list = [...list].sort((a, b) => (b.score ?? -99) - (a.score ?? -99));
+    else if (sort === "score-asc") list = [...list].sort((a, b) => (a.score ?? 99) - (b.score ?? 99));
+    else if (sort === "confidence") list = [...list].sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0));
     return list;
   }, [items, filter, query, sort]);
 
@@ -165,10 +161,10 @@ function ItemsTable({ items }) {
       <div className="filter-row">
         {[
           ["all", "Tümü"],
-          ["scored", "Skorlananlar"],
+          ["scored", "Skorlanan"],
           ["ok", "Tam"],
           ["partial", "Kısmi"],
-          ["no_data", "Veri yok"],
+          ["no_data", "Veri Yok"],
         ].map(([id, label]) => (
           <button
             key={id}
@@ -182,15 +178,15 @@ function ItemsTable({ items }) {
           className="search-input"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
-          placeholder="Madde ara…"
+          placeholder="Kriter ara…"
         />
         <select value={sort} onChange={(event) => setSort(event.target.value)} className="sort-select">
-          <option value="order">Sıra</option>
-          <option value="score-desc">Skor (yüksek → düşük)</option>
-          <option value="score-asc">Skor (düşük → yüksek)</option>
+          <option value="order">Numara</option>
+          <option value="score-desc">Skor (azalan)</option>
+          <option value="score-asc">Skor (artan)</option>
           <option value="confidence">Güven</option>
         </select>
-        <span className="muted">{filtered.length} madde</span>
+        <span className="muted">{filtered.length} kriter</span>
       </div>
       <div className="items-grid">
         {filtered.map((item) => (
@@ -207,7 +203,7 @@ function ItemsTable({ items }) {
             <p className="summary clamp-3">{item.summary}</p>
             <div className="item-footer">
               <span className="muted">
-                {item.category} | ağırlık {item.weight} | güven {(item.confidence ?? 0).toFixed(2)}
+                {item.category} · Ağırlık {item.weight} · Güven {(item.confidence ?? 0).toFixed(2)}
               </span>
               {item.sources?.length > 0 && (
                 <span className="muted">
@@ -217,7 +213,7 @@ function ItemsTable({ items }) {
             </div>
             {item.data && Object.keys(item.data).length > 0 && (
               <details className="item-data">
-                <summary>Detay verisi</summary>
+                <summary>Teknik veriyi göster</summary>
                 <pre>{JSON.stringify(item.data, null, 2)}</pre>
               </details>
             )}
@@ -250,6 +246,24 @@ function Skeleton() {
   );
 }
 
+function JobProgress({ job, elapsed }) {
+  const progress = Math.max(0, Math.min(100, job?.progress ?? 0));
+  return (
+    <div className="job-progress">
+      <div className="job-head">
+        <span>{job?.message || "Görev başlatılıyor…"}</span>
+        <span className="muted">Süre {formatDuration(elapsed)}</span>
+      </div>
+      <div className="job-bar">
+        <div className="job-fill" style={{ width: `${progress}%` }} />
+      </div>
+      <span className="muted small">
+        Derin araştırma birkaç dakika sürebilir; sayfayı kapatmadan bekleyin. İlerleme otomatik güncellenir.
+      </span>
+    </div>
+  );
+}
+
 export default function App() {
   const [health, setHealth] = useState(null);
   const [analysesList, setAnalysesList] = useState([]);
@@ -265,6 +279,9 @@ export default function App() {
   const [deep, setDeep] = useState(null);
   const [busy, setBusy] = useState("");
   const [error, setError] = useState("");
+  const [job, setJob] = useState(null);
+  const [jobStartedAt, setJobStartedAt] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
   const [ragQuery, setRagQuery] = useState("");
   const [ragResults, setRagResults] = useState([]);
   const [ragAnswer, setRagAnswer] = useState(null);
@@ -280,6 +297,14 @@ export default function App() {
     api.reports().then(setReports).catch(() => {});
     api.ragStats().then(setRagStats).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (busy !== "deep" || !jobStartedAt) return undefined;
+    const timer = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - jobStartedAt) / 1000));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [busy, jobStartedAt]);
 
   const toggleAnalysis = (key) => {
     setSelected((prev) => (prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key]));
@@ -322,7 +347,12 @@ export default function App() {
   const runDeepResearch = async () => {
     setBusy("deep");
     setError("");
+    setDeep(null);
+    setAnalysisResults([]);
+    setElapsed(0);
+    setJobStartedAt(Date.now());
     try {
+      await api.health();
       const payload = {
         coin,
         timeframe,
@@ -331,7 +361,17 @@ export default function App() {
         analyses: selected.length ? selected : null,
         include_prompt: true,
       };
-      const result = await api.deepResearch(payload);
+      let state = await api.startDeepResearch(payload);
+      setJob(state);
+      while (state.status === "queued" || state.status === "running") {
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+        state = await api.jobStatus(state.job_id);
+        setJob(state);
+      }
+      if (state.status === "error") {
+        throw new Error(state.error || "Araştırma tamamlanamadı.");
+      }
+      const result = state.result;
       setDeep(result);
       setAnalysisResults(result.analyses || []);
       setSnapshotData(await api.snapshot(coin));
@@ -341,6 +381,7 @@ export default function App() {
     } catch (err) {
       setError(err.message);
     } finally {
+      setJob(null);
       setBusy("");
     }
   };
@@ -363,24 +404,6 @@ export default function App() {
     }
   };
 
-  const downloadPrompt = () => {
-    if (!deep?.prompt) return;
-    const blob = new Blob([deep.prompt], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${deep.run.coin.symbol.toUpperCase()}_prompt.txt`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const copyPrompt = async () => {
-    if (!deep?.prompt) return;
-    await navigator.clipboard.writeText(deep.prompt);
-    setCopied("prompt");
-    setTimeout(() => setCopied(""), 2000);
-  };
-
   const downloadReport = () => {
     if (!deep?.markdown) return;
     const blob = new Blob([deep.markdown], { type: "text/markdown;charset=utf-8" });
@@ -399,6 +422,24 @@ export default function App() {
     setTimeout(() => setCopied(""), 2000);
   };
 
+  const downloadPrompt = () => {
+    if (!deep?.prompt) return;
+    const blob = new Blob([deep.prompt], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${deep.run.coin.symbol.toUpperCase()}_prompt.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const copyPrompt = async () => {
+    if (!deep?.prompt) return;
+    await navigator.clipboard.writeText(deep.prompt);
+    setCopied("prompt");
+    setTimeout(() => setCopied(""), 2000);
+  };
+
   const run = deep?.run;
   const scoredItems = items.filter((item) => item.score !== null && item.confidence > 0);
 
@@ -409,22 +450,22 @@ export default function App() {
           Crypto<span>DeepResearch</span>
         </h1>
         <p className="muted small">
-          Yerel RAG + 66 maddelik araştırma. Veriler ücretsiz kaynaklardan toplanır.
+          Kripto varlıklar için yerel RAG ve derin araştırma altyapısı
         </p>
 
         <label className="field">
-          <span>Coin (sembol veya id)</span>
+          <span>Varlık (sembol veya CoinGecko kimliği)</span>
           <input
             value={coin}
             onChange={(event) => setCoin(event.target.value)}
             onBlur={loadSnapshot}
-            placeholder="bitcoin, eth, pepe..."
+            placeholder="örn. bitcoin, eth, chainlink"
           />
         </label>
 
         <div className="field-row">
           <label className="field">
-            <span>Timeframe</span>
+            <span>Zaman Dilimi</span>
             <select value={timeframe} onChange={(event) => setTimeframe(event.target.value)}>
               {TIMEFRAMES.map((value) => (
                 <option key={value} value={value}>{value}</option>
@@ -432,7 +473,7 @@ export default function App() {
             </select>
           </label>
           <label className="field">
-            <span>Geçmiş (gün)</span>
+            <span>Geriye Dönük Veri (gün)</span>
             <input
               type="number"
               min="30"
@@ -444,7 +485,7 @@ export default function App() {
         </div>
 
         <div className="field">
-          <span>Analizler {selected.length ? `(${selected.length} seçili)` : "(tümü)"}</span>
+          <span>Analiz Modülleri {selected.length ? `(${selected.length} seçili)` : "(tümü)"}</span>
           <div className="checklist">
             {analysesList.map((analysis) => (
               <label key={analysis.key} className="check">
@@ -461,21 +502,21 @@ export default function App() {
 
         <div className="field-row">
           <label className="field">
-            <span>Platform</span>
+            <span>Prompt Hedefi</span>
             <select value={platform} onChange={(event) => setPlatform(event.target.value)}>
-              <option value="generic">generic</option>
-              <option value="claude">claude</option>
-              <option value="codex">codex</option>
-              <option value="chatgpt">chatgpt</option>
+              <option value="generic">Genel</option>
+              <option value="claude">Claude</option>
+              <option value="codex">Codex</option>
+              <option value="chatgpt">ChatGPT</option>
             </select>
           </label>
         </div>
 
         <button className="primary" onClick={runAnalyze} disabled={!!busy}>
-          {busy === "analyze" ? "Analiz ediliyor…" : "Analiz Et"}
+          {busy === "analyze" ? "Analiz çalışıyor…" : "Analiz Çalıştır"}
         </button>
         <button className="accent" onClick={runDeepResearch} disabled={!!busy}>
-          {busy === "deep" ? "Araştırma sürüyor (dakikalar)…" : "Deep Research + Prompt"}
+          {busy === "deep" ? "Derin araştırma sürüyor…" : "Derin Araştırma Başlat"}
         </button>
 
         {snapshotData && (
@@ -488,13 +529,13 @@ export default function App() {
           {health && (
             <>
               <div className="muted small">
-                Anahtarlar: {Object.entries(health.keys).filter(([, value]) => value).map(([key]) => key).join(", ") || "yok"}
+                API anahtarları: {Object.entries(health.keys).filter(([, value]) => value).map(([key]) => key).join(", ") || "tanımlı değil"}
               </div>
               <div className="muted small">
-                OpenRouter: {health.openrouter ? "aktif" : "yok (prompt üretilir)"}
+                OpenRouter: {health.openrouter ? "aktif" : "pasif (yalnızca prompt üretilir)"}
               </div>
               <div className="muted small">
-                Rapor: {health.reports} | Vektör: {ragStats?.vectors ?? 0}
+                Rapor: {health.reports} · Vektör kaydı: {ragStats?.vectors ?? 0}
               </div>
             </>
           )}
@@ -516,41 +557,39 @@ export default function App() {
           </nav>
           {run && (
             <div className="score-summary">
-              <span className={scoreColor(run.weighted_score)}>skor {score(run.weighted_score)}</span>
-              <span className="up">yükseliş %{Number(run.up_probability).toFixed(1)}</span>
-              <span className="down">düşüş %{Number(run.down_probability).toFixed(1)}</span>
+              <span className={scoreColor(run.weighted_score)}>Skor {score(run.weighted_score)}</span>
+              <span className="up">Yükseliş %{Number(run.up_probability).toFixed(1)}</span>
+              <span className="down">Düşüş %{Number(run.down_probability).toFixed(1)}</span>
               <span className="range">{priceRange(run.expected_low, run.expected_high)}</span>
             </div>
           )}
         </header>
 
         {error && <div className="error">{error}</div>}
-        {busy && (
-          <div className="progress">
-            {busy === "deep"
-              ? "Deep research çalışıyor; 66 madde ve tüm analizler toplanıyor…"
-              : "Çalışıyor…"}
-          </div>
-        )}
+        {busy === "deep" && <JobProgress job={job} elapsed={elapsed} />}
+        {busy === "analyze" && <div className="progress">Analiz çalışıyor…</div>}
 
         <section className="content">
           {tab === "overview" && (
             <>
               <SnapshotCard data={snapshotData} />
-              {(snapshotData || analysisResults.length > 0) && <PriceChart coin={coin} defaultTimeframe={timeframe} />}
+              {(snapshotData || analysisResults.length > 0) && (
+                <PriceChart coin={coin} defaultTimeframe={timeframe} />
+              )}
               {run && (
                 <div className="card">
-                  <h3>Olasılık ve Dağılım</h3>
+                  <h3>Olasılık Dağılımı</h3>
                   <ProbabilityBar up={run.up_probability} down={run.down_probability} />
                   <div className="range-line">
-                    Beklenen aralık: <b>{priceRange(run.expected_low, run.expected_high)}</b>
+                    Beklenen fiyat aralığı: <b>{priceRange(run.expected_low, run.expected_high)}</b>
                   </div>
                   <ScoreDistribution items={run.items} />
                 </div>
               )}
               {!snapshotData && !busy && (
                 <div className="empty">
-                  Soldan bir coin seçip <b>Analiz Et</b> veya <b>Deep Research</b> başlatın.
+                  Başlamak için sol panelden bir varlık seçin ve <b>Analiz Çalıştır</b> veya{" "}
+                  <b>Derin Araştırma Başlat</b> düğmesine basın.
                 </div>
               )}
               {(busy === "analyze" || busy === "deep") && analysisResults.length === 0 && <Skeleton />}
@@ -562,30 +601,32 @@ export default function App() {
             </>
           )}
 
-          {tab === "items" && (
+          {tab === "findings" && (
             <>
               {!run && scoredItems.length === 0 && (
                 <div className="empty">
-                  66 maddenin tamamı için önce <b>Deep Research</b> çalıştırın. Böylece her madde
-                  veri, kaynak ve skorla doldurulur.
+                  Araştırma bulgularını görmek için <b>Derin Araştırma Başlat</b> düğmesini kullanın.
+                  Böylece 66 kriterin tamamı veri, kaynak ve skorla doldurulur.
                 </div>
               )}
-              {run && <ItemsTable items={run.items} />}
-              {!run && scoredItems.length > 0 && <ItemsTable items={items} />}
+              {run && <FindingsTable items={run.items} />}
+              {!run && scoredItems.length > 0 && <FindingsTable items={items} />}
             </>
           )}
 
           {tab === "report" && (
             <>
-              {!deep && <div className="empty">Rapor için Deep Research çalıştırın.</div>}
+              {!deep && (
+                <div className="empty">Rapor üretmek için derin araştırma başlatın.</div>
+              )}
               {deep && (
                 <>
                   <div className="toolbar">
-                    <button onClick={copyReport}>{copied === "report" ? "Kopyalandı ✓" : "Panoya kopyala"}</button>
-                    <button onClick={downloadReport}>Markdown indir</button>
+                    <button onClick={copyReport}>{copied === "report" ? "Kopyalandı ✓" : "Kopyala"}</button>
+                    <button onClick={downloadReport}>Markdown İndir</button>
                     <button onClick={() => window.print()}>Yazdır / PDF</button>
                     <span className="muted">
-                      {deep.report_path} | Context: {JSON.stringify(deep.context_stats?.groups || {})}
+                      {deep.report_path} · Bağlam: {JSON.stringify(deep.context_stats?.groups || {})}
                     </span>
                   </div>
                   <Markdown>{deep.markdown}</Markdown>
@@ -596,13 +637,16 @@ export default function App() {
 
           {tab === "prompt" && (
             <>
-              {!deep && <div className="empty">Prompt için Deep Research çalıştırın.</div>}
+              {!deep && <div className="empty">Prompt üretmek için derin araştırma başlatın.</div>}
               {deep && (
                 <>
                   <div className="toolbar">
-                    <button onClick={copyPrompt}>{copied === "prompt" ? "Kopyalandı ✓" : "Panoya kopyala"}</button>
+                    <button onClick={copyPrompt}>{copied === "prompt" ? "Kopyalandı ✓" : "Kopyala"}</button>
                     <button onClick={downloadPrompt}>İndir</button>
-                    <span className="muted">{deep.prompt?.length ?? 0} karakter</span>
+                    <span className="muted">
+                      Bu metni Claude, ChatGPT, Codex veya OpenRouter gibi araçlara yapıştırabilirsiniz
+                      · {deep.prompt?.length ?? 0} karakter
+                    </span>
                   </div>
                   <textarea className="prompt-box" readOnly value={deep.prompt || ""} />
                 </>
@@ -616,7 +660,7 @@ export default function App() {
                 <input
                   value={ragQuery}
                   onChange={(event) => setRagQuery(event.target.value)}
-                  placeholder="Örnek: ETF akışları, likidasyon, regülasyon..."
+                  placeholder="Araştırma notlarında ve haberlerde ara…"
                   onKeyDown={(event) => event.key === "Enter" && runRagSearch("rag-search")}
                 />
                 <button onClick={() => runRagSearch("rag-search")} disabled={!!busy}>

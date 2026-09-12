@@ -185,7 +185,7 @@ def deep_research(
 @app.command()
 def items():
     """66 maddelik kayıt defterini listeler."""
-    table = Table(title="66 Maddelik Araştırma Listesi")
+    table = Table(title="Araştırma Kriterleri (66)")
     table.add_column("#", justify="right")
     table.add_column("Madde")
     table.add_column("Kategori")

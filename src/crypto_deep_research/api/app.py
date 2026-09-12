@@ -15,8 +15,9 @@ from pydantic import BaseModel, Field
 
 from crypto_deep_research.analysis.base import AnalysisContext
 from crypto_deep_research.analysis.engine import available_analyses, run_analyses
+from crypto_deep_research.api.jobs import Job, JobManager
 from crypto_deep_research.config import get_settings
-from crypto_deep_research.deep_research.engine import DeepResearchEngine
+from crypto_deep_research.deep_research.engine import DeepResearchEngine, DeepResearchOutput
 from crypto_deep_research.deep_research.registry import registry_summary
 from crypto_deep_research.llm import OpenRouterClient, OpenRouterError
 from crypto_deep_research.models import Kline
@@ -71,6 +72,21 @@ def _services() -> tuple[Any, Database, Any]:
     settings = get_settings()
     db = Database(settings.db_path)
     return settings, db, build_providers(settings, db)
+
+
+def _serialize_output(output: DeepResearchOutput, include_prompt: bool) -> dict[str, Any]:
+    return {
+        "run": json.loads(output.run.model_dump_json()),
+        "analyses": [result.model_dump(mode="json") for result in output.analysis_results],
+        "report_path": output.report_path,
+        "prompt_path": output.prompt_path,
+        "prompt": output.prompt if include_prompt else None,
+        "markdown": output.markdown,
+        "context_stats": output.context_stats,
+    }
+
+
+jobs = JobManager()
 
 
 @app.get("/api/health")
@@ -154,20 +170,46 @@ async def deep_research(request: DeepResearchRequest) -> dict[str, Any]:
             lookback_days=request.lookback_days,
             platform=request.platform,
         )
-        return {
-            "run": json.loads(output.run.model_dump_json()),
-            "analyses": [result.model_dump(mode="json") for result in output.analysis_results],
-            "report_path": output.report_path,
-            "prompt_path": output.prompt_path,
-            "prompt": output.prompt if request.include_prompt else None,
-            "markdown": output.markdown,
-            "context_stats": output.context_stats,
-        }
+        return _serialize_output(output, request.include_prompt)
     except Exception as exc:
-        logger.exception("Deep research hatası")
+        logger.exception("Derin araştırma hatası")
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     finally:
         await providers.aclose()
+
+
+@app.post("/api/deep-research/jobs")
+async def start_deep_research_job(request: DeepResearchRequest) -> dict[str, Any]:
+    """Uzun süren derin araştırmayı arka planda başlatır; ilerleme sorgulanabilir."""
+
+    async def runner(job: Job) -> dict[str, Any]:
+        settings, db, providers = _services()
+        engine = DeepResearchEngine(providers, settings, db)
+        job.update(1, "Veri kaynakları hazırlanıyor…")
+        try:
+            output = await engine.run(
+                request.coin,
+                analyses=request.analyses,
+                timeframe=request.timeframe,
+                lookback_days=request.lookback_days,
+                platform=request.platform,
+                progress=job.update,
+            )
+            return _serialize_output(output, request.include_prompt)
+        finally:
+            await providers.aclose()
+
+    jobs.prune()
+    job = jobs.create(runner)
+    return {"job_id": job.id, "status": job.status, "message": job.message}
+
+
+@app.get("/api/deep-research/jobs/{job_id}")
+async def deep_research_job_status(job_id: str) -> dict[str, Any]:
+    job = jobs.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Görev bulunamadı")
+    return job.to_dict()
 
 
 @app.get("/api/ohlcv/{coin}")

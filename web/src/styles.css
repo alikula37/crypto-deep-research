@@ -303,3 +303,9 @@ button.accent { background: var(--accent-2); border-color: var(--accent-2); colo
 .chart-tooltip-text.up { fill: var(--green); }
 .chart-tooltip-text.down { fill: var(--red); }
 .chart-dot { fill: var(--accent); stroke: var(--bg); stroke-width: 1.5; }
+
+/* Arka plan isi ilerlemesi */
+.job-progress { background: var(--bg-soft); border-bottom: 1px solid var(--border); padding: 12px 22px; display: flex; flex-direction: column; gap: 6px; }
+.job-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 600; gap: 10px; }
+.job-bar { height: 8px; border-radius: 999px; background: var(--bg); overflow: hidden; border: 1px solid var(--border); }
+.job-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width 0.5s ease; }

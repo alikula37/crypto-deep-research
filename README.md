@@ -35,9 +35,11 @@ oluşturur.
 - **MCP server**: Claude Desktop, Claude Code, Codex, Cursor gibi araçlara doğrudan veri ve
   analiz sunar.
 - **Web UI**: NotebookLM benzeri koyu tema; coin/timeframe/analiz seçimi, **timeframe bazlı
-  interaktif SVG fiyat grafiği**, yükseliş/düşüş olasılık çubuğu, 66 madde tablosu (arama +
-  sıralama + açılır veri görünümü), rapor ve prompt görüntüleme, **Markdown indirme ve
-  Yazdır/PDF**, RAG arama, rapor geçmişi.
+  interaktif SVG fiyat grafiği**, yükseliş/düşüş olasılık çubuğu, araştırma bulguları tablosu
+  (arama + sıralama + açılır veri görünümü), rapor ve prompt görüntüleme, **Markdown indirme
+  ve Yazdır/PDF**, kaynak arama, rapor arşivi. Uzun süren derin araştırmalar **arka planda**
+  çalışır; ilerleme çubuğu, kriter sayacı ve süre göstergesiyle izlenir (tarayıcı zaman
+  aşımına takılmaz).
 - **tr-TR sayı biçimi**: Tüm çıktılarda binlik ayracı nokta, ondalık virgül; mikro fiyatlar
   (ör. PEPE $0,00000338) bilimsel gösterime düşmeden ve sıfıra yuvarlanmadan gösterilir.
 - **Opsiyonel OpenRouter**: API anahtarı girilirse RAG soruları ve rapor üretimi LLM'e
@@ -153,7 +155,9 @@ Web UI aynı zamanda bir REST API sunar (`uv run cdr serve` → `http://127.0.0.
 | GET | `/api/snapshot/{coin}` | Anlık fiyat/mcap/ATH-ATL + global veriler |
 | GET | `/api/ohlcv/{coin}?timeframe=1d&limit=300` | Grafik için mum verisi (Binance, yedek CoinGecko) |
 | POST | `/api/analyze` | Seçili analizleri çalıştırır |
-| POST | `/api/deep-research` | 66 madde + rapor + prompt üretir |
+| POST | `/api/deep-research` | 66 kriter + rapor + prompt üretir (senkron) |
+| POST | `/api/deep-research/jobs` | Derin araştırmayı arka planda başlatır (job_id döner) |
+| GET | `/api/deep-research/jobs/{id}` | Görev durumu, ilerleme yüzdesi ve sonuç |
 | POST | `/api/rag/search` / `/api/rag/ask` | Yerel RAG araması / (anahtar varsa) LLM yanıtı |
 | GET | `/api/reports` / `/api/reports/{name}` | Rapor listesi / Markdown içeriği |
 | GET | `/api/runs` / `/api/runs/{id}` | Koşu listesi / detayı |

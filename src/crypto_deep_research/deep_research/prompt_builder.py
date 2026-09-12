@@ -148,7 +148,7 @@ def build_prompt(
             sections.append("Kaynaklar: " + ", ".join(sorted({s.name for s in analysis.sources})))
 
     sections.append("=" * 70)
-    sections.append("66 MADDELİK DETAYLI ARAŞTIRMA")
+    sections.append("66 KRİTERLİK ARAŞTIRMA BULGULARI")
     sections.append("=" * 70)
     sections.extend(_prepare_items(items))
 

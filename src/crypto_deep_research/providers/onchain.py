@@ -147,15 +147,16 @@ class OnChainProvider:
             return []
         known = KNOWN_EXCHANGE_ADDRESSES["bitcoin"]
         flows: list[WhaleFlow] = []
-        for block in (blocks or [])[:3]:
-            block_id = block.get("id")
-            if not block_id:
-                continue
-            try:
-                txs = await self.http.get_json(
-                    "mempool", f"{MEMPOOL}/block/{block_id}/txs", ttl=300
-                )
-            except ProviderError:
+        recent_blocks = [block for block in (blocks or [])[:3] if block.get("id")]
+        tx_batches = await asyncio.gather(
+            *[
+                self.http.get_json("mempool", f"{MEMPOOL}/block/{block['id']}/txs", ttl=300)
+                for block in recent_blocks
+            ],
+            return_exceptions=True,
+        )
+        for block, txs in zip(recent_blocks, tx_batches, strict=False):
+            if isinstance(txs, Exception):
                 continue
             timestamp = datetime.fromtimestamp(
                 int(block.get("timestamp") or utcnow().timestamp()), tz=timezone.utc
@@ -237,19 +238,22 @@ class OnChainProvider:
             )
         except ProviderError:
             return []
-        items = (blocks or {}).get("items") or []
+        items = [block for block in (blocks or {}).get("items") or [] if block.get("height") is not None]
         flows: list[WhaleFlow] = []
-        for block in items[:pages]:
-            number = block.get("height")
-            if number is None:
-                continue
-            try:
-                data = await self.http.get_json(
+        selected_blocks = items[:pages]
+        body_batches = await asyncio.gather(
+            *[
+                self.http.get_json(
                     "blockscout",
-                    f"{BLOCKSCOUT_ETH}/blocks/{number}/transactions",
+                    f"{BLOCKSCOUT_ETH}/blocks/{block['height']}/transactions",
                     ttl=180,
                 )
-            except ProviderError:
+                for block in selected_blocks
+            ],
+            return_exceptions=True,
+        )
+        for data in body_batches:
+            if isinstance(data, Exception):
                 continue
             for tx in (data or {}).get("items") or []:
                 try:

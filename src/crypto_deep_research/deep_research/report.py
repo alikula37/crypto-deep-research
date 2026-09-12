@@ -35,7 +35,7 @@ def render_report(
     scored = [item for item in items if item.score is not None and item.confidence > 0]
 
     lines: list[str] = [
-        f"# {run.coin.name} ({run.coin.symbol.upper()}) - Kripto Deep Research Raporu",
+        f"# {run.coin.name} ({run.coin.symbol.upper()}) - Kripto Araştırma Raporu",
         "",
         f"- **Tarih:** {created.strftime('%d.%m.%Y %H:%M')} UTC",
         f"- **Fiyat:** {price(run.current_price)}",
@@ -43,8 +43,8 @@ def render_report(
         f"- **Ağırlıklı skor:** {score(run.weighted_score)}",
         f"- **Yükseliş / Düşüş olasılığı:** %{run.up_probability:.1f} / %{run.down_probability:.1f}",
         f"- **Beklenen aralık:** {price_range(run.expected_low, run.expected_high)}",
-        f"- **66 madde:** {ok_count} tam, {partial_count} kısmi, {missing_count} veri yok "
-        f"({len(scored)} madde skorlandı)",
+        f"- **Araştırma:** 66 kriter · {ok_count} tam, {partial_count} kısmi, {missing_count} veri yok "
+        f"({len(scored)} kriter skorlandı)",
         "",
         "> Bu rapor otomatik üretilmiştir ve yatırım tavsiyesi değildir. Skorlar veri ağırlıklı",
         "> tahminlerdir; kesinlik iddiası taşımaz.",
@@ -82,9 +82,9 @@ def render_report(
 
     lines.extend(
         [
-            "## 66 Maddelik Araştırma Tablosu",
+            "## Araştırma Bulguları (66 Kriter)",
             "",
-            "| # | Madde | Durum | Skor | Güven | Özet |",
+            "| # | Kriter | Durum | Skor | Güven | Özet |",
             "| --- | --- | --- | --- | --- | --- |",
         ]
     )
@@ -95,7 +95,7 @@ def render_report(
         )
     lines.append("")
 
-    lines.append("## Madde Detayları")
+    lines.append("## Kriter Detayları")
     lines.append("")
     for item in items:
         lines.append(f"### {item.item_id}. {item.title_tr}")
