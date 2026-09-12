@@ -34,7 +34,7 @@ oluşturur.
   (`intfloat/multilingual-e5-large`). İnternet gerekmez, ek maliyet yok.
 - **MCP server**: Claude Desktop, Claude Code, Codex, Cursor gibi araçlara doğrudan veri ve
   analiz sunar.
-- **Web UI**: NotebookLM benzeri koyu tema; coin/timeframe/analiz seçimi, **timeframe bazlı
+- **Web UI**: NotebookLM benzeri koyu tema; **otomatik tamamlamalı varlık arama**, koşu zamanı/analiz seçimi, **timeframe bazlı
   interaktif SVG fiyat grafiği**, yükseliş/düşüş olasılık çubuğu, araştırma bulguları tablosu
   (arama + sıralama + açılır veri görünümü), rapor ve prompt görüntüleme, **Markdown indirme
   ve Yazdır/PDF**, kaynak arama, rapor arşivi. Uzun süren derin araştırmalar **arka planda**
@@ -152,6 +152,7 @@ Web UI aynı zamanda bir REST API sunar (`uv run cdr serve` → `http://127.0.0.
 | GET | `/api/health` | Durum ve tanımlı API anahtarları |
 | GET | `/api/analyses` | Kullanılabilir analizler |
 | GET | `/api/items` | 66 maddelik kayıt defteri |
+| GET | `/api/coins/search?q=link` | Varlık arama (otomatik tamamlama) |
 | GET | `/api/snapshot/{coin}` | Anlık fiyat/mcap/ATH-ATL + global veriler |
 | GET | `/api/ohlcv/{coin}?timeframe=1d&limit=300` | Grafik için mum verisi (Binance, yedek CoinGecko) |
 | POST | `/api/analyze` | Seçili analizleri çalıştırır |

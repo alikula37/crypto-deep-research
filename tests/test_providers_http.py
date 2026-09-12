@@ -187,3 +187,50 @@ def test_defillama_summarize_fees():
 
 def test_defillama_summarize_fees_empty():
     assert DefiLlamaProvider.summarize_fees(None) == {}
+
+
+COINGECKO_SEARCH_URL = "https://api.coingecko.com/api/v3/search"
+COINGECKO_LIST_URL = "https://api.coingecko.com/api/v3/coins/list"
+
+
+@respx.mock
+async def test_coingecko_search_parsing(http, db, settings):
+    respx.get(COINGECKO_SEARCH_URL).mock(
+        return_value=httpx.Response(
+            200,
+            json={
+                "coins": [
+                    {"id": "chainlink", "name": "Chainlink", "symbol": "link", "market_cap_rank": 12},
+                    {"id": "link", "name": "Link", "symbol": "lnk", "market_cap_rank": 950},
+                ]
+            },
+        )
+    )
+    provider = CoinGeckoProvider(http, db, settings)
+    results = await provider.search("link", limit=5)
+    assert [item["id"] for item in results] == ["chainlink", "link"]
+    assert results[0]["symbol"] == "LINK"
+    assert results[0]["rank"] == 12
+
+
+@respx.mock
+async def test_coingecko_search_fallback_on_error(http, db, settings):
+    respx.get(COINGECKO_SEARCH_URL).mock(return_value=httpx.Response(500, text="boom"))
+    respx.get(COINGECKO_LIST_URL).mock(
+        return_value=httpx.Response(
+            200,
+            json=[
+                {"id": "chainlink", "symbol": "link", "name": "Chainlink"},
+                {"id": "link", "symbol": "lnk", "name": "Link"},
+                {"id": "bitcoin", "symbol": "btc", "name": "Bitcoin"},
+            ],
+        )
+    )
+    provider = CoinGeckoProvider(http, db, settings)
+    results = await provider.search("chain", limit=5)
+    assert results and results[0]["id"] == "chainlink"
+
+
+async def test_coingecko_search_empty_query(http, db, settings):
+    provider = CoinGeckoProvider(http, db, settings)
+    assert await provider.search("   ") == []

@@ -117,6 +117,17 @@ async def items() -> list[dict[str, Any]]:
     return registry_summary()
 
 
+@app.get("/api/coins/search")
+async def search_coins(q: str = "", limit: int = 10) -> dict[str, Any]:
+    """Varlik arama (otomatik tamamlama); CoinGecko /search, yedek yerel liste."""
+    settings, db, providers = _services()
+    try:
+        results = await providers.coingecko.search(q, limit=min(max(limit, 1), 25))
+        return {"query": q, "results": results}
+    finally:
+        await providers.aclose()
+
+
 @app.get("/api/snapshot/{coin}")
 async def snapshot(coin: str) -> dict[str, Any]:
     settings, db, providers = _services()

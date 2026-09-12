@@ -309,3 +309,15 @@ button.accent { background: var(--accent-2); border-color: var(--accent-2); colo
 .job-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 600; gap: 10px; }
 .job-bar { height: 8px; border-radius: 999px; background: var(--bg); overflow: hidden; border: 1px solid var(--border); }
 .job-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); transition: width 0.5s ease; }
+
+/* Varlik otomatik tamamlama */
+.coin-select { position: relative; }
+.coin-input { width: 100%; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 9px 10px; font-size: 13px; outline: none; }
+.coin-input:focus { border-color: var(--accent); }
+.coin-dropdown { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 30; margin: 0; padding: 4px; list-style: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; max-height: 264px; overflow-y: auto; box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45); }
+.coin-option { display: grid; grid-template-columns: 52px 1fr auto; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 12px; }
+.coin-option.active, .coin-option:hover { background: rgba(76, 141, 255, 0.14); }
+.coin-symbol { font-weight: 700; color: var(--accent); }
+.coin-name { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.coin-rank { color: var(--muted); font-size: 11px; }
+.coin-empty { padding: 10px; color: var(--muted); font-size: 12px; }

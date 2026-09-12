@@ -243,6 +243,67 @@ class CoinGeckoProvider:
         data = await self._get("/search/trending", ttl=600)
         return list((data or {}).get("coins") or [])
 
+    async def search(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
+        """Varlik arama (otomatik tamamlama icin); /search uç noktasini kullanir."""
+        token = (query or "").strip()
+        if not token:
+            return []
+        try:
+            data = await self._get("/search", {"query": token}, ttl=300)
+            coins = (data or {}).get("coins") or []
+            results: list[dict[str, Any]] = []
+            for coin in coins[:limit]:
+                if not coin.get("id"):
+                    continue
+                results.append(
+                    {
+                        "id": coin.get("id"),
+                        "symbol": (coin.get("symbol") or "").upper(),
+                        "name": coin.get("name") or coin.get("id"),
+                        "rank": coin.get("market_cap_rank"),
+                        "thumb": coin.get("thumb") or coin.get("large"),
+                    }
+                )
+            if results:
+                return results
+        except ProviderError:
+            pass
+        return await self.search_fallback(token, limit)
+
+    async def search_fallback(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
+        """Yerel coin listesi uzerinden yedek arama."""
+        low = query.lower()
+        try:
+            coin_list = await self.coin_list()
+        except ProviderError:
+            return []
+        scored: list[tuple[int, dict[str, Any]]] = []
+        for coin in coin_list:
+            symbol = str(coin.get("symbol", "")).lower()
+            name = str(coin.get("name", "")).lower()
+            if symbol == low:
+                score = 100
+            elif symbol.startswith(low):
+                score = 80
+            elif name.startswith(low):
+                score = 70
+            elif low in name:
+                score = 40
+            else:
+                continue
+            scored.append((score, coin))
+        scored.sort(key=lambda item: (-item[0], str(item[1].get("name", ""))))
+        return [
+            {
+                "id": coin["id"],
+                "symbol": str(coin.get("symbol", "")).upper(),
+                "name": coin.get("name") or coin["id"],
+                "rank": None,
+                "thumb": None,
+            }
+            for _, coin in scored[:limit]
+        ]
+
     async def coins_categories(self) -> list[dict[str, Any]]:
         data = await self._get(
             "/coins/categories", {"order": "market_cap_desc"}, ttl=1800

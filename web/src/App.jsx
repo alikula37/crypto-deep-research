@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api } from "./api.js";
+import CoinSelect from "./CoinSelect.jsx";
 import PriceChart from "./PriceChart.jsx";
 import { DASH, formatDateTime, formatDuration, money, pct, price, priceRange, score } from "./format.js";
 
@@ -310,11 +311,13 @@ export default function App() {
     setSelected((prev) => (prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key]));
   };
 
-  const loadSnapshot = async () => {
+  const loadSnapshot = async (coinOverride) => {
+    const target = String(coinOverride ?? coin ?? "").trim();
+    if (!target) return;
     setBusy("snapshot");
     setError("");
     try {
-      setSnapshotData(await api.snapshot(coin));
+      setSnapshotData(await api.snapshot(target));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -453,15 +456,22 @@ export default function App() {
           Kripto varlıklar için yerel RAG ve derin araştırma altyapısı
         </p>
 
-        <label className="field">
+        <div className="field">
           <span>Varlık (sembol veya CoinGecko kimliği)</span>
-          <input
-            value={coin}
-            onChange={(event) => setCoin(event.target.value)}
-            onBlur={loadSnapshot}
+          <CoinSelect
+            defaultValue={coin}
             placeholder="örn. bitcoin, eth, chainlink"
+            onManualChange={(value) => setCoin(value)}
+            onSelect={(suggestion) => {
+              setCoin(suggestion.id);
+              loadSnapshot(suggestion.id);
+            }}
+            onSubmit={(value) => {
+              setCoin(value);
+              loadSnapshot(value);
+            }}
           />
-        </label>
+        </div>
 
         <div className="field-row">
           <label className="field">
