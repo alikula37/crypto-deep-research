@@ -393,6 +393,40 @@ class Database:
             "SELECT run_id, coin, created_at FROM runs ORDER BY created_at DESC LIMIT ?", (limit,)
         )
 
+    def run_summaries(self, coin: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
+        """Kosu ozetleri: skor gecmisi grafikleri icin hafif alanlar (eskiden yeniye)."""
+        if coin:
+            rows = self.query(
+                "SELECT run_id, coin, created_at, payload FROM runs WHERE coin = ? "
+                "ORDER BY created_at DESC LIMIT ?",
+                (coin, limit),
+            )
+        else:
+            rows = self.query(
+                "SELECT run_id, coin, created_at, payload FROM runs ORDER BY created_at DESC LIMIT ?",
+                (limit,),
+            )
+        summaries: list[dict[str, Any]] = []
+        for row in rows:
+            try:
+                payload = json.loads(row["payload"])
+            except (ValueError, TypeError):
+                continue
+            summaries.append(
+                {
+                    "run_id": row["run_id"],
+                    "coin": row["coin"],
+                    "created_at": row["created_at"],
+                    "timeframe": payload.get("timeframe"),
+                    "weighted_score": payload.get("weighted_score"),
+                    "up_probability": payload.get("up_probability"),
+                    "down_probability": payload.get("down_probability"),
+                    "current_price": payload.get("current_price"),
+                }
+            )
+        summaries.reverse()
+        return summaries
+
     # ------------------------------------------------------------------ metric geçmişi
     def record_metric(self, coin: str, metric: str, value: float, ts: float | None = None) -> None:
         self.execute(

@@ -57,12 +57,14 @@ Gereksinimler: Python 3.10+ ve [uv](https://docs.astral.sh/uv/). Web geliştirme
 
 | Sekme | İçerik |
 | --- | --- |
-| Genel Bakış | Anlık fiyat/mcap, mum grafiği, olasılık dağılımı, modül durumları |
+| Genel Bakış | Anlık fiyat/mcap, mum grafiği, skor geçmişi, olasılık dağılımı, modül durumları |
 | Araştırma Bulguları | 66 kriter: açıklama, bulgu, skor, güven (koşu öncesi tüm kriterler listelenir) |
 | Rapor | Kaynaklı Markdown raporu (kopyala / indir / PDF) |
 | Prompt Çıktısı | Harici AI araçlarına hazır prompt |
 | Kaynak Arama | Yerel RAG araması ve (anahtar varsa) AI yanıtı |
-| Rapor Arşivi | Geçmiş koşular ve raporlar |
+| Rapor Arşivi | Geçmiş koşular, rapor arama filtresi ve Markdown görüntüleme |
+
+Klavye kısayolları: `/` arama alanına git · `?` yardım · `⌘/Ctrl + Enter` derin araştırmayı başlat · `Esc` kapat.
 
 ### CLI
 

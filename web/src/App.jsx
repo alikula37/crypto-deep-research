@@ -4,6 +4,7 @@ import remarkGfm from "remark-gfm";
 import { api } from "./api.js";
 import CoinSelect from "./CoinSelect.jsx";
 import PriceChart from "./PriceChart.jsx";
+import ScoreHistoryChart from "./ScoreHistoryChart.jsx";
 import {
   IconAlert,
   IconCheck,
@@ -359,6 +360,7 @@ function FindingsTable({ items }) {
         ))}
         <input
           className="search-input"
+          data-search-input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Kriter ara…"
@@ -448,6 +450,7 @@ function CriteriaCatalog({ items }) {
       <div className="filter-row">
         <input
           className="search-input"
+          data-search-input
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="66 kriter arasında ara…"
@@ -553,6 +556,38 @@ function ResearchLoader({ message, progress, elapsed, mode }) {
   );
 }
 
+function ShortcutHelp({ open, onClose }) {
+  if (!open) return null;
+  const shortcuts = [
+    ["/", "Aktif sekmedeki arama alanına git"],
+    ["Esc", "Alanı bırak / pencereyi kapat"],
+    ["?", "Bu yardımı aç veya kapat"],
+    ["⌘ / Ctrl + Enter", "Derin araştırmayı başlat"],
+    ["Enter", "Varlık alanında piyasa özetini yükle (dropdown'da seçimi onaylar)"],
+    ["↑ ↓", "Varlık önerileri arasında gezin"],
+  ];
+  return (
+    <div className="modal-backdrop" onClick={onClose} role="presentation">
+      <div className="modal" role="dialog" aria-modal="true" aria-label="Klavye kısayolları" onClick={(event) => event.stopPropagation()}>
+        <div className="modal-head">
+          <h3>Klavye Kısayolları</h3>
+          <button className="modal-close" onClick={onClose} aria-label="Kapat">
+            <IconX width={15} height={15} />
+          </button>
+        </div>
+        <ul className="shortcut-list">
+          {shortcuts.map(([keys, description]) => (
+            <li key={keys}>
+              <kbd>{keys}</kbd>
+              <span>{description}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 function Toast({ toast }) {
   if (!toast) return null;
   return (
@@ -610,11 +645,15 @@ export default function App() {
   const [ragResults, setRagResults] = useState([]);
   const [ragAnswer, setRagAnswer] = useState(null);
   const [reports, setReports] = useState([]);
+  const [reportQuery, setReportQuery] = useState("");
+  const [runHistory, setRunHistory] = useState([]);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const [ragStats, setRagStats] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
   const [copied, setCopied] = useState("");
   const toastTimer = useRef(null);
   const selectionsInitialized = useRef(false);
+  const deepResearchRef = useRef(null);
 
   useEffect(() => {
     api.health().then(setHealth).catch(() => {});
@@ -640,6 +679,46 @@ export default function App() {
   }, [busy, jobStartedAt]);
 
   useEffect(() => () => toastTimer.current && clearTimeout(toastTimer.current), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .runs(coin)
+      .then((rows) => {
+        if (!cancelled) setRunHistory(rows);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [coin, deep]);
+
+  useEffect(() => {
+    const handler = (event) => {
+      const target = event.target;
+      const typing =
+        target &&
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
+      if (event.key === "/" && !typing) {
+        const field = document.querySelector("section.content [data-search-input], .toolbar input");
+        if (field) {
+          event.preventDefault();
+          field.focus();
+        }
+      } else if (event.key === "Escape") {
+        if (typing && target.blur) target.blur();
+        setShowShortcuts(false);
+      } else if (event.key === "?" && !typing) {
+        event.preventDefault();
+        setShowShortcuts((value) => !value);
+      } else if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        event.preventDefault();
+        deepResearchRef.current?.();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   const showToast = (message, kind = "success") => {
     setToast({ message, kind });
@@ -692,6 +771,7 @@ export default function App() {
   };
 
   const runDeepResearch = async () => {
+    if (busy) return;
     setBusy("deep");
     setError("");
     setDeep(null);
@@ -805,6 +885,16 @@ export default function App() {
 
   const run = deep?.run;
   const deepBusy = busy === "deep";
+  deepResearchRef.current = runDeepResearch;
+
+  const filteredReports = useMemo(() => {
+    const needle = reportQuery.trim().toLowerCase();
+    if (!needle) return reports;
+    return reports.filter(
+      (report) =>
+        report.name.toLowerCase().includes(needle) || (report.coin || "").toLowerCase().includes(needle)
+    );
+  }, [reports, reportQuery]);
 
   return (
     <div className="app">
@@ -936,6 +1026,9 @@ export default function App() {
               </div>
             </>
           )}
+          <button className="mini-btn" onClick={() => setShowShortcuts(true)}>
+            Klavye kısayolları (?)
+          </button>
         </div>
       </aside>
 
@@ -996,6 +1089,18 @@ export default function App() {
                     Beklenen fiyat aralığı: <b>{priceRange(run.expected_low, run.expected_high)}</b>
                   </div>
                   <ScoreDistribution items={run.items} />
+                </div>
+              )}
+              {runHistory.length >= 2 && (
+                <div className="card history-card">
+                  <div className="card-head">
+                    <h3>Skor Geçmişi</h3>
+                    <span className="muted">
+                      {runHistory.length} koşu ·{" "}
+                      {snapshotData?.snapshot?.coin?.symbol?.toUpperCase() || coin.toUpperCase()}
+                    </span>
+                  </div>
+                  <ScoreHistoryChart runs={runHistory} />
                 </div>
               )}
               {analysesList.length > 0 && (snapshotData || analysisResults.length > 0 || busy) && (
@@ -1107,6 +1212,7 @@ export default function App() {
               <div className="toolbar">
                 <input
                   value={ragQuery}
+                  data-search-input
                   onChange={(event) => setRagQuery(event.target.value)}
                   placeholder="Araştırma notlarında ve haberlerde ara…"
                   onKeyDown={(event) => event.key === "Enter" && runRagSearch("rag-search")}
@@ -1149,13 +1255,29 @@ export default function App() {
             <>
               <PageIntro id="history" />
               <div className="toolbar">
-                <span className="muted">{reports.length} rapor</span>
+                <input
+                  className="search-input"
+                  data-search-input
+                  value={reportQuery}
+                  onChange={(event) => setReportQuery(event.target.value)}
+                  placeholder="Rapor veya coin ara…"
+                />
                 <button onClick={() => api.reports().then(setReports)}>
                   <IconRefresh width={14} height={14} /> Yenile
                 </button>
+                <span className="muted">
+                  {filteredReports.length}/{reports.length} rapor
+                </span>
               </div>
+              {filteredReports.length === 0 && (
+                <EmptyState title="Eşleşen rapor yok">
+                  {reports.length === 0
+                    ? "Derin araştırma tamamlandığında raporlar burada arşivlenir."
+                    : "Arama ölçütünü değiştirin veya Yenile düğmesini kullanın."}
+                </EmptyState>
+              )}
               <div className="reports-list">
-                {reports.map((report) => (
+                {filteredReports.map((report) => (
                   <button
                     key={report.name}
                     className="report-row"
@@ -1189,6 +1311,7 @@ export default function App() {
         </section>
       </main>
 
+      <ShortcutHelp open={showShortcuts} onClose={() => setShowShortcuts(false)} />
       <Toast toast={toast} />
     </div>
   );

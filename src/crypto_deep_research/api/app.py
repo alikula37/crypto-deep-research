@@ -344,7 +344,7 @@ async def report(name: str) -> dict[str, Any]:
 async def runs(coin: str | None = None) -> list[dict[str, Any]]:
     settings = get_settings()
     db = Database(settings.db_path)
-    return db.list_runs(coin=coin, limit=100)
+    return db.run_summaries(coin=coin, limit=100)
 
 
 @app.get("/api/runs/{run_id}")
