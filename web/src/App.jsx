@@ -215,6 +215,12 @@ function ItemsTable({ items }) {
                 </span>
               )}
             </div>
+            {item.data && Object.keys(item.data).length > 0 && (
+              <details className="item-data">
+                <summary>Detay verisi</summary>
+                <pre>{JSON.stringify(item.data, null, 2)}</pre>
+              </details>
+            )}
           </div>
         ))}
       </div>
@@ -373,6 +379,17 @@ export default function App() {
     await navigator.clipboard.writeText(deep.prompt);
     setCopied("prompt");
     setTimeout(() => setCopied(""), 2000);
+  };
+
+  const downloadReport = () => {
+    if (!deep?.markdown) return;
+    const blob = new Blob([deep.markdown], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${deep.run.coin.symbol.toUpperCase()}_rapor.md`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const copyReport = async () => {
@@ -565,6 +582,8 @@ export default function App() {
                 <>
                   <div className="toolbar">
                     <button onClick={copyReport}>{copied === "report" ? "Kopyalandı ✓" : "Panoya kopyala"}</button>
+                    <button onClick={downloadReport}>Markdown indir</button>
+                    <button onClick={() => window.print()}>Yazdır / PDF</button>
                     <span className="muted">
                       {deep.report_path} | Context: {JSON.stringify(deep.context_stats?.groups || {})}
                     </span>
@@ -658,6 +677,7 @@ export default function App() {
                 <>
                   <div className="toolbar">
                     <b className="break-anywhere">{selectedReport.name}</b>
+                    <button onClick={() => window.print()}>Yazdır / PDF</button>
                     <button onClick={() => setSelectedReport(null)}>Kapat</button>
                   </div>
                   <Markdown>{selectedReport.markdown}</Markdown>

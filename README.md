@@ -36,7 +36,8 @@ oluşturur.
   analiz sunar.
 - **Web UI**: NotebookLM benzeri koyu tema; coin/timeframe/analiz seçimi, **timeframe bazlı
   interaktif SVG fiyat grafiği**, yükseliş/düşüş olasılık çubuğu, 66 madde tablosu (arama +
-  sıralama), rapor ve prompt görüntüleme, RAG arama, rapor geçmişi.
+  sıralama + açılır veri görünümü), rapor ve prompt görüntüleme, **Markdown indirme ve
+  Yazdır/PDF**, RAG arama, rapor geçmişi.
 - **tr-TR sayı biçimi**: Tüm çıktılarda binlik ayracı nokta, ondalık virgül; mikro fiyatlar
   (ör. PEPE $0,00000338) bilimsel gösterime düşmeden ve sıfıra yuvarlanmadan gösterilir.
 - **Opsiyonel OpenRouter**: API anahtarı girilirse RAG soruları ve rapor üretimi LLM'e
@@ -53,7 +54,7 @@ uv sync
 cp .env.example .env        # opsiyonel API anahtarları
 ```
 
-Gereksinimler: Python 3.10+, [uv](https://docs.astral.sh/uv/). Web UI için Node 18+.
+Gereksinimler: Python 3.10+, [uv](https://docs.astral.sh/uv/). Web UI için Node 22.12+ (Vite 8 / Vitest 5).
 
 > İlk RAG kullanımında embedding modeli indirilir (~2GB). Daha küçük model için `.env` içinde
 > `CDR_EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` kullanın.
@@ -137,6 +138,29 @@ brew services start colima     # açılışta otomatik başlat (opsiyonel)
 
 Not: Embedding modeli ilk RAG kullanımında indirilir ve `./data/fastembed` altında
 saklanır (~2GB); sonraki çalıştırmalarda yeniden indirilmez.
+
+---
+
+## REST API
+
+Web UI aynı zamanda bir REST API sunar (`uv run cdr serve` → `http://127.0.0.1:8000`):
+
+| Metot | Yol | Açıklama |
+| --- | --- | --- |
+| GET | `/api/health` | Durum ve tanımlı API anahtarları |
+| GET | `/api/analyses` | Kullanılabilir analizler |
+| GET | `/api/items` | 66 maddelik kayıt defteri |
+| GET | `/api/snapshot/{coin}` | Anlık fiyat/mcap/ATH-ATL + global veriler |
+| GET | `/api/ohlcv/{coin}?timeframe=1d&limit=300` | Grafik için mum verisi (Binance, yedek CoinGecko) |
+| POST | `/api/analyze` | Seçili analizleri çalıştırır |
+| POST | `/api/deep-research` | 66 madde + rapor + prompt üretir |
+| POST | `/api/rag/search` / `/api/rag/ask` | Yerel RAG araması / (anahtar varsa) LLM yanıtı |
+| GET | `/api/reports` / `/api/reports/{name}` | Rapor listesi / Markdown içeriği |
+| GET | `/api/runs` / `/api/runs/{id}` | Koşu listesi / detayı |
+| GET | `/api/contexts` / `/api/contexts/{key}` | Context Control Plane kayıtları |
+| GET | `/api/rag/stats` | Vektör deposu durumu |
+
+Swagger arayüzü: `http://127.0.0.1:8000/docs`
 
 ---
 
