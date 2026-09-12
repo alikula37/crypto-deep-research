@@ -17,6 +17,7 @@ SourceType = Literal["analysis", "special", "news", "unavailable"]
 class ItemSpec(BaseModel):
     id: int
     title_tr: str
+    description_tr: str | None = None
     category: str
     source: str = Field(description="analysis:<key> | special:<name> | news | unavailable")
     query: str | None = None
@@ -52,9 +53,13 @@ def registry_summary() -> list[dict]:
         {
             "id": item.id,
             "title": item.title_tr,
+            "description": item.description_tr,
             "category": item.category,
             "source": item.source,
+            "source_type": item.source_type,
+            "query": item.query,
             "weight": item.weight,
+            "note": item.note,
         }
         for item in load_registry()
     ]

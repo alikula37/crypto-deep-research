@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DASH, money, num, pct, price, priceRange, ratio, score, toTr } from "./format.js";
+import { DASH, formatDateTime, money, num, pct, price, priceRange, ratio, score, toTr } from "./format.js";
 
 describe("format", () => {
   it("tr-TR ayraclari", () => {
@@ -51,5 +51,20 @@ describe("format", () => {
     expect(text).toContain("$0,00000303");
     expect(text).toContain("$0,00000359");
     expect(text.toLowerCase()).not.toContain("e");
+  });
+
+  it("tarih bicimi ms sayi, Date ve ISO kabul eder", () => {
+    const expected = new Date(1789206011535).toLocaleString("tr-TR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    expect(formatDateTime(1789206011535)).toBe(expected);
+    expect(formatDateTime(new Date(1789206011535))).toBe(expected);
+    expect(formatDateTime("2026-09-12T09:40:11.535Z")).toBe(expected);
+    expect(formatDateTime("gecersiz")).toBe(DASH);
+    expect(formatDateTime(null)).toBe(DASH);
   });
 });

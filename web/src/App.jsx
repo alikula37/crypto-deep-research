@@ -13,6 +13,7 @@ import {
   IconDoc,
   IconDownload,
   IconHistory,
+  IconInfo,
   IconPlay,
   IconPrinter,
   IconRefresh,
@@ -42,6 +43,89 @@ const STATUS_META = {
   not_run: { label: "Çalıştırılmadı", tone: "idle", icon: IconPlay },
   idle: { label: "Seçilmedi", tone: "idle", icon: IconPlay },
 };
+
+const TAB_INTROS = {
+  overview: {
+    title: "Genel Bakış",
+    summary: "Varlığın anlık piyasa görüntüsü, fiyat grafiği, modül durumları ve ağırlıklı skor özeti.",
+    points: [
+      "Üstteki kartlar fiyat, piyasa değeri, hacim ve ATH/ATL uzaklığı gibi anlık verileri gösterir.",
+      "Olasılık dağılımı 66 kriterin ağırlıklı skorundan türetilir ve ±%45 sınırıyla gösterilir.",
+      "Beklenen fiyat aralığı, ATR bazlı oynaklık ve skor yönü kullanılarak hesaplanır.",
+      "Analiz Modülleri panelinde her modülün Tam/Kısmi/Veri yok durumu görünür; sonuca tıklayınca kartına gidilir.",
+    ],
+  },
+  findings: {
+    title: "Araştırma Bulguları",
+    summary: "66 kriterin her biri için neyin araştırıldığı, bulgu, skor ve güven bilgisi.",
+    points: [
+      "Her karttaki 'Ne araştırılır?' satırı, o kriterin baktığı veriyi ve yöntemi anlatır.",
+      "Durum: Tam (yeterli veri), Kısmi (sınırlı veri), Veri Yok (doğrulanabilir ücretsiz kaynak bulunamadı).",
+      "Skor −1 ile +1 arasındadır: eksi baskı/düşüş, artı destek/yükseliş yönündedir.",
+      "Güven 0–1 arasındadır; düşük güvenli skorlar ağırlıklı ortalamada daha az etkili olur.",
+      "Ağırlık, kriterin genel skora katkı katsayısıdır; yüksek ağırlık daha belirleyici demektir.",
+      "Derin araştırma çalıştırılmadan önce bu sekmede 66 kriterin tümü açıklamalarıyla listelenir.",
+    ],
+  },
+  report: {
+    title: "Rapor",
+    summary: "Derin araştırma sonunda üretilen Markdown raporu; kopyalanabilir, indirilebilir ve yazdırılabilir.",
+    points: [
+      "Rapor; yönetici özeti, olasılık/aralık tahmini, 66 kriterin bulguları ve kaynakça bölümlerinden oluşur.",
+      "Bağlam istatistikleri hangi veri grubundan kaç kaydın kullanıldığını gösterir.",
+      "Markdown İndir ile dosyayı kaydedebilir, Yazdır/PDF ile arşivleyebilirsiniz.",
+    ],
+  },
+  prompt: {
+    title: "Prompt Çıktısı",
+    summary: "Raporun ChatGPT, Claude, Codex veya OpenRouter gibi araçlara yapıştırılmaya hazır istem metni.",
+    points: [
+      "Prompt; varlık özeti, modül bulguları, 66 kriter bağlamı ve beklenen çıktı şemasını içerir.",
+      "OpenRouter anahtarı tanımlıysa sistem doğrudan yanıt üretebilir; değilse yalnızca prompt oluşturulur.",
+      "Metnin uzunluğu karakter sayısı olarak araç çubuğunda gösterilir.",
+    ],
+  },
+  rag: {
+    title: "Kaynak Arama",
+    summary: "Yerel bilgi tabanında (haberler, notlar, geçmiş çalışmalar) anlamsal arama.",
+    points: [
+      "Arama; SQLite FTS5 tam metin ve LanceDB vektör indeksini birlikte kullanır.",
+      "'Ara' ilgili pasajları getirir; 'AI ile Yanıtla' bu pasajlardan yanıt ya da prompt üretir.",
+      "Sonuçlardaki sayı benzerlik skorudur; büyük olan daha alakalı anlamına gelir.",
+    ],
+  },
+  history: {
+    title: "Rapor Arşivi",
+    summary: "Geçmiş derin araştırma raporları; bir satıra tıklayınca içeriği açılır.",
+    points: [
+      "Her satır varlık, dosya adı ve oluşturma zamanını gösterir.",
+      "Seçilen rapor Markdown olarak görüntülenir; yazdırabilir veya Kapat ile kapatabilirsiniz.",
+      "Yenile düğmesi arşiv listesini sunucudan tekrar çeker.",
+    ],
+  },
+};
+
+function PageIntro({ id }) {
+  const intro = TAB_INTROS[id];
+  if (!intro) return null;
+  return (
+    <div className="page-intro">
+      <div className="page-intro-head">
+        <IconInfo width={15} height={15} />
+        <b>{intro.title}</b>
+        <span>{intro.summary}</span>
+      </div>
+      <details className="page-intro-more">
+        <summary>Bu sayfa nasıl okunur?</summary>
+        <ul>
+          {intro.points.map((point) => (
+            <li key={point}>{point}</li>
+          ))}
+        </ul>
+      </details>
+    </div>
+  );
+}
 
 function scoreColor(value) {
   if (value === null || value === undefined) return "neutral";
@@ -143,6 +227,17 @@ function ModuleStatusStrip({ modules, results, selected, busy }) {
           <span className="legend-item tone-idle"><i /> Çalıştırılmadı</span>
         </div>
       </div>
+      <details className="module-help">
+        <summary>Modüller ne yapar?</summary>
+        <ul>
+          {modules.map((module) => (
+            <li key={module.key}>
+              <b>{module.title}</b>
+              {module.description ? ` — ${module.description}` : ""}
+            </li>
+          ))}
+        </ul>
+      </details>
       <div className="module-strip">
         {modules.map((module, index) => {
           const result = resultMap.get(module.key);
@@ -158,7 +253,7 @@ function ModuleStatusStrip({ modules, results, selected, busy }) {
               key={module.key}
               className={`module-chip tone-${meta.tone} ${result ? "clickable" : ""}`}
               onClick={() => result && scrollTo(module.key)}
-              title={result ? "Sonuçlara git" : meta.label}
+              title={[module.description, result ? "Sonuçlara git" : meta.label].filter(Boolean).join(" · ")}
             >
               <span className="module-no">{index + 1}</span>
               <span className="module-name">{module.title}</span>
@@ -174,7 +269,7 @@ function ModuleStatusStrip({ modules, results, selected, busy }) {
   );
 }
 
-function AnalysisCard({ result }) {
+function AnalysisCard({ result, description }) {
   const reasons = result.data?.reasons || [];
   const meta = STATUS_META[result.status] || STATUS_META.no_data;
   const Icon = meta.icon;
@@ -198,6 +293,7 @@ function AnalysisCard({ result }) {
         <h3>{result.title}</h3>
         <ScorePill value={result.score} />
       </div>
+      {description && <p className="module-desc">{description}</p>}
       <p className="summary">{result.summary}</p>
       {reasons.length > 0 && (
         <ul className="reasons">
@@ -231,6 +327,8 @@ function FindingsTable({ items }) {
       list = list.filter(
         (item) =>
           item.title_tr.toLowerCase().includes(needle) ||
+          (item.description_tr || "").toLowerCase().includes(needle) ||
+          (item.category || "").toLowerCase().includes(needle) ||
           (item.summary || "").toLowerCase().includes(needle)
       );
     }
@@ -284,9 +382,25 @@ function FindingsTable({ items }) {
                 <ScorePill value={item.score} />
               </div>
             </div>
-            <p className="summary clamp-3">{item.summary}</p>
+            {item.description_tr && (
+              <p className="item-desc">
+                <span className="section-label">Ne araştırılır?</span> {item.description_tr}
+              </p>
+            )}
+            <div className="item-finding">
+              <span className="section-label">Bulgu</span>
+              <p className="summary clamp-3">{item.summary}</p>
+            </div>
+            {item.note && (
+              <p className="item-note">
+                <IconInfo width={12} height={12} /> {item.note}
+              </p>
+            )}
             <div className="item-footer">
-              <span className="muted">
+              <span
+                className="muted"
+                title="Kategori · Ağırlık: kriterin genel skora katkı katsayısı · Güven: verinin güvenilirliği (0–1)"
+              >
                 {item.category} · Ağırlık {item.weight} · Güven {(item.confidence ?? 0).toFixed(2)}
               </span>
               {item.sources?.length > 0 && (
@@ -297,10 +411,71 @@ function FindingsTable({ items }) {
             </div>
             {item.data && Object.keys(item.data).length > 0 && (
               <details className="item-data">
-                <summary>Teknik veriyi göster</summary>
+                <summary>Hesaplanan ham veriyi göster</summary>
                 <pre>{JSON.stringify(item.data, null, 2)}</pre>
               </details>
             )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function sourceLabel(item) {
+  if (item.source_type === "analysis") return `Analiz modülü · ${item.source_ref}`;
+  if (item.source_type === "special") return "Yerel hesaplama motoru";
+  if (item.source_type === "news") return `Haber taraması · "${item.query}"`;
+  return "Doğrulanabilir ücretsiz veri kaynağı yok";
+}
+
+function CriteriaCatalog({ items }) {
+  const [query, setQuery] = useState("");
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return items;
+    return items.filter(
+      (item) =>
+        item.title.toLowerCase().includes(needle) ||
+        (item.description || "").toLowerCase().includes(needle) ||
+        item.category.toLowerCase().includes(needle)
+    );
+  }, [items, query]);
+
+  return (
+    <div>
+      <div className="filter-row">
+        <input
+          className="search-input"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="66 kriter arasında ara…"
+        />
+        <span className="muted">{filtered.length} kriter</span>
+      </div>
+      <div className="items-grid">
+        {filtered.map((item) => (
+          <div className="card item-card catalog-card" key={item.id}>
+            <div className="card-head">
+              <h4>
+                <span className="item-no">{item.id}</span> {item.title}
+              </h4>
+              <div className="card-meta">
+                <span className="category-chip">{item.category}</span>
+                <span className="weight-chip" title="Genel skora katkı katsayısı">
+                  Ağırlık {item.weight}
+                </span>
+              </div>
+            </div>
+            <p className="item-desc">{item.description}</p>
+            {item.note && (
+              <p className="item-note">
+                <IconInfo width={12} height={12} /> {item.note}
+              </p>
+            )}
+            <div className="item-footer">
+              <span className="muted">{sourceLabel(item)}</span>
+            </div>
           </div>
         ))}
       </div>
@@ -613,7 +788,6 @@ export default function App() {
   };
 
   const run = deep?.run;
-  const scoredItems = items.filter((item) => item.score !== null && item.confidence > 0);
   const deepBusy = busy === "deep";
 
   return (
@@ -793,6 +967,7 @@ export default function App() {
         <section className="content">
           {tab === "overview" && (
             <>
+              <PageIntro id="overview" />
               <SnapshotCard data={snapshotData} busy={busy === "snapshot"} />
               {(snapshotData || analysisResults.length > 0) && (
                 <PriceChart coin={coin} defaultTimeframe={timeframe} />
@@ -824,7 +999,11 @@ export default function App() {
               {(busy === "analyze" || busy === "deep") && analysisResults.length === 0 && <Skeleton />}
               <div className="grid">
                 {analysisResults.map((result) => (
-                  <AnalysisCard key={result.key || result.title} result={result} />
+                  <AnalysisCard
+                    key={result.key || result.title}
+                    result={result}
+                    description={analysesList.find((module) => module.key === result.key)?.description}
+                  />
                 ))}
               </div>
             </>
@@ -832,19 +1011,23 @@ export default function App() {
 
           {tab === "findings" && (
             <>
-              {!run && scoredItems.length === 0 && (
-                <EmptyState title="Henüz bulgu yok">
-                  <b>Derin Araştırma Başlat</b> düğmesini kullanın; 66 kriter veri, kaynak ve skorla
-                  doldurulur.
-                </EmptyState>
+              <PageIntro id="findings" />
+              {!run && (
+                <>
+                  <EmptyState title="Henüz araştırma çalıştırılmadı">
+                    Aşağıda <b>Derin Araştırma Başlat</b> ile çalıştırılacak 66 kriter, her birinin neyi
+                    araştırdığıyla birlikte listeleniyor.
+                  </EmptyState>
+                  {items.length > 0 && <CriteriaCatalog items={items} />}
+                </>
               )}
               {run && <FindingsTable items={run.items} />}
-              {!run && scoredItems.length > 0 && <FindingsTable items={items} />}
             </>
           )}
 
           {tab === "report" && (
             <>
+              <PageIntro id="report" />
               {!deep && (
                 <EmptyState title="Rapor bekleniyor">
                   Derin araştırma tamamlandığında rapor burada görüntülenir.
@@ -875,6 +1058,7 @@ export default function App() {
 
           {tab === "prompt" && (
             <>
+              <PageIntro id="prompt" />
               {!deep && (
                 <EmptyState title="Prompt bekleniyor">
                   Derin araştırma tamamlandığında harici AI araçları için prompt üretilir.
@@ -903,6 +1087,7 @@ export default function App() {
 
           {tab === "rag" && (
             <>
+              <PageIntro id="rag" />
               <div className="toolbar">
                 <input
                   value={ragQuery}
@@ -946,6 +1131,7 @@ export default function App() {
 
           {tab === "history" && (
             <>
+              <PageIntro id="history" />
               <div className="toolbar">
                 <span className="muted">{reports.length} rapor</span>
                 <button onClick={() => api.reports().then(setReports)}>

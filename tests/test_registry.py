@@ -27,3 +27,18 @@ def test_registry_source_types_are_valid():
 def test_weights_in_range():
     for item in load_registry():
         assert 0 <= item.weight <= 1.0, item
+
+
+def test_every_item_explains_what_is_researched():
+    for item in load_registry():
+        assert item.description_tr, f"{item.id}. madde icin aciklama eksik"
+        assert len(item.description_tr) >= 30, f"{item.id}. madde aciklamasi cok kisa"
+
+
+def test_result_from_carries_description_and_note():
+    from crypto_deep_research.deep_research.specials import result_from
+
+    spec = next(item for item in load_registry() if item.note)
+    result = result_from(spec)
+    assert result.description_tr == spec.description_tr
+    assert result.note == spec.note

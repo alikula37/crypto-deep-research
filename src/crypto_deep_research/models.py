@@ -159,6 +159,8 @@ class ItemResult(AnalysisResult):
 
     item_id: int
     title_tr: str = ""
+    description_tr: str | None = None
+    note: str | None = None
     category: str = ""
     weight: float = 1.0
     qualitative: bool = False

@@ -43,6 +43,8 @@ def result_from(
     return ItemResult(
         item_id=spec.id,
         title_tr=spec.title_tr,
+        description_tr=spec.description_tr,
+        note=spec.note,
         category=spec.category,
         weight=spec.weight,
         qualitative=spec.source_type in ("news", "unavailable"),

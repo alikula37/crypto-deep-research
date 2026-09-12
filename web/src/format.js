@@ -127,7 +127,7 @@ export function priceRange(low, high, currency = "$") {
 
 export function formatDateTime(value) {
   if (!value) return DASH;
-  const date = typeof value === "string" ? new Date(value) : value;
+  const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return DASH;
   return date.toLocaleString("tr-TR", {
     day: "2-digit",

@@ -38,9 +38,25 @@ ANALYSIS_REGISTRY: dict[str, tuple[str, AnalysisFn]] = {
 
 DEFAULT_ANALYSES: list[str] = list(ANALYSIS_REGISTRY.keys())
 
+ANALYSIS_DESCRIPTIONS: dict[str, str] = {
+    "technical": "SMA 20/50/200, RSI, MACD ve Bollinger ile trend, momentum ve seviyeler ölçülür.",
+    "liquidations": "Fonlama oranı, açık pozisyon ve likidasyonlarla türev piyasa kaldıraç riski incelenir.",
+    "whales": "Büyük cüzdanların alım-satımı, borsa akışları ve toplam arz içindeki payı ölçülür.",
+    "volumes": "Borsa bazında hacimler ve hacim/MCap oranıyla likidite derinliği değerlendirilir.",
+    "revenue": "Protokol gelirleri, ücretler ve MCap oranıyla değerleme yapılır.",
+    "news": "Son haber başlıkları taranır; olumlu/olumsuz ton duygu skoruna çevrilir.",
+    "marketcap": "Geçmiş ve güncel piyasa değeri ile arz değişimi karşılaştırılır.",
+    "parity": "BTC/ETH paritesindeki fiyat ve direnç seviyeleri değerlendirilir.",
+    "ath_atl": "Fiyatın tüm zamanların en yüksek/düşük seviyesine uzaklığı ölçülür.",
+    "rankings": "Piyasa değeri sıralamasındaki konum ve son değişim izlenir.",
+}
+
 
 def available_analyses() -> list[dict[str, str]]:
-    return [{"key": key, "title": title} for key, (title, _) in ANALYSIS_REGISTRY.items()]
+    return [
+        {"key": key, "title": title, "description": ANALYSIS_DESCRIPTIONS.get(key, "")}
+        for key, (title, _) in ANALYSIS_REGISTRY.items()
+    ]
 
 
 async def run_analyses(
