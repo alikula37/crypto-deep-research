@@ -90,8 +90,10 @@ class DeepResearchEngine:
         articles = await ctx.articles(hours=168)
         notify(45, "Haberler ve bilgi tabanı hazırlanıyor")
         try:
-            self.rag.ingest_articles(coin.id, articles)
-            self.rag.ingest_analysis(coin.id, analysis_results)
+            # Embedding modeli yuklemesi ve vektor indeksleme CPU-yogun ve senkron;
+            # olay dongusunu kilitlememek icin ayri is parcaciginda calistirilir.
+            await asyncio.to_thread(self.rag.ingest_articles, coin.id, articles)
+            await asyncio.to_thread(self.rag.ingest_analysis, coin.id, analysis_results)
         except Exception as exc:
             logger.warning("RAG indeksleme hatası: %s", exc)
 
@@ -142,7 +144,7 @@ class DeepResearchEngine:
             {"prompt_path": str(prompt_path), "report_path": str(report_path)},
         )
         try:
-            self.rag.ingest_report(coin.id, report_name, markdown)
+            await asyncio.to_thread(self.rag.ingest_report, coin.id, report_name, markdown)
         except Exception:
             logger.warning("Rapor RAG'e eklenemedi")
         notify(100, "Tamamlandı")

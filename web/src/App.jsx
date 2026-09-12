@@ -710,9 +710,24 @@ export default function App() {
       };
       let state = await api.startDeepResearch(payload);
       setJob(state);
+      let pollFailures = 0;
       while (state.status === "queued" || state.status === "running") {
         await new Promise((resolve) => setTimeout(resolve, 2500));
-        state = await api.jobStatus(state.job_id);
+        try {
+          state = await api.jobStatus(state.job_id);
+          pollFailures = 0;
+        } catch (pollError) {
+          // Sunucu kisa sureli yogun olabilir (embedding yuklemesi vb.);
+          // birkac ust uste hatadan sonra gerçekten vazgec.
+          pollFailures += 1;
+          if (pollFailures >= 4) throw pollError;
+          setJob((previous) => ({
+            ...(previous || state),
+            job_id: state.job_id,
+            message: "Sunucu yanıtı bekleniyor; bağlantı yeniden kuruluyor…",
+          }));
+          continue;
+        }
         setJob(state);
       }
       if (state.status === "error") {

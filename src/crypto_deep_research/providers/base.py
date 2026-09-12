@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 # Sağlayıcı başına minimum istek aralığı (saniye). Ücretsiz kotalari korumak için.
 MIN_INTERVALS: dict[str, float] = {
-    "coingecko": 2.2,
+    "coingecko": 3.5,
     "binance": 0.2,
     "okx": 0.3,
     "bybit": 0.3,
@@ -25,7 +25,7 @@ MIN_INTERVALS: dict[str, float] = {
     "coinalyze": 1.1,
     "defillama": 1.1,
     "cryptopanic": 2.0,
-    "gdelt": 1.0,
+    "gdelt": 2.0,
     "reddit": 2.0,
     "google_trends": 3.0,
     "blockchain_com": 1.0,

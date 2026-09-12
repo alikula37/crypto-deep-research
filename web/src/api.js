@@ -53,7 +53,7 @@ export const api = {
       timeoutMs: 30000,
     }),
   jobStatus: (jobId) =>
-    request(`/api/deep-research/jobs/${encodeURIComponent(jobId)}`, { timeoutMs: 30000 }),
+    request(`/api/deep-research/jobs/${encodeURIComponent(jobId)}`, { timeoutMs: 90000 }),
   ragSearch: (payload) =>
     request("/api/rag/search", { method: "POST", body: JSON.stringify(payload) }),
   ragAsk: (payload) =>
