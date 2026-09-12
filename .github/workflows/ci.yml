@@ -5,21 +5,31 @@ on:
     branches: [main]
   pull_request:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
     steps:
       - uses: actions/checkout@v7
       - name: Install uv
         uses: astral-sh/setup-uv@v10.1.0
         with:
           enable-cache: true
-      - name: Python 3.11 kurulumu
-        run: uv python install 3.11
-      - name: Bagimliliklari kur
-        run: uv sync --extra dev --python 3.11
+          cache-dependency-glob: "uv.lock"
+      - name: Python ${{ matrix.python-version }} kurulumu
+        run: uv python install ${{ matrix.python-version }}
+      - name: Bagimliliklari kur (kilitli)
+        run: uv sync --extra dev --frozen --python ${{ matrix.python-version }}
       - name: Lint
-        run: uv run ruff check src tests
+        run: uv run ruff check src tests --output-format=github
       - name: Testler
         env:
           CDR_EMBEDDINGS_ENABLED: "false"
@@ -27,6 +37,7 @@ jobs:
 
   web:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: web
@@ -37,8 +48,8 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: web/package-lock.json
-      - name: Bagimliliklari kur
-        run: npm ci || npm install
+      - name: Bagimliliklari kur (kilitli)
+        run: npm ci
       - name: Birim testleri
         run: npm test
       - name: Derle
