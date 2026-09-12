@@ -24,7 +24,7 @@ jobs:
         run: |
           pr_number=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open \
             --json number,headRefName,author \
-            --jq ".[] | select(.headRefName == \"$HEAD_BRANCH\") | select(.author.login == \"dependabot[bot]\") | .number")
+            --jq ".[] | select(.headRefName == \"$HEAD_BRANCH\") | select(.author.login == \"app/dependabot\" or .author.login == \"dependabot[bot]\") | .number")
           if [ -n "$pr_number" ]; then
             gh pr merge "$pr_number" --repo "$GITHUB_REPOSITORY" --squash --delete-branch
           else
