@@ -87,7 +87,7 @@ class DeepResearchEngine:
         analyses_map = {result.key: result for result in analysis_results}
         notify(35, "10 ana analiz tamamlandı")
 
-        articles = await ctx.articles(hours=72)
+        articles = await ctx.articles(hours=168)
         notify(45, "Haberler ve bilgi tabanı hazırlanıyor")
         try:
             self.rag.ingest_articles(coin.id, articles)
@@ -102,6 +102,8 @@ class DeepResearchEngine:
         if not include_all_items:
             item_results = [item for item in item_results if item.status in ("ok", "partial")]
 
+        group_factors = compute_group_factors(specs)
+
         run = self._build_run(
             coin=coin,
             snapshot_price=snapshot.price_usd,
@@ -110,6 +112,7 @@ class DeepResearchEngine:
             timeframe=timeframe,
             lookback_days=lookback_days,
             platform=platform,
+            group_factors=group_factors,
         )
 
         for analysis in analysis_results:
@@ -191,8 +194,9 @@ class DeepResearchEngine:
         timeframe: str,
         lookback_days: int,
         platform: str,
+        group_factors: dict[int, float] | None = None,
     ) -> ResearchRun:
-        weighted_score = compute_weighted_score(item_results)
+        weighted_score = compute_weighted_score(item_results, group_factors=group_factors)
         up_probability, down_probability = probabilities(weighted_score)
         atr_pct = _atr_pct(analysis_results)
         expected_low, expected_high = expected_range(
@@ -205,6 +209,8 @@ class DeepResearchEngine:
         notes = [
             f"66 kriterin {ok_items} tanesi tam, {partial_items} tanesi kısmi veriyle değerlendirildi; "
             f"{no_data_items} madde için doğrulanabilir ücretsiz veri bulunamadı ve ortalamaya dahil edilmedi.",
+            "Aynı analiz modülünü paylaşan kriterler skorlamada tek sinyal olarak (en yüksek ağırlıkla) sayılır.",
+            "Kısmi veriyle değerlendirilen kriterler yarım ağırlıkla katkı verir.",
             "Skorlar veri kaynaklarının ağırlıklı ortalamasıdır; kesin fiyat tahmini değildir.",
             "Yatırım tavsiyesi değildir.",
         ]
@@ -228,7 +234,37 @@ class DeepResearchEngine:
         )
 
 
-def compute_weighted_score(items: list[ItemResult]) -> float | None:
+def compute_group_factors(specs: list[ItemSpec]) -> dict[int, float]:
+    """Ayni ham sinyali paylasan maddeler icin agirlik carpani uretir.
+
+    Grup, skorlamada bir kez ve grubun en yuksek agirligiyla temsil edilir:
+    her uyenin payi ``max_w / sum_w`` ile carpanlanir, boylece grup katkisi
+    tek bir sinyal kadar olur.
+    """
+    groups: dict[str, list[ItemSpec]] = {}
+    for spec in specs:
+        group = spec.scoring_group
+        if group:
+            groups.setdefault(group, []).append(spec)
+    factors: dict[int, float] = {}
+    for members in groups.values():
+        total = sum(member.weight for member in members)
+        if total <= 0 or len(members) < 2:
+            continue
+        maximum = max(member.weight for member in members)
+        factor = maximum / total
+        for member in members:
+            factors[member.id] = factor
+    return factors
+
+
+def compute_weighted_score(
+    items: list[ItemResult],
+    *,
+    group_factors: dict[int, float] | None = None,
+    partial_penalty: float = 0.5,
+) -> float | None:
+    factors = group_factors or {}
     numerator = 0.0
     denominator = 0.0
     for item in items:
@@ -236,7 +272,9 @@ def compute_weighted_score(items: list[ItemResult]) -> float | None:
             continue
         if item.status not in ("ok", "partial"):
             continue
-        weight = item.weight * item.confidence
+        weight = item.weight * item.confidence * factors.get(item.item_id, 1.0)
+        if item.status == "partial":
+            weight *= partial_penalty
         numerator += item.score * weight
         denominator += weight
     if denominator == 0:
@@ -247,7 +285,7 @@ def compute_weighted_score(items: list[ItemResult]) -> float | None:
 def probabilities(weighted_score: float | None) -> tuple[float, float]:
     if weighted_score is None:
         return 50.0, 50.0
-    up = clamp(50 + 45 * weighted_score, 5.0, 95.0)
+    up = clamp(50 + 35 * weighted_score, 5.0, 95.0)
     return round(up, 1), round(100 - up, 1)
 
 

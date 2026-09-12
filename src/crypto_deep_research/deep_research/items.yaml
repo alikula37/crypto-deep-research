@@ -1,438 +1,559 @@
-# Kripto Yapay Zeka Analizi - 66 maddelik araştırma kayıt defteri
+# Kripto Yapay Zeka Analizi - 66 maddelik arastirma kayit defteri
 # source: analysis:<anahtar> | special:<fonksiyon> | news | unavailable
-# weight: ağırlıklı ortalamada kullanılan önem katsayisi (0.0 - 1.0)
+# weight: agirlikli ortalamada kullanilan onem katsayisi (0.0 - 1.0)
+# score_group: ayni ham sinyali paylasan maddeler; skorlamada grup bir kez (en yuksek agirlikla) sayilir
 items:
-  - id: 1
-    title_tr: "Teknik Analiz"
-    description_tr: "SMA 20/50/200, RSI, MACD ve Bollinger bantlarıyla trend yönü ve momentum ölçülür (OHLCV verisi)."
-    category: "Teknik"
-    source: "analysis:technical"
-    weight: 1.0
-  - id: 2
-    title_tr: "Temel Analiz"
-    description_tr: "Piyasa değeri, FDV, dolaşımdaki/toplam arz ve gelir verileriyle değerleme ve arz baskısı incelenir."
-    category: "Temel"
-    source: "special:fundamentals"
-    weight: 1.0
-  - id: 3
-    title_tr: "Piyasa Duyarlılığı"
-    description_tr: "Korku-Açgözlülük endeksi, türev piyasa skoru ve haber duyarlılığıyla risk iştahı ölçülür."
-    category: "Sentiment"
-    source: "special:market_sensitivity"
-    weight: 0.8
-  - id: 4
-    title_tr: "Sosyal Medya ve Haberler"
-    description_tr: "Son 7 günün haber başlıkları taranır; olumlu/olumsuz ton duygu skoru olarak hesaplanır."
-    category: "Sentiment"
-    source: "analysis:news"
-    weight: 0.9
-  - id: 5
-    title_tr: "Türev Piyasalar"
-    description_tr: "Fonlama oranı, açık pozisyon (OI), long/short dengesi ve likidasyonlarla kaldıraç riski incelenir."
-    category: "Türev"
-    source: "analysis:liquidations"
-    weight: 0.9
-  - id: 6
-    title_tr: "Yatırımcı Davranışları"
-    description_tr: "Korku-Açgözlülük trendi, borsa giriş-çıkışları ve adres aktivitesiyle birikim/dağıtım davranışı ölçülür."
-    category: "Zincir-Üstü"
-    source: "special:investor_behavior"
-    weight: 0.8
-  - id: 7
-    title_tr: "İndikatörler"
-    description_tr: "RSI, MACD, Stochastic ve Bollinger gibi osilatörlerin verdiği alım-satım sinyalleri yorumlanır."
-    category: "Teknik"
-    source: "analysis:technical"
-    weight: 0.9
-  - id: 8
-    title_tr: "Sektörel Analiz"
-    description_tr: "Coin'in ait olduğu CoinGecko kategorilerinin 30 günlük getirisi coin performansıyla karşılaştırılır."
-    category: "Temel"
-    source: "special:sector"
-    weight: 0.6
-  - id: 9
-    title_tr: "Regülasyon ve Yasal Durum"
-    description_tr: "SEC davaları, onaylar ve yasaklara dair haberler taranır; düzenleyici riskin yönü çıkarılır."
-    category: "Haber"
-    source: "news"
-    query: "regulation SEC lawsuit approval ban"
-    keywords: ["sec", "regulation", "lawsuit", "ban", "approval", "regulator", "yasal", "regülasyon"]
-    weight: 0.7
-  - id: 10
-    title_tr: "Global Jeopolitik Olaylar"
-    description_tr: "Savaş, yaptırım ve tarife gibi jeopolitik haberler makro risk açısından taranır."
-    category: "Haber"
-    source: "news"
-    query: "geopolitics war sanctions"
-    keywords: ["war", "sanction", "geopolitic", "conflict", "tariff", "jeopolitik", "savaş"]
-    weight: 0.6
-  - id: 11
-    title_tr: "Teknolojik İlerlemeler"
-    description_tr: "CoinGecko geliştirici metrikleri ve GitHub aktivitesiyle projenin geliştirme temposu ölçülür."
-    category: "Temel"
-    source: "special:technology"
-    weight: 0.7
-  - id: 12
-    title_tr: "Şirket Haberleri"
-    description_tr: "Şirketlerin kripto hamleleri, ortaklıklar ve kazanç haberleri kurumsal benimseme açısından izlenir."
-    category: "Haber"
-    source: "news"
-    query: "company business partnership earnings"
-    keywords: ["microstrategy", "tesla", "blackrock", "company", "partnership", "earnings", "şirket"]
-    weight: 0.6
-  - id: 13
-    title_tr: "Makroekonomik Faktörler"
-    description_tr: "Dolar endeksi (DXY), faizler ve VIX gibi makro göstergeler yfinance üzerinden değerlendirilir."
-    category: "Makro"
-    source: "special:macro"
-    weight: 0.9
-  - id: 14
-    title_tr: "Mum Formasyonları"
-    description_tr: "Son mumlarda doji, engulfing, hammer gibi formasyonlar OHLCV verisinden tespit edilir."
-    category: "Teknik"
-    source: "analysis:technical"
-    weight: 0.6
-  - id: 15
-    title_tr: "Grafik Formasyonları"
-    description_tr: "İkili tepe/dip, üçgen ve bayrak gibi grafik formasyonları fiyat serisinden çıkarılır."
-    category: "Teknik"
-    source: "analysis:technical"
-    weight: 0.7
-  - id: 16
-    title_tr: "Fibonacci"
-    description_tr: "Son salınım üzerinden Fibonacci geri çekilme ve uzatma seviyeleri hesaplanır."
-    category: "Teknik"
-    source: "analysis:technical"
-    weight: 0.6
-  - id: 17
-    title_tr: "TradingView"
-    description_tr: "Yerel teknik göstergelerin bileşimiyle TradingView tarzı Al/Sat/Tut derecelendirmesi üretilir."
-    category: "Teknik"
-    source: "special:tradingview_proxy"
-    weight: 0.5
-    note: "TradingView'in ücretsiz API'si yok; yerel teknik derecelendirme vekili kullanılır."
-  - id: 18
-    title_tr: "Hacim"
-    description_tr: "Borsa bazında 24 saatlik hacimler ve hacim/MCap oranıyla likidite derinliği ölçülür."
-    category: "Piyasa"
-    source: "analysis:volumes"
-    weight: 0.9
-  - id: 19
-    title_tr: "En Güçlü Destek ve Direnç Noktaları"
-    description_tr: "Fiyat serisinden demetlenen en güçlü destek ve direnç bölgeleri hesaplanır."
-    category: "Teknik"
-    source: "analysis:technical"
-    weight: 0.8
-  - id: 20
-    title_tr: "Güncel Yapay Zeka Tahmini"
-    description_tr: "Ücretsiz ve doğrulanabilir tahmin API'si olmadığından nötr bırakılır; LLM anahtarıyla tahmin eklenebilir."
-    category: "AI"
-    source: "unavailable"
-    weight: 0.3
-    note: "Ücretsiz ve doğrulanabilir bir AI tahmin API'si yok. OpenRouter anahtari girilirse LLM tahmini eklenebilir."
-  - id: 21
-    title_tr: "Fraktal Modeller"
-    description_tr: "Hurst üssü ve R/S analiziyle piyasanın trend mi yoksa ortalamaya dönüş mü olduğu ölçülür."
-    category: "Kantitatif"
-    source: "special:fractal"
-    weight: 0.5
-  - id: 22
-    title_tr: "Twitter, Reddit ve Haber Makalelerindeki Duygu Analizleri"
-    description_tr: "Twitter/X, Reddit ve haber başlıkları birlikte skorlanarak topluluk duygusu çıkarılır."
-    category: "Sentiment"
-    source: "special:sentiment_combo"
-    weight: 0.8
-  - id: 23
-    title_tr: "Python"
-    description_tr: "Veri hattının kendi kalite metriği: veri kapsamı, hata ve eksik oranı raporlanır."
-    category: "Meta"
-    source: "special:pipeline_meta"
-    weight: 0.1
-    note: "Veri hattinin kendi kalite metrigi."
-  - id: 24
-    title_tr: "Tarihsel Benzerlikler"
-    description_tr: "Benzer getiri desenleri tarihte aranır; o dönemlerdeki sonraki 30 günlük performans kıyaslanır."
-    category: "Kantitatif"
-    source: "special:historical_similarity"
-    weight: 0.7
-  - id: 25
-    title_tr: "Astrolojiyle Finansal Piyasalar Arasında İlişki Kuran Araştırmalar"
-    description_tr: "Bilimsel geçerliliği olan veri kaynağı olmadığından nötr kabul edilir ve ağırlığı ihmal edilir."
-    category: "Alternatif"
-    source: "unavailable"
-    weight: 0.05
-    note: "Bilimsel geçerliligi olan veri kaynağı yok; nötr kabul edilir ve ağırlığı ihmal edilir."
-  - id: 26
-    title_tr: "Google Trends Aramalarındaki Yoğunluk"
-    description_tr: "pytrends ile arama yoğunluğu trendi çekilir; ilgi artışı/azalışı gösterge sayılır."
-    category: "Sentiment"
-    source: "special:google_trends"
-    weight: 0.5
-  - id: 27
-    title_tr: "Bitcoin ATM'lerinde İşlem Hacmi"
-    description_tr: "Bitcoin ATM'lerine dair haber akışı taranır; fiziksel benimseme sinyali aranır."
-    category: "Zincir-Üstü"
-    source: "news"
-    query: "bitcoin ATM"
-    keywords: ["atm", "bitcoin atm"]
-    weight: 0.2
-  - id: 28
-    title_tr: "Bitcoin Madenciliği Elektrik Tüketimi"
-    description_tr: "Bitcoin madenciliği elektrik tüketimi ve hash rate verileriyle maliyet baskısı izlenir."
-    category: "Zincir-Üstü"
-    source: "special:mining_energy"
-    weight: 0.5
-  - id: 29
-    title_tr: "Sektör Liderlerinin Tweet'leri"
-    description_tr: "Elon Musk, Saylor gibi isimlerin kripto paylaşımları haber akışından izlenir."
-    category: "Sentiment"
-    source: "news"
-    query: "Elon Musk Saylor Powell crypto tweet"
-    keywords: ["musk", "saylor", "wood", "ceo", "tweet", "x post"]
-    weight: 0.4
-  - id: 30
-    title_tr: "Kitle Psikolojisi"
-    description_tr: "Aşırı iyimserlik/korku, fonlama ve hacim verileriyle sürü davranışı ve dönüş sinyalleri araştırılır."
-    category: "Sentiment"
-    source: "special:crowd_psychology"
-    weight: 0.8
-  - id: 31
-    title_tr: "Balinaların Kararları"
-    description_tr: "Büyük cüzdanların alım-satım yönü ve toplam arz içindeki payı ölçülür."
-    category: "Zincir-Üstü"
-    source: "analysis:whales"
-    weight: 0.8
-  - id: 32
-    title_tr: "Balina İzleme ve Cüzdan Hareketleri"
-    description_tr: "Ücretsiz gezginlerdeki büyük transferler taranarak balina cüzdan hareketleri izlenir."
-    category: "Zincir-Üstü"
-    source: "analysis:whales"
-    weight: 0.8
-  - id: 33
-    title_tr: "Kültürel Etkinlikler"
-    description_tr: "Konferans, festival ve benimseme etkinliklerine dair haberler taranır."
-    category: "Haber"
-    source: "news"
-    query: "conference event adoption culture"
-    keywords: ["conference", "event", "festival", "summit", "kulturel"]
-    weight: 0.2
-  - id: 34
-    title_tr: "Haberlerin Yazılma Hızı"
-    description_tr: "Haber üretim hızındaki ani artışlar dikkat çeken olay göstergesi olarak ölçülür."
-    category: "Haber"
-    source: "special:news_velocity"
-    weight: 0.5
-  - id: 35
-    title_tr: "Bilimsel Deneysel Modeller"
-    description_tr: "EWMA/GARCH yaklaşımıyla volatilite rejimi ve beklenen oynaklık modellenir."
-    category: "Kantitatif"
-    source: "special:volatility_model"
-    weight: 0.6
-  - id: 36
-    title_tr: "Mevsimsel Etkiler"
-    description_tr: "Aylık ve günlük getiri istatistikleriyle takvimsel mevsimsellik desenleri aranır."
-    category: "Kantitatif"
-    source: "special:seasonality"
-    weight: 0.4
-  - id: 37
-    title_tr: "Ekonometrik Modeller"
-    description_tr: "Log-lineer regresyonla fiyat trendi, eğim ve sapma katsayısı tahmin edilir."
-    category: "Kantitatif"
-    source: "special:regression_trend"
-    weight: 0.6
-  - id: 38
-    title_tr: "Zincir Dışı (Off-chain) Veriler"
-    description_tr: "Borsalardaki hacim ve türev verileriyle zincir dışı piyasa aktivitesi değerlendirilir."
-    category: "Piyasa"
-    source: "special:offchain"
-    weight: 0.7
-  - id: 39
-    title_tr: "Korelasyon Analizi"
-    description_tr: "90 günlük pencerede BTC, ETH, Nasdaq, altın ve dolar ile korelasyon hesaplanır."
-    category: "Makro"
-    source: "special:correlation"
-    weight: 0.6
-  - id: 40
-    title_tr: "Hedge Fon ve Kurumsal Raporlar"
-    description_tr: "Hedge fon, ETF giriş-çıkış ve Grayscale gibi kurumsal akış haberleri taranır."
-    category: "Haber"
-    source: "news"
-    query: "hedge fund institutional ETF inflow Grayscale"
-    keywords: ["hedge fund", "institutional", "etf", "grayscale", "blackrock", "fidelity", "flow"]
-    weight: 0.6
-  - id: 41
-    title_tr: "Yerel Ekonomik Faktörler"
-    description_tr: "Türkiye ve lira özelindeki ekonomik gelişmeler ile yerel haberler taranır."
-    category: "Makro"
-    source: "news"
-    query: "Turkey lira local economy exchange"
-    keywords: ["turkey", "turkish", "lira", "try", "local", "yerel", "enflasyon"]
-    weight: 0.3
-  - id: 42
-    title_tr: "Kara Para Aklama Karşıtı (AML) Verileri"
-    description_tr: "Kara para aklama, uyum ve ceza haberleri yasal risk açısından taranır."
-    category: "Haber"
-    source: "news"
-    query: "AML money laundering compliance fine"
-    keywords: ["aml", "money laundering", "compliance", "fine", "sanction", "kara para"]
-    weight: 0.3
-  - id: 43
-    title_tr: "Alternatif Varlıkların Performansı"
-    description_tr: "Altın ve gümüş gibi alternatif varlıkların 30 günlük getirisi kripto ile karşılaştırılır."
-    category: "Makro"
-    source: "special:alternatives"
-    weight: 0.5
-  - id: 44
-    title_tr: "Volatilite Endeksleri"
-    description_tr: "VIX ve türev volatilite endeksleriyle piyasadaki risk iştahı ölçülür."
-    category: "Türev"
-    source: "special:volatility_indices"
-    weight: 0.7
-  - id: 45
-    title_tr: "Çapraz Zincir (Cross-chain) Verileri"
-    description_tr: "DefiLlama köprü hacimleriyle zincirler arası sermaye hareketi incelenir."
-    category: "Zincir-Üstü"
-    source: "special:cross_chain"
-    weight: 0.4
-  - id: 46
-    title_tr: "Medya Manipulasyonu ve Propaganda"
-    description_tr: "Haber başlıklarındaki abartı, tekrar ve yönlendirmeyle manipülasyon sinyali aranır."
-    category: "Sentiment"
-    source: "special:media_manipulation"
-    weight: 0.4
-  - id: 47
-    title_tr: "Sentetik Kıyaslama"
-    description_tr: "Seçili sinyallerin ağırlıklı bileşimiyle tek bir sentetik piyasa göstergesi üretilir."
-    category: "Kantitatif"
-    source: "special:composite"
-    weight: 0.7
-  - id: 48
-    title_tr: "Psikolojik Destek ve Direnç Seviyeleri"
-    description_tr: "50.000, 100.000 gibi yuvarlak sayıların destek/direnç etkisi test edilir."
-    category: "Teknik"
-    source: "special:psych_levels"
-    weight: 0.5
-  - id: 49
-    title_tr: "Enerji Maliyetleri"
-    description_tr: "Petrol, gaz ve elektrik fiyatlarıyla madencilik enerji maliyeti baskısı izlenir."
-    category: "Makro"
-    source: "special:energy_costs"
-    weight: 0.4
-  - id: 50
-    title_tr: "Makro Risk Faktörleri"
-    description_tr: "VIX, DXY ve FRED serileriyle makro risk iştahı ve stres seviyesi ölçülür."
-    category: "Makro"
-    source: "special:macro_risk"
-    weight: 0.8
-  - id: 51
-    title_tr: "Topluluk Yönetim Kararları"
-    description_tr: "Yönetişim teklifleri, oylamalar ve fork/yükseltme haberleri taranır."
-    category: "Haber"
-    source: "news"
-    query: "governance proposal vote upgrade fork"
-    keywords: ["governance", "proposal", "vote", "fork", "upgrade", "dao"]
-    weight: 0.4
-  - id: 52
-    title_tr: "Ülkelerin Bitcoin Hakkındaki Güncel Kararları"
-    description_tr: "Ülkelerin bitcoin rezervi, yasal para ve düzenleme kararları haberlerden izlenir."
-    category: "Haber"
-    source: "news"
-    query: "country bitcoin reserve legal tender government"
-    keywords: ["reserve", "legal tender", "government", "country", "nation", "regulation"]
-    weight: 0.5
-  - id: 53
-    title_tr: "Halk Olayları ve Güvenlik Riskleri"
-    description_tr: "Hack, saldırı, ihlal ve protesto haberleri güvenlik riski açısından taranır."
-    category: "Haber"
-    source: "news"
-    query: "security risk hack breach protest"
-    keywords: ["security", "hack", "breach", "attack", "risk", "güvenlik"]
-    weight: 0.4
-  - id: 54
-    title_tr: "Vergi Mevzuatı Değişiklikleri"
-    description_tr: "Kripto vergilendirme ve yasal düzenleme değişiklikleri haberlerden takip edilir."
-    category: "Haber"
-    source: "news"
-    query: "crypto tax legislation IRS"
-    keywords: ["tax", "taxation", "irs", "vergi", "legislation"]
-    weight: 0.4
-  - id: 55
-    title_tr: "Fiziksel Dünya ile Bitcoin Etkileşimi"
-    description_tr: "ETF, ödeme ve donanım cüzdan gibi fiziksel benimseme haberleri taranır."
-    category: "Haber"
-    source: "news"
-    query: "bitcoin ETF physical adoption payment hardware"
-    keywords: ["etf", "physical", "payment", "adoption", "hardware", "atm"]
-    weight: 0.3
-  - id: 56
-    title_tr: "Blockchain Verilerinde Anomaliler"
-    description_tr: "Büyük transfer, kontrat etkileşimi ve arz şoklarında olağan dışı hareketler taranır."
-    category: "Zincir-Üstü"
-    source: "special:anomalies"
-    weight: 0.6
-  - id: 57
-    title_tr: "Duygu Analizi ile Satış Baskısı Tespiti"
-    description_tr: "Emir defteri dengesizliği, duygu analizi ve likidasyonlarla satış baskısı tespit edilir."
-    category: "Türev"
-    source: "special:sell_pressure"
-    weight: 0.8
-  - id: 58
-    title_tr: "Uluslararası Sermaye Akışlarının Kriptoya Etkisi"
-    description_tr: "ETF ve kurumsal sermaye akışları, stablecoin arzı ve DXY ile likidite yönü ölçülür."
-    category: "Makro"
-    source: "special:capital_flows"
-    weight: 0.7
-  - id: 59
-    title_tr: "Kripto Cüzdanlarının Büyüme Oranı"
-    description_tr: "BTC/ETH aktif cüzdan sayısındaki büyüme benimseme göstergesi olarak izlenir."
-    category: "Zincir-Üstü"
-    source: "special:wallet_growth"
-    weight: 0.5
-  - id: 60
-    title_tr: "Özel Şirketlerin Blockchain Projeleri"
-    description_tr: "Özel şirketlerin blockchain projeleri ve kurumsal benimseme haberleri taranır."
-    category: "Haber"
-    source: "news"
-    query: "company blockchain project enterprise adoption"
-    keywords: ["enterprise", "company", "blockchain project", "corporate", "partnership"]
-    weight: 0.4
-  - id: 61
-    title_tr: "Akıllı Kontrat Analizleri"
-    description_tr: "DefiLlama protokol verileri ve kontrat güvenlik haberleriyle akıllı kontrat sağlığı incelenir."
-    category: "Zincir-Üstü"
-    source: "special:smart_contracts"
-    weight: 0.5
-  - id: 62
-    title_tr: "Stablecoin Rezerv Hareketleri"
-    description_tr: "DefiLlama stablecoin arz değişimiyle piyasaya giren/çıkan likidite ölçülür."
-    category: "Zincir-Üstü"
-    source: "special:stablecoin_flows"
-    weight: 0.7
-  - id: 63
-    title_tr: "Merkez Bankalarının Kriptoya Bakışı"
-    description_tr: "Fed ve ECB gibi merkez bankalarının kripto/CBDC politikaları haberlerden izlenir."
-    category: "Makro"
-    source: "news"
-    query: "central bank CBDC crypto policy"
-    keywords: ["central bank", "cbdc", "fed", "ecb", "policy", "merkez bankasi"]
-    weight: 0.5
-  - id: 64
-    title_tr: "Büyük Çaplı Madencilik Taşınmaları"
-    description_tr: "Madencilik operasyonlarının bölge değiştirmesi ve hash rate kaymaları izlenir."
-    category: "Zincir-Üstü"
-    source: "special:mining_shift"
-    weight: 0.4
-  - id: 65
-    title_tr: "Açık Blockchain Patentleri"
-    description_tr: "Blockchain patent başvuruları ve fikri mülkiyet haberleri taranır."
-    category: "Haber"
-    source: "news"
-    query: "blockchain patent filing"
-    keywords: ["patent", "filing", "intellectual property"]
-    weight: 0.2
-  - id: 66
-    title_tr: "Bitcoin Dominance"
-    description_tr: "BTC'nin toplam piyasa değeri içindeki payı ve 30 günlük değişimi ölçülür."
-    category: "Piyasa"
-    source: "special:dominance"
-    weight: 0.7
+- id: 1
+  title_tr: Teknik Analiz
+  description_tr: SMA 20/50/200, RSI, MACD ve Bollinger bantlarıyla trend yönü ve momentum ölçülür (OHLCV verisi).
+  category: Teknik
+  source: analysis:technical
+  weight: 1.0
+- id: 2
+  title_tr: Temel Analiz
+  description_tr: Piyasa değeri, FDV, dolaşımdaki/toplam arz ve gelir verileriyle değerleme ve arz baskısı incelenir.
+  category: Temel
+  source: special:fundamentals
+  weight: 0.9
+- id: 3
+  title_tr: Piyasa Duyarlılığı
+  description_tr: Korku-Açgözlülük endeksi, türev piyasa skoru ve haber duyarlılığıyla risk iştahı ölçülür.
+  category: Sentiment
+  source: special:market_sensitivity
+  weight: 0.4
+- id: 4
+  title_tr: Sosyal Medya ve Haberler
+  description_tr: Son 7 günün haber başlıkları taranır; olumlu/olumsuz ton duygu skoru olarak hesaplanır.
+  category: Sentiment
+  source: analysis:news
+  weight: 0.8
+- id: 5
+  title_tr: Türev Piyasalar
+  description_tr: Fonlama oranı, açık pozisyon (OI), long/short dengesi ve likidasyonlarla kaldıraç riski incelenir.
+  category: Türev
+  source: analysis:liquidations
+  weight: 0.7
+- id: 6
+  title_tr: Yatırımcı Davranışları
+  description_tr: Korku-Açgözlülük trendi ve BTC/ETH adres aktivitesiyle yatırımcı davranışı ölçülür; borsa giriş-çıkış
+    verisi ücretsiz kaynaklarda bulunmuyor.
+  category: Zincir-Üstü
+  source: special:investor_behavior
+  weight: 0.4
+- id: 7
+  title_tr: İndikatörler
+  description_tr: RSI, MACD, Stochastic ve Bollinger gibi osilatörlerin verdiği alım-satım sinyalleri yorumlanır.
+  category: Teknik
+  source: analysis:technical
+  weight: 0.3
+- id: 8
+  title_tr: Sektörel Analiz
+  description_tr: Coin'in 24 saatlik getirisi, ait olduğu CoinGecko kategorisinin getirisiyle karşılaştırılır (göreli
+    güç).
+  category: Temel
+  source: special:sector
+  weight: 0.3
+- id: 9
+  title_tr: Regülasyon ve Yasal Durum
+  description_tr: SEC davaları, onaylar ve yasaklara dair haberler taranır; düzenleyici riskin yönü çıkarılır.
+  category: Haber
+  source: news
+  query: regulation SEC lawsuit approval ban
+  keywords:
+  - sec
+  - securities and exchange
+  - lawsuit
+  - settlement
+  - regulatory approval
+  - regulator
+  - regulation
+  - legal action
+  weight: 0.5
+- id: 10
+  title_tr: Global Jeopolitik Olaylar
+  description_tr: Savaş, yaptırım ve tarife gibi jeopolitik haberler makro risk açısından taranır.
+  category: Haber
+  source: news
+  query: geopolitics war sanctions
+  keywords:
+  - war
+  - sanction
+  - geopolitic
+  - conflict
+  - tariff
+  - invasion
+  - military strike
+  weight: 0.3
+- id: 11
+  title_tr: Teknolojik İlerlemeler
+  description_tr: CoinGecko geliştirici metrikleri (commit, yıldız, sorun) ve GitHub deposu aktivitesiyle geliştirme
+    temposu ölçülür.
+  category: Temel
+  source: special:technology
+  weight: 0.3
+- id: 12
+  title_tr: Şirket Haberleri
+  description_tr: Şirketlerin kripto hamleleri, ortaklıklar ve kazanç haberleri kurumsal benimseme açısından izlenir.
+  category: Haber
+  source: news
+  query: company business partnership earnings
+  keywords:
+  - microstrategy
+  - strategy
+  - tesla
+  - blackrock
+  - partnership
+  - acquisition
+  - earnings
+  - treasury
+  - corporate bitcoin
+  weight: 0.4
+- id: 13
+  title_tr: Makroekonomik Faktörler
+  description_tr: Dolar endeksi (DXY), faizler ve VIX gibi makro göstergeler yfinance üzerinden değerlendirilir.
+  category: Makro
+  source: special:macro
+  weight: 0.6
+- id: 14
+  title_tr: Mum Formasyonları
+  description_tr: Son mumlarda doji, engulfing, hammer gibi formasyonlar OHLCV verisinden tespit edilir.
+  category: Teknik
+  source: analysis:technical
+  weight: 0.15
+- id: 15
+  title_tr: Grafik Formasyonları
+  description_tr: İkili tepe/dip, üçgen ve bayrak gibi grafik formasyonları fiyat serisinden çıkarılır.
+  category: Teknik
+  source: analysis:technical
+  weight: 0.2
+- id: 16
+  title_tr: Fibonacci
+  description_tr: Son salınım üzerinden Fibonacci geri çekilme ve uzatma seviyeleri hesaplanır.
+  category: Teknik
+  source: analysis:technical
+  weight: 0.1
+- id: 17
+  title_tr: TradingView
+  description_tr: Yerel teknik göstergelerin bileşimiyle TradingView tarzı Al/Sat/Tut derecelendirmesi üretilir;
+    teknik modülle aynı sinyali taşır.
+  category: Teknik
+  source: special:tradingview_proxy
+  weight: 0.2
+  note: TradingView'in ücretsiz API'si yok; yerel teknik derecelendirme vekili kullanılır.
+  score_group: analysis:technical
+- id: 18
+  title_tr: Hacim
+  description_tr: Borsa bazında 24 saatlik hacimler ve hacim/MCap oranıyla likidite derinliği ölçülür.
+  category: Piyasa
+  source: analysis:volumes
+  weight: 0.7
+- id: 19
+  title_tr: En Güçlü Destek ve Direnç Noktaları
+  description_tr: Fiyat serisinden demetlenen en güçlü destek ve direnç bölgeleri hesaplanır.
+  category: Teknik
+  source: analysis:technical
+  weight: 0.2
+- id: 20
+  title_tr: Güncel Yapay Zeka Tahmini
+  description_tr: Ücretsiz ve doğrulanabilir tahmin API'si olmadığından skora katılmaz (ağırlık 0); LLM anahtarıyla
+    tahmin eklenebilir.
+  category: AI
+  source: unavailable
+  weight: 0.0
+  note: Skora katılmaz (ağırlık 0). OpenRouter anahtarı girilirse LLM tahmini eklenebilir.
+- id: 21
+  title_tr: Fraktal Modeller
+  description_tr: Hurst üssü ve R/S analiziyle piyasanın trend mi yoksa ortalamaya dönüş mü olduğu ölçülür.
+  category: Kantitatif
+  source: special:fractal
+  weight: 0.4
+- id: 22
+  title_tr: Twitter, Reddit ve Haber Makalelerindeki Duygu Analizleri
+  description_tr: Haber başlıkları, Reddit gönderileri ve korku-açgözlülük endeksiyle topluluk duygusu ölçülür (Twitter/X
+    erişimi ücretsiz değil).
+  category: Sentiment
+  source: special:sentiment_combo
+  weight: 0.4
+- id: 23
+  title_tr: Python
+  description_tr: Veri hattının kalite metriği; rapor için bilgi amaçlıdır, skora katılmaz (ağırlık 0).
+  category: Meta
+  source: special:pipeline_meta
+  weight: 0.0
+  note: Skora katılmaz; raporda veri kalitesi metası olarak kalır.
+- id: 24
+  title_tr: Tarihsel Benzerlikler
+  description_tr: Benzer getiri desenleri sızıntısız tarihsel pencerelerde aranır; aday pencereler cari dönemle
+    örtüşmez.
+  category: Kantitatif
+  source: special:historical_similarity
+  weight: 0.2
+- id: 25
+  title_tr: Astrolojiyle Finansal Piyasalar Arasında İlişki Kuran Araştırmalar
+  description_tr: Bilimsel geçerliliği olan veri kaynağı olmadığından skora katılmaz (ağırlık 0).
+  category: Alternatif
+  source: unavailable
+  weight: 0.0
+  note: Skora katılmaz (ağırlık 0); bilimsel geçerliliği yok.
+- id: 26
+  title_tr: Google Trends Aramalarındaki Yoğunluk
+  description_tr: pytrends ile arama yoğunluğu trendi çekilir; ilgi artışı/azalışı gösterge sayılır.
+  category: Sentiment
+  source: special:google_trends
+  weight: 0.25
+- id: 27
+  title_tr: Bitcoin ATM'lerinde İşlem Hacmi
+  description_tr: Bitcoin ATM'lerine dair haber akışı taranır; fiziksel benimseme sinyali aranır.
+  category: Zincir-Üstü
+  source: news
+  query: bitcoin ATM
+  keywords:
+  - bitcoin atm
+  - crypto atm
+  - btm
+  weight: 0.1
+- id: 28
+  title_tr: Bitcoin Madenciliği Elektrik Tüketimi
+  description_tr: Bitcoin hashrate, madenci geliri ve petrol fiyatıyla madencilik enerji maliyeti baskısı izlenir
+    (ETH ve altlarda enerji vekili).
+  category: Zincir-Üstü
+  source: special:mining_energy
+  weight: 0.35
+- id: 29
+  title_tr: Sektör Liderlerinin Tweet'leri
+  description_tr: Elon Musk, Saylor gibi isimlerin kripto paylaşımları haber akışından izlenir.
+  category: Sentiment
+  source: news
+  query: Elon Musk Saylor Powell crypto tweet
+  keywords:
+  - musk
+  - saylor
+  - tweet
+  - x post
+  weight: 0.3
+- id: 30
+  title_tr: Kitle Psikolojisi
+  description_tr: Aşırı iyimserlik/korku, fonlama ve hacim verileriyle sürü davranışı ve dönüş sinyalleri araştırılır.
+  category: Sentiment
+  source: special:crowd_psychology
+  weight: 0.5
+- id: 31
+  title_tr: Balinaların Kararları
+  description_tr: Büyük cüzdanların borsaya giriş-çıkış yönü ve toplam arz içindeki payı ölçülür; yön sinyali yoksa
+    skora girmez.
+  category: Zincir-Üstü
+  source: analysis:whales
+  weight: 0.8
+- id: 32
+  title_tr: Balina İzleme ve Cüzdan Hareketleri
+  description_tr: Balina transfer akışı 31. maddeyle aynı kaynağı kullanır; skorlamada grupta bir kez sayılır.
+  category: Zincir-Üstü
+  source: analysis:whales
+  weight: 0.5
+- id: 33
+  title_tr: Kültürel Etkinlikler
+  description_tr: Konferans, festival ve benimseme etkinliklerine dair haberler taranır.
+  category: Haber
+  source: news
+  query: conference event adoption culture
+  keywords:
+  - conference
+  - summit
+  - festival
+  - hackathon
+  - meetup
+  weight: 0.15
+- id: 34
+  title_tr: Haberlerin Yazılma Hızı
+  description_tr: Haber üretim hızındaki ani artışlar belirsizlik/olay göstergesi olarak ölçülür (yön değil, yoğunluk
+    sinyali).
+  category: Haber
+  source: special:news_velocity
+  weight: 0.25
+- id: 35
+  title_tr: Bilimsel Deneysel Modeller
+  description_tr: EWMA/GARCH yaklaşımıyla volatilite rejimi ve beklenen oynaklık modellenir.
+  category: Kantitatif
+  source: special:volatility_model
+  weight: 0.3
+- id: 36
+  title_tr: Mevsimsel Etkiler
+  description_tr: Aylık ve günlük getiri istatistikleriyle takvimsel mevsimsellik desenleri aranır.
+  category: Kantitatif
+  source: special:seasonality
+  weight: 0.2
+- id: 37
+  title_tr: Ekonometrik Modeller
+  description_tr: 90 günlük getiri serisinin t-istatistiğiyle trendin istatistiksel anlamlılığı ölçülür (fiyat seviyesi
+    regresyonu değil).
+  category: Kantitatif
+  source: special:regression_trend
+  weight: 0.4
+- id: 38
+  title_tr: Zincir Dışı (Off-chain) Veriler
+  description_tr: Borsa hacmi ve türev verilerinin bileşkesiyle zincir dışı piyasa aktivitesi özetlenir (18 ve 5.
+    maddelerin türevi).
+  category: Piyasa
+  source: special:offchain
+  weight: 0.15
+- id: 39
+  title_tr: Korelasyon Analizi
+  description_tr: 90 günlük pencerede BTC, ETH, Nasdaq, altın ve dolar ile korelasyon hesaplanır.
+  category: Makro
+  source: special:correlation
+  weight: 0.4
+- id: 40
+  title_tr: Hedge Fon ve Kurumsal Raporlar
+  description_tr: Hedge fon, ETF giriş-çıkış ve Grayscale gibi kurumsal akış haberleri taranır.
+  category: Haber
+  source: news
+  query: hedge fund institutional ETF inflow Grayscale
+  keywords:
+  - hedge fund
+  - institutional
+  - etf inflow
+  - etf outflow
+  - etf flow
+  - grayscale
+  - fidelity
+  weight: 0.4
+- id: 41
+  title_tr: Yerel Ekonomik Faktörler
+  description_tr: Türkiye ve lira özelindeki ekonomik gelişmeler ile yerel haberler taranır.
+  category: Makro
+  source: news
+  query: Turkey lira local economy exchange
+  keywords:
+  - türkiye
+  - turkiye
+  - lira
+  - turkish
+  - btc try
+  - local exchange
+  weight: 0.15
+- id: 42
+  title_tr: Kara Para Aklama Karşıtı (AML) Verileri
+  description_tr: Kara para aklama, uyum ve ceza haberleri yasal risk açısından taranır.
+  category: Haber
+  source: news
+  query: AML money laundering compliance fine
+  keywords:
+  - aml
+  - money laundering
+  - financial crime
+  - compliance
+  weight: 0.15
+- id: 43
+  title_tr: Alternatif Varlıkların Performansı
+  description_tr: Altın ve gümüş gibi alternatif varlıkların 30 günlük getirisi kripto ile karşılaştırılır.
+  category: Makro
+  source: special:alternatives
+  weight: 0.25
+- id: 44
+  title_tr: Volatilite Endeksleri
+  description_tr: VIX ve Deribit DVOL ile oynaklık fiyatlaması ve risk iştahı ölçülür; veri yoksa değerlendirilmez.
+  category: Türev
+  source: special:volatility_indices
+  weight: 0.5
+- id: 45
+  title_tr: Çapraz Zincir (Cross-chain) Verileri
+  description_tr: DefiLlama köprü hacimleriyle zincirler arası sermaye hareketi incelenir.
+  category: Zincir-Üstü
+  source: special:cross_chain
+  weight: 0.3
+  note: Ücretli bridge API'si yerine ücretsiz DefiLlama zincir TVL serisi kullanılır.
+- id: 46
+  title_tr: Medya Manipulasyonu ve Propaganda
+  description_tr: Haber tekrar oranı ve sentiment dağılımı izlenir; yön skoru üretmez, rapor için bilgi amaçlıdır.
+  category: Sentiment
+  source: special:media_manipulation
+  weight: 0.05
+  note: Yön skoru üretmez; yalnızca uyarı raporlar.
+- id: 47
+  title_tr: Sentetik Kıyaslama
+  description_tr: Seçili sinyallerin ağırlıklı bileşimiyle tek bir sentetik piyasa göstergesi üretilir.
+  category: Kantitatif
+  source: special:composite
+  weight: 0.2
+- id: 48
+  title_tr: Psikolojik Destek ve Direnç Seviyeleri
+  description_tr: Yuvarlak sayı seviyelerine yakınlık destek/direnç etkisi açısından test edilir.
+  category: Teknik
+  source: special:psych_levels
+  weight: 0.25
+- id: 49
+  title_tr: Enerji Maliyetleri
+  description_tr: Petrol, gaz ve elektrik fiyatlarıyla madencilik enerji maliyeti baskısı izlenir.
+  category: Makro
+  source: special:energy_costs
+  weight: 0.2
+- id: 50
+  title_tr: Makro Risk Faktörleri
+  description_tr: VIX, DXY ve FRED faiz serileriyle makro stres ölçülür; veri yoksa değerlendirilmez.
+  category: Makro
+  source: special:macro_risk
+  weight: 0.3
+- id: 51
+  title_tr: Topluluk Yönetim Kararları
+  description_tr: Yönetişim teklifleri, oylamalar ve fork/yükseltme haberleri taranır.
+  category: Haber
+  source: news
+  query: governance proposal vote upgrade fork
+  keywords:
+  - governance
+  - proposal
+  - vote
+  - fork
+  - upgrade
+  - dao
+  weight: 0.4
+- id: 52
+  title_tr: Ülkelerin Bitcoin Hakkındaki Güncel Kararları
+  description_tr: Ülkelerin bitcoin rezervi, yasal para ve düzenleme kararları sıkı anahtar kelimelerle haberlerden
+    izlenir.
+  category: Haber
+  source: news
+  query: country bitcoin reserve legal tender government
+  keywords:
+  - legal tender
+  - bitcoin reserve
+  - national reserve
+  - government bitcoin
+  - bitcoin law
+  - nation-state
+  weight: 0.2
+- id: 53
+  title_tr: Halk Olayları ve Güvenlik Riskleri
+  description_tr: Hack, saldırı, ihlal ve protesto haberleri güvenlik riski açısından taranır.
+  category: Haber
+  source: news
+  query: security risk hack breach protest
+  keywords:
+  - hack
+  - breach
+  - exploit
+  - attack
+  - stolen
+  - phishing
+  - rug pull
+  weight: 0.4
+- id: 54
+  title_tr: Vergi Mevzuatı Değişiklikleri
+  description_tr: Kripto vergilendirme ve yasal düzenleme değişiklikleri haberlerden takip edilir.
+  category: Haber
+  source: news
+  query: crypto tax legislation IRS
+  keywords:
+  - tax
+  - taxation
+  - irs
+  - vergi
+  - tax legislation
+  weight: 0.2
+- id: 55
+  title_tr: Fiziksel Dünya ile Bitcoin Etkileşimi
+  description_tr: ETF, ödeme ve donanım cüzdan gibi fiziksel benimseme haberleri taranır.
+  category: Haber
+  source: news
+  query: bitcoin ETF physical adoption payment hardware
+  keywords:
+  - payment
+  - hardware wallet
+  - pos terminal
+  - merchant
+  - bitcoin atm
+  weight: 0.15
+- id: 56
+  title_tr: Blockchain Verilerinde Anomaliler
+  description_tr: Mempool yoğunluğu ve ücret anormallikleri taranır (BTC) ve ETH ağ kullanımı izlenir; diğer varlıklarda
+    veri yok.
+  category: Zincir-Üstü
+  source: special:anomalies
+  weight: 0.2
+- id: 57
+  title_tr: Duygu Analizi ile Satış Baskısı Tespiti
+  description_tr: Emir defteri dengesizliği, duygu analizi ve likidasyonlarla satış baskısı tespit edilir.
+  category: Türev
+  source: special:sell_pressure
+  weight: 0.4
+- id: 58
+  title_tr: Uluslararası Sermaye Akışlarının Kriptoya Etkisi
+  description_tr: Stablecoin arzı, DXY ve ETF haberleriyle sermaye akışı yönü ölçülür; veri yoksa değerlendirilmez.
+  category: Makro
+  source: special:capital_flows
+  weight: 0.3
+- id: 59
+  title_tr: Kripto Cüzdanlarının Büyüme Oranı
+  description_tr: BTC aktif adres oluşumu 90 günlük değişimle ölçülür; ETH'te yalnız toplam adres bilgisi kısmi
+    olarak raporlanır.
+  category: Zincir-Üstü
+  source: special:wallet_growth
+  weight: 0.5
+- id: 60
+  title_tr: Özel Şirketlerin Blockchain Projeleri
+  description_tr: Özel şirketlerin blockchain projeleri ve kurumsal benimseme haberleri taranır.
+  category: Haber
+  source: news
+  query: company blockchain project enterprise adoption
+  keywords:
+  - enterprise blockchain
+  - consortium
+  - blockchain project
+  - blockchain pilot
+  - corporate ledger
+  - web3 enterprise
+  weight: 0.2
+- id: 61
+  title_tr: Akıllı Kontrat Analizleri
+  description_tr: DefiLlama protokol TVL'si ve güvenlik haberleriyle akıllı kontrat sağlığı izlenir.
+  category: Zincir-Üstü
+  source: special:smart_contracts
+  weight: 0.3
+- id: 62
+  title_tr: Stablecoin Rezerv Hareketleri
+  description_tr: DefiLlama stablecoin arz değişimiyle piyasaya giren/çıkan likidite ölçülür.
+  category: Zincir-Üstü
+  source: special:stablecoin_flows
+  weight: 0.7
+- id: 63
+  title_tr: Merkez Bankalarının Kriptoya Bakışı
+  description_tr: Merkez bankalarının CBDC ve kripto politikaları sıkı anahtar kelimelerle haberlerden izlenir.
+  category: Makro
+  source: news
+  query: central bank CBDC crypto policy
+  keywords:
+  - central bank
+  - cbdc
+  - federal reserve
+  - ecb
+  - fed
+  - monetary policy
+  weight: 0.25
+- id: 64
+  title_tr: Büyük Çaplı Madencilik Taşınmaları
+  description_tr: Madencilik haberleri ve hash verisiyle sektör hareketleri izlenir; bölge değişimi verisi ücretsiz
+    değildir.
+  category: Zincir-Üstü
+  source: special:mining_shift
+  weight: 0.1
+- id: 65
+  title_tr: Borsa Listeleme ve Vadeli İşlem Duyuruları
+  description_tr: Kripto borsalarının yeni listeleme, delist ve vadeli işlem duyuruları haberlerden izlenir.
+  category: Piyasa
+  source: news
+  query: exchange listing delisting futures launch
+  keywords:
+  - listing
+  - delisting
+  - perpetual futures
+  - futures launch
+  - new trading pair
+  - spot listing
+  weight: 0.2
+  note: Patent akışı ücretsiz kaynaklarda bulunamadığı için listeleme/vadeli işlem duyuruları izlenir.
+- id: 66
+  title_tr: Bitcoin Dominance
+  description_tr: BTC'nin toplam piyasa değeri içindeki hakimiyet seviyesi ve 24 saatlik piyasa değişimi ölçülür.
+  category: Piyasa
+  source: special:dominance
+  weight: 0.4

@@ -115,6 +115,16 @@ class DefiLlamaProvider:
         except ProviderError:
             return []
 
+    async def chain_tvl_history(self, chain: str) -> list[dict[str, Any]]:
+        """Bir zincirin toplam kilitli deger (TVL) serisini dondurur (ucretsiz)."""
+        try:
+            data = await self.http.get_json(
+                self.name, f"{BASE}/v2/historicalChainTvl/{chain}", ttl=1800
+            )
+            return data if isinstance(data, list) else []
+        except ProviderError:
+            return []
+
     @staticmethod
     def summarize_fees(data: dict[str, Any] | None) -> dict[str, Any]:
         """DefiLlama fee/gelir verisini özetler."""

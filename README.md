@@ -1,177 +1,85 @@
 # Crypto Deep Research
 
-Kripto paralar için **yerel RAG + 66 maddelik deep research** sistemi. NotebookLM benzeri bir
-yapı: seçili coinler için ücretsiz veri kaynaklarından veri toplar, analiz eder, kaynaklı rapor
-üretir ve hariçi AI'lara (Claude, Codex, ChatGPT...) yapıştırılabilecek detaylı Türkçe prompt
-oluşturur.
+Kripto varlıklar için **tamamen yerel** derin araştırma sistemi. Ücretsiz veri kaynaklarından
+66 kriteri değerlendirir; kaynaklı Türkçe rapor ve yapay zekâlara yapıştırmaya hazır prompt üretir.
 
-> Bu sistem yatırım tavsiyesi değildir. Üretilen skor ve olasılıklar araştırma amaçlıdır ve
-> kesinlik iddiası taşımaz.
+> Yatırım tavsiyesi değildir. Skor ve olasılıklar araştırma amaçlıdır, kesinlik iddiası taşımaz.
+> Örnek çıktı: [`examples/ornek-rapor-BTC.md`](examples/ornek-rapor-BTC.md)
 
----
+## Ne yapar?
 
-## Özellikler
+- **10 analiz modülü + 66 kriter** paralel çalışır; her kriter ne araştırdığını, bulgusunu,
+  skorunu, güvenini ve kaynağını raporlar.
+- Sonuçları tek bir **ağırlıklı skora** ve **yükseliş/düşüş olasılığına** indirger.
+- **Yerel RAG** ile haber, analiz ve geçmiş raporlarda anlamsal arama yapar.
+- **Web arayüzü, CLI, REST API ve MCP** olarak kullanılabilir.
 
-- **10 ana analiz modülü** (çoklu seçilebilir):
-  1. Likidasyon haritası ve türev piyasalar (funding, open interest, long/short)
-  2. Balina alım-satım / toplam arz (zincir-üstü büyük transferler + stablecoin likiditesi)
-  3. Tüm borsalardaki hacimler (CoinGecko ticker dağılımı + Binance/OKX/Bybit doğrulaması)
-  4. Gelirler, fee'ler ve fee/mcap oranı (DefiLlama)
-  5. Son haberler + sentiment skorları (CryptoPanic, RSS, GDELT, VADER)
-  6. Geçmiş mcap / güncel mcap oranı ve kendi tarihine göre konum
-  7. BTC/ETH paritesi, ATH ve direnç mesafesi
-  8. USD bazlı ATH/ATL mesafesi
-  9. Coinler arası mcap sıralaması ve geçmiş max/min rank uzaklığı
-  10. Timeframe teknik analiz (RSI, MACD, EMA, Bollinger, ATR, Fibonacci, formasyonlar)
+## Öne çıkanlar
 
-- **66 maddelik deep research motoru**: Kullanıcının verdiği 66 maddelik liste birebir
-  `items.yaml` içinde tanımlıdır. Her madde veri + kaynak + güven + skor üretir; veri
-  bulunamayan maddeler açıkça "veri yok" işaretlenir ve ortalamaya katılmaz.
-- **Context Control Plane**: Her context objesinin kimliği, scope'u, provenance'ı, TTL'i ve
-  versiyonu vardır. Politika kararları: `KEEP / COMPRESS / CACHE / OFFLOAD / DROP / PIN /
-  PREFETCH`. Offload geri alınabilir (offload → compress → retrieve → rehydrate).
-- **Tamamen yerel RAG**: SQLite (metadata + FTS5) + LanceDB (vektör) + `fastembed`
-  (`intfloat/multilingual-e5-large`). İnternet gerekmez, ek maliyet yok.
-- **MCP server**: Claude Desktop, Claude Code, Codex, Cursor gibi araçlara doğrudan veri ve
-  analiz sunar.
-- **Web UI**: NotebookLM benzeri koyu tema; **otomatik tamamlamalı varlık arama**, koşu zamanı/analiz seçimi, **timeframe bazlı
-  interaktif SVG fiyat grafiği**, yükseliş/düşüş olasılık çubuğu, araştırma bulguları tablosu
-  (arama + sıralama + açılır veri görünümü), rapor ve prompt görüntüleme, **Markdown indirme
-  ve Yazdır/PDF**, kaynak arama, rapor arşivi. Uzun süren derin araştırmalar **arka planda**
-  çalışır; ilerleme çubuğu, kriter sayacı ve süre göstergesiyle izlenir (tarayıcı zaman
-  aşımına takılmaz).
-- **tr-TR sayı biçimi**: Tüm çıktılarda binlik ayracı nokta, ondalık virgül; mikro fiyatlar
-  (ör. PEPE $0,00000338) bilimsel gösterime düşmeden ve sıfıra yuvarlanmadan gösterilir.
-- **Opsiyonel OpenRouter**: API anahtarı girilirse RAG soruları ve rapor üretimi LLM'e
-  devredilebilir. Anahtar yoksa sistem yalnızca prompt üretir (varsayılan davranış).
+- **Şeffaf kriterler:** her kartta "Ne araştırılır?", bulgu, durum (Tam / Kısmi / Veri Yok),
+  skor, güven ve kaynak bilgisi.
+- **Çift sayım koruması:** aynı sinyali paylaşan kriterler skorda bir kez sayılır; kısmi veri
+  yarım ağırlıkla katkı verir. Böylece aynı teknik skor 7 kez tartılmaz.
+- **Dürüst veri:** veri bulunamayan kriter "veri yok" işaretlenir ve ortalamaya katılmaz.
+- **Uzun işler arka planda:** canlı ilerleme çubuğu, aşama mesajları ve süre göstergesi.
+- **Modern arayüz:** otomatik tamamlamalı varlık arama, interaktif mum grafiği, olasılık
+  çubuğu, modül durum paneli, arama/sıralama, Markdown indirme ve yazdırma/PDF.
+- **tr-TR sayı biçimi:** 1.234,56; mikro fiyatlar (ör. $0,00000338) kaybolmaz.
+- **API anahtarı gerekmez:** tüm temel kaynaklar anahtarsız çalışır; anahtar girilirse oto devreye girer.
+- **MCP desteği:** Claude Desktop/Code, Codex ve Cursor için 11 hazır araç.
 
----
-
-## Kurulum
+## Hızlı başlangıç (Docker)
 
 ```bash
 git clone https://github.com/alikula37/crypto-deep-research.git
 cd crypto-deep-research
-uv sync
-cp .env.example .env        # opsiyonel API anahtarları
+docker compose build && docker compose up -d
 ```
 
-Gereksinimler: Python 3.10+, [uv](https://docs.astral.sh/uv/). Web UI için Node 22.12+ (Vite 8 / Vitest 5).
+- Arayüz: http://127.0.0.1:8000 · API dokümantasyonu: http://127.0.0.1:8000/docs
+- Docker yoksa: `brew install colima docker && colima start`
+- Veriler `./data` altında kalıcıdır; ilk RAG kullanımında embedding modeli (~2 GB) bir kez indirilir.
 
-> İlk RAG kullanımında embedding modeli indirilir (~2GB). Daha küçük model için `.env` içinde
-> `CDR_EMBEDDING_MODEL=sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` kullanın.
+### Yerel kurulum (Docker'sız)
 
----
+```bash
+uv sync
+cp .env.example .env     # tüm anahtarlar opsiyonel
+uv run cdr serve         # web UI + API → http://127.0.0.1:8000
+```
+
+Gereksinimler: Python 3.10+ ve [uv](https://docs.astral.sh/uv/). Web geliştirme:
+`cd web && npm install && npm run dev`.
 
 ## Kullanım
 
-```bash
-# Anlık piyasa özeti
-uv run cdr snapshot bitcoin
+### Web arayüzü
 
-# Seçili analizler
-uv run cdr analyze bitcoin --types technical,news,liquidations
+| Sekme | İçerik |
+| --- | --- |
+| Genel Bakış | Anlık fiyat/mcap, mum grafiği, olasılık dağılımı, modül durumları |
+| Araştırma Bulguları | 66 kriter: açıklama, bulgu, skor, güven (koşu öncesi tüm kriterler listelenir) |
+| Rapor | Kaynaklı Markdown raporu (kopyala / indir / PDF) |
+| Prompt Çıktısı | Harici AI araçlarına hazır prompt |
+| Kaynak Arama | Yerel RAG araması ve (anahtar varsa) AI yanıtı |
+| Rapor Arşivi | Geçmiş koşular ve raporlar |
 
-# Tüm analizler + 66 madde + rapor + prompt
-uv run cdr deep-research bitcoin --platform claude --json
-
-# RAG arama (haber + analiz + rapor deposu)
-uv run cdr search "ETF akışları" --coin bitcoin
-
-# RAG + OpenRouter (anahtar varsa)
-uv run cdr ask "BTC için likidasyon riski nedir?" --coin bitcoin
-
-# MCP server (stdio)
-uv run cdr mcp
-
-# Web UI + REST API
-uv run cdr serve            # http://127.0.0.1:8000
-
-# Diğer
-uv run cdr items            # 66 madde listesi
-uv run cdr analyses         # analiz anahtarları
-uv run cdr cache --stats    # önbellek durumu
-uv run cdr rag-stats        # RAG deposu durumu
-```
-
-Web UI geliştirme modu:
+### CLI
 
 ```bash
-cd web && npm install && npm run dev    # http://localhost:5173
+uv run cdr snapshot bitcoin                                      # anlık piyasa özeti
+uv run cdr analyze bitcoin --types technical,news,liquidations   # seçili modüller
+uv run cdr deep-research bitcoin --platform claude --json        # 66 kriter + rapor + prompt
+uv run cdr search "ETF akışları" --coin bitcoin                  # yerel RAG araması
+uv run cdr ask "BTC likidasyon riski nedir?" --coin bitcoin      # RAG + isteğe bağlı LLM
+uv run cdr items                                                 # 66 kriter ve açıklamaları
+uv run cdr mcp                                                   # MCP server (stdio)
 ```
 
----
+Docker içinde çalıştırmak için: `docker compose run --rm app cdr snapshot bitcoin`
 
-## Docker ile Çalıştırma
+### MCP (Claude Desktop / Code, Codex, Cursor)
 
-Docker Desktop veya Colima ile çalışır. Veriler `./data` altında kalıcıdır
-(SQLite, raporlar, promptlar, vektör deposu, embedding önbelleği).
-
-```bash
-# İmajı derle ve web UI + API'yi başlat
-docker compose build
-docker compose up -d          # http://127.0.0.1:8000
-docker compose logs -f
-docker compose down
-```
-
-CLI komutları konteynerde:
-
-```bash
-docker compose run --rm app cdr snapshot bitcoin
-docker compose run --rm app cdr analyze bitcoin -t technical,news
-docker compose run --rm app cdr deep-research bitcoin --platform claude
-docker compose exec app cdr search "ETF akışları" --coin bitcoin
-```
-
-MCP server (stdio) konteynerde:
-
-```bash
-docker run -i --rm -v "$PWD/data:/data" crypto-deep-research:latest /app/.venv/bin/cdr mcp
-```
-
-Colima kurulumu (Docker Desktop alternatifi, hesap gerektirmez):
-
-```bash
-brew install colima docker docker-compose
-colima start --cpu 4 --memory 6 --disk 40
-brew services start colima     # açılışta otomatik başlat (opsiyonel)
-```
-
-Not: Embedding modeli ilk RAG kullanımında indirilir ve `./data/fastembed` altında
-saklanır (~2GB); sonraki çalıştırmalarda yeniden indirilmez.
-
----
-
-## REST API
-
-Web UI aynı zamanda bir REST API sunar (`uv run cdr serve` → `http://127.0.0.1:8000`):
-
-| Metot | Yol | Açıklama |
-| --- | --- | --- |
-| GET | `/api/health` | Durum ve tanımlı API anahtarları |
-| GET | `/api/analyses` | Kullanılabilir analizler |
-| GET | `/api/items` | 66 maddelik kayıt defteri |
-| GET | `/api/coins/search?q=link` | Varlık arama (otomatik tamamlama) |
-| GET | `/api/snapshot/{coin}` | Anlık fiyat/mcap/ATH-ATL + global veriler |
-| GET | `/api/ohlcv/{coin}?timeframe=1d&limit=300` | Grafik için mum verisi (Binance, yedek CoinGecko) |
-| POST | `/api/analyze` | Seçili analizleri çalıştırır |
-| POST | `/api/deep-research` | 66 kriter + rapor + prompt üretir (senkron) |
-| POST | `/api/deep-research/jobs` | Derin araştırmayı arka planda başlatır (job_id döner) |
-| GET | `/api/deep-research/jobs/{id}` | Görev durumu, ilerleme yüzdesi ve sonuç |
-| POST | `/api/rag/search` / `/api/rag/ask` | Yerel RAG araması / (anahtar varsa) LLM yanıtı |
-| GET | `/api/reports` / `/api/reports/{name}` | Rapor listesi / Markdown içeriği |
-| GET | `/api/runs` / `/api/runs/{id}` | Koşu listesi / detayı |
-| GET | `/api/contexts` / `/api/contexts/{key}` | Context Control Plane kayıtları |
-| GET | `/api/rag/stats` | Vektör deposu durumu |
-
-Swagger arayüzü: `http://127.0.0.1:8000/docs`
-
----
-
-## MCP Entegrasyonu
-
-MCP server `uv run cdr mcp` komutuyla stdio üzerinden çalışır. Claude Desktop için
 `claude_desktop_config.json`:
 
 ```json
@@ -179,101 +87,81 @@ MCP server `uv run cdr mcp` komutuyla stdio üzerinden çalışır. Claude Deskt
   "mcpServers": {
     "crypto-deep-research": {
       "command": "uv",
-      "args": [
-        "--directory",
-        "/TAM/YOL/crypto-deep-research",
-        "run",
-        "cdr",
-        "mcp"
-      ]
+      "args": ["--directory", "/TAM/YOL/crypto-deep-research", "run", "cdr", "mcp"]
     }
   }
 }
 ```
 
-Sunulan araçlar:
+Araçlar: `list_analyses, list_research_items, resolve_coin, get_market_snapshot, run_analysis,
+get_price_chart, deep_research, search_context, list_reports, get_report, get_run`
 
-| Araç | Açıklama |
-| --- | --- |
-| `list_analyses` | Kullanılabilir analiz anahtarları |
-| `list_research_items` | 66 maddelik liste |
-| `resolve_coin` | Sembol → CoinGecko id çözümleme |
-| `get_market_snapshot` | Fiyat, mcap, ATH/ATL, global veriler |
-| `run_analysis` | Tek analiz çalıştırma |
-| `deep_research` | 66 madde + skor + rapor + prompt |
-| `search_context` | Yerel RAG araması |
-| `list_reports`, `get_report` | Rapor listeleme/okuma |
-| `get_run` | Koşu detayları (66 madde dahil) |
+## REST API
 
----
+`uv run cdr serve` ile birlikte gelir; Swagger: `http://127.0.0.1:8000/docs`
 
-## Ücretsiz Veri Kaynakları
-
-| Kaynak | Kullanım | Anahtar |
+| Metot | Yol | Açıklama |
 | --- | --- | --- |
-| CoinGecko Demo | fiyat, mcap, rank, ATH/ATL, geçmiş mcap, kategori, dominance | opsiyonel (`CDR_COINGECKO_API_KEY`) |
-| Binance / OKX / Bybit public | OHLCV, hacim, order book, funding, OI, long/short | gerekmez |
-| Coinalyze | gerçek likidasyon geçmişi, OI/funding serisi | ücretsiz key önerilir |
-| DefiLlama | fee/gelir, stablecoin, TVL, bridge (cross-chain) | gerekmez |
-| CryptoPanic | haber + topluluk sentiment | ücretsiz key |
-| RSS (CoinDesk, Cointelegraph TR, Decrypt, The Block...) | haber akışı | gerekmez |
-| GDELT | haber hacmi, jeopolitik tarama | gerekmez |
-| alternative.me | Fear & Greed endeksi | gerekmez |
-| Reddit | topluluk sentimenti | gerekmez |
-| Google Trends (pytrends) | arama ilgisi | gerekmez |
-| Blockchain.com / mempool.space | hashrate, adres, ücret, büyük BTC transferleri | gerekmez |
-| Blockscout / Etherscan | ETH ağı, gas, büyük transferler | Etherscan için opsiyonel key |
-| yfinance | DXY, S&P, altın, VIX, petrol, 10Y | gerekmez |
-| FRED | faiz, enflasyon, getiri eğrisi | ücretsiz key |
-| Deribit | DVOL volatilite endeksi | gerekmez |
-| GitHub API | geliştirici aktivitesi | gerekmez |
+| GET | `/api/health` | Durum ve tanımlı API anahtarları |
+| GET | `/api/analyses` | Analiz modülleri (açıklamalarıyla) |
+| GET | `/api/items` | 66 kriter kayıt defteri |
+| GET | `/api/coins/search?q=link` | Varlık arama (otomatik tamamlama) |
+| GET | `/api/snapshot/{coin}` | Fiyat, mcap, ATH/ATL, global veriler |
+| GET | `/api/ohlcv/{coin}?timeframe=1d` | Grafik için mum verisi |
+| POST | `/api/analyze` | Seçili analizleri çalıştırır |
+| POST | `/api/deep-research/jobs` | Derin araştırmayı arka planda başlatır |
+| GET | `/api/deep-research/jobs/{id}` | Görev durumu, ilerleme ve sonuç |
+| POST | `/api/rag/search` · `/api/rag/ask` | Yerel RAG araması / AI yanıtı |
+| GET | `/api/reports` · `/api/reports/{name}` | Rapor listesi / içeriği |
 
-Kimlik gerektirmeyen kaynaklar anahtarsız çalışır; anahtar verilen kaynaklar otomatik devreye
-girer. Tüm istekler SQLite önbelleğindedir (TTL + stale fallback), sayaçlar rate limit
-korunacak şekilde ayarlanmıştır.
+## Yapılandırma
 
----
+Tüm ayarlar `.env` üzerinden yönetilir; hiçbiri zorunlu değildir:
 
-## Skorlama Metodolojisi
+| Değişken | Ne sağlar |
+| --- | --- |
+| `CDR_COINGECKO_API_KEY` | Daha yüksek istek limiti (opsiyonel önerilir) |
+| `CDR_COINALYZE_API_KEY` | Gerçek likidasyon geçmişi |
+| `CDR_CRYPTOPANIC_API_KEY` | Ek haber kaynağı + sentiment |
+| `CDR_ETHERSCAN_API_KEY` | ETH büyük transfer taraması |
+| `CDR_FRED_API_KEY` | Faiz, enflasyon, getiri eğrisi |
+| `CDR_OPENROUTER_API_KEY` | RAG yanıtı ve rapor üretimini LLM'e devreder |
+| `CDR_EMBEDDING_MODEL` | Daha küçük embedding modeli (hız/disk kazancı) |
 
-- Her madde `-1` (güçlü negatif) ile `+1` (güçlü pozitif) arasında skor ve `0..1` güven üretir.
-- Ağırlıklı skor: `Σ(skor × ağırlık × güven) / Σ(ağırlık × güven)`; yalnızca `ok`/`partial`
-  durumdaki ve güveni > 0 olan maddeler katılır.
-- Yükseliş olasılığı: `%50 + 45 × ağırlıklı skor` (5–95 aralığına kırpılır); düşüş bunun
-  tümleyenidir.
-- Beklenen fiyat aralığı: ATR yüzdesinden türetilen günlük hareket ve skora göre asimetrik
-  kaydırma ile hesaplanır.
-- Veri bulunmayan maddeler (ör. astroloji, ücretli API gerektiren alanlar) ortalamaya
-  katılmaz; raporda şeffaf şekilde listelenir.
+Anahtarsız çalışan kaynaklar: CoinGecko, Binance/OKX/Bybit, DefiLlama, RSS, GDELT,
+alternative.me, Reddit, Google Trends, Blockchain.com, mempool.space, Blockscout, yfinance,
+Deribit, GitHub.
 
----
+## Skorlama
 
-## Bilinen Sınırlamalar
+- Her kriter `-1` (güçlü negatif) ile `+1` (güçlü pozitif) arasında skor ve `0–1` güven üretir.
+- Formül: `Σ(skor × ağırlık × güven × grup faktörü) / Σ(ağırlık × güven × grup faktörü)`
+- Aynı modülü paylaşan kriterler tek sinyal sayılır; `partial` durumdaki kriterler yarım
+  ağırlıkla katkı verir; `no_data` kriterler ortalamaya girmez.
+- Yükseliş olasılığı: `%50 + 35 × ağırlıklı skor` (5–95 aralığına kırpılır).
+- Beklenen fiyat aralığı ATR bazlı oynaklık ve skor yönüyle hesaplanır.
 
-- Bazı 66 madde için ücretsiz ve doğrulanabilir veri yoktur (astroloji, patent veritabanları,
-  Bitcoin ATM hacmi, X/Twitter API'si). Bu maddeler "veri yok" olarak işaretlenir.
-- Likidasyon haritası, Coinalyze anahtarı yoksa open interest ve kaldıraç kademelerinden
-  yaklaşık olarak tahmin edilir.
-- Balina yön tespiti yalnızca kamuya açık bilinen borsa adresleriyle sınırlıdır; etiketler
-  doğrulama gerektirebilir.
+Detaylı gerekçe ve kriter denetim notları: [`docs/kriter-denetimi.md`](docs/kriter-denetimi.md)
+
+## Sınırlamalar
+
+- Bazı kriterler için ücretsiz ve doğrulanabilir veri yoktur (astroloji, patent akışı, X/Twitter
+  API'si); bunlar "veri yok" işaretlenir ve skora katılmaz.
+- Coinalyze anahtarı yoksa likidasyon geçmişi yaklaşık tahmin edilir.
 - TradingView'ün ücretsiz API'si yoktur; yerel teknik derecelendirme vekili kullanılır.
-- Ücretsiz API'ler zaman zaman limit uygular (429); stale cache + FTS yedekleri devrededir.
-
----
+- Ücretsiz API'ler zaman zaman limit uygular (429); önbellek ve yedek kaynaklar devrededir.
 
 ## Geliştirme
 
 ```bash
 uv run pytest -q                # Python testleri
 uv run ruff check src tests     # lint
-cd web && npm test              # web birim testleri (Vitest)
+cd web && npm test              # web birim testleri
 cd web && npm run build         # web derleme
 ```
 
-Bağımlılık güncellemeleri Dependabot ile haftalık açılır; CI yeşil olduğunda
-otomatik olarak squash ile birleştirilir (`dependabot-auto-merge` iş akışı).
-
-CI: GitHub Actions (`ruff` + `pytest` + web build).
+CI (GitHub Actions): ruff + pytest + web test/build. Dependabot güncellemeleri haftalık açılır,
+CI yeşilse otomatik squash merge edilir.
 
 ## Lisans
 

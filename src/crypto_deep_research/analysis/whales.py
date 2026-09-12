@@ -90,22 +90,26 @@ async def analyze_whales(ctx: AnalysisContext) -> AnalysisResult:
 
     stable_change = stablecoin_data.get("stablecoin_change_7d_pct")
     if stable_change is not None:
-        confidence += 0.2
-        if stable_change > 1.0:
-            score += 0.3
-            reasons.append(f"Stablecoin arzı 7 günde %{stable_change:.2f} arttı: piyasaya nakit girişi")
-        elif stable_change < -1.0:
-            score -= 0.3
-            reasons.append(f"Stablecoin arzı 7 günde %{stable_change:.2f} azaldı: nakit çıkışı")
+        reasons.append(
+            f"Stablecoin arzı 7 günde %{stable_change:+.2f} (bilgi amaçlı; akış skoru 62. maddede)"
+        )
 
-    if not flows and stable_change is None:
+    if not flows:
         return ctx.result(
             "whales",
             "Balina Alım-Satım / Toplam Arz",
-            status="no_data",
-            summary="Bu coin için ücretsiz balina akış verisi bulunamadı.",
+            status="partial",
+            summary=(
+                "Son bloklarda eşiği aşan büyük transfer bulunamadı; yön sinyali üretilemedi "
+                "(bu, sıfır akış anlamına gelmez, örneklem sınırlıdır)."
+            ),
+            data={"flows_count": 0, "reasons": reasons, **stablecoin_data},
             sources=sources,
-            warnings=warnings,
+            score=None,
+            confidence=0.0,
+            warnings=[
+                "Bu çalıştırmada balina yön sinyali yok; madde ağırlıklı ortalamaya dahil edilmedi."
+            ],
         )
 
     top_flows = sorted(flows, key=lambda flow: flow.amount, reverse=True)[:10]

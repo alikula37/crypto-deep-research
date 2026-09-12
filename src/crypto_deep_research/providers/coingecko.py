@@ -187,7 +187,7 @@ class CoinGeckoProvider:
                 "tickers": "false",
                 "market_data": "true",
                 "community_data": "false",
-                "developer_data": "false",
+                "developer_data": "true",
                 "sparkline": "false",
             },
             ttl=self.settings.ttl_static,

@@ -64,6 +64,7 @@ const TAB_INTROS = {
       "Skor −1 ile +1 arasındadır: eksi baskı/düşüş, artı destek/yükseliş yönündedir.",
       "Güven 0–1 arasındadır; düşük güvenli skorlar ağırlıklı ortalamada daha az etkili olur.",
       "Ağırlık, kriterin genel skora katkı katsayısıdır; yüksek ağırlık daha belirleyici demektir.",
+      "Aynı analiz modülünü paylaşan kriterler tek sinyal sayılır; kısmi veri yarım ağırlıkla katkı verir.",
       "Derin araştırma çalıştırılmadan önce bu sekmede 66 kriterin tümü açıklamalarıyla listelenir.",
     ],
   },
@@ -399,7 +400,7 @@ function FindingsTable({ items }) {
             <div className="item-footer">
               <span
                 className="muted"
-                title="Kategori · Ağırlık: kriterin genel skora katkı katsayısı · Güven: verinin güvenilirliği (0–1)"
+                title="Kategori · Ağırlık: kriterin genel skora katkı katsayısı (aynı modül grubunda bir kez sayılır) · Güven: verinin güvenilirliği (0–1)"
               >
                 {item.category} · Ağırlık {item.weight} · Güven {(item.confidence ?? 0).toFixed(2)}
               </span>

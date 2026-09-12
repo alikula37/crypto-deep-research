@@ -139,7 +139,8 @@ def render_report(
             "- Her madde veri + kaynak + güven ile raporlanır; verisi olmayan maddeler ortalamaya",
             "  dahil edilmez ve raporda açıkça işaretlenir.",
             "- Skorlar -1 (güçlü negatif) ile +1 (güçlü pozitif) arasındadır; ağırlıklı ortalama",
-            "  güven katsayısı ile hesaplanır.",
+            "  güven katsayısıyla, aynı modülü paylaşan kriterler tek sinyal sayılarak hesaplanır.",
+            "- Kısmi veriyle değerlendirilen kriterler yarım ağırlıkla katkı verir.",
             "- Sayılar tr-TR biçiminde gösterilir (binlik ayracı nokta, ondalık virgül).",
             "",
         ]

@@ -24,6 +24,19 @@ class ItemSpec(BaseModel):
     keywords: list[str] = Field(default_factory=list)
     weight: float = 1.0
     note: str | None = None
+    score_group: str | None = Field(
+        default=None,
+        description="Ayni ham sinyali paylasan maddeler; grup skorlamada bir kez (en yuksek agirlikla) sayilir.",
+    )
+
+    @property
+    def scoring_group(self) -> str | None:
+        """Skorlamada kullanilacak grup anahtari (acik score_group veya analysis kaynagi)."""
+        if self.score_group:
+            return self.score_group
+        if self.source_type == "analysis":
+            return f"analysis:{self.source_ref}"
+        return None
 
     @property
     def source_type(self) -> str:
@@ -60,6 +73,7 @@ def registry_summary() -> list[dict]:
             "query": item.query,
             "weight": item.weight,
             "note": item.note,
+            "score_group": item.scoring_group,
         }
         for item in load_registry()
     ]

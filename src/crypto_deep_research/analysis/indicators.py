@@ -340,7 +340,7 @@ def indicator_score(snapshot: dict[str, Any]) -> tuple[float, float, list[str]]:
 
     if weight == 0:
         return 0.0, 0.0, signals
-    return max(-1.0, min(1.0, score / weight)), min(1.0, weight / 4.5), signals
+    return max(-1.0, min(1.0, score / weight)), min(0.8, weight / 4.5), signals
 
 
 def compute_levels(df: pd.DataFrame, current_price: float) -> dict[str, Any]:

@@ -42,3 +42,21 @@ def test_result_from_carries_description_and_note():
     result = result_from(spec)
     assert result.description_tr == spec.description_tr
     assert result.note == spec.note
+
+
+def test_news_keywords_use_word_boundaries():
+    """'sec' security'yi, 'irs' first'i yakalamamali (kelime siniri)."""
+    from types import SimpleNamespace
+
+    from crypto_deep_research.deep_research.specials import _match_articles
+
+    articles = [
+        SimpleNamespace(title="Security firm reports record earnings", summary=""),
+        SimpleNamespace(title="FBI investigation on first exchange", summary=""),
+        SimpleNamespace(title="SEC sues exchange over token listing", summary=""),
+        SimpleNamespace(title="IRS updates crypto tax guidance", summary=""),
+    ]
+    sec_hits = _match_articles(articles, ["sec", "lawsuit"])
+    irs_hits = _match_articles(articles, ["irs", "tax"])
+    assert [article.title for article in sec_hits] == ["SEC sues exchange over token listing"]
+    assert [article.title for article in irs_hits] == ["IRS updates crypto tax guidance"]
