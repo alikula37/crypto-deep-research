@@ -416,6 +416,7 @@ class Database:
                 {
                     "run_id": row["run_id"],
                     "coin": row["coin"],
+                    "symbol": ((payload.get("coin") or {}).get("symbol") or "").upper(),
                     "created_at": row["created_at"],
                     "timeframe": payload.get("timeframe"),
                     "weighted_score": payload.get("weighted_score"),

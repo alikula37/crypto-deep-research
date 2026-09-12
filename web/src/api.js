@@ -60,6 +60,8 @@ export const api = {
     request("/api/rag/ask", { method: "POST", body: JSON.stringify(payload), timeoutMs: 180000 }),
   reports: () => request("/api/reports"),
   report: (name) => request(`/api/reports/${encodeURIComponent(name)}`),
+  accuracy: (coin) =>
+    request(`/api/accuracy${coin ? `?coin=${encodeURIComponent(coin)}` : ""}`, { timeoutMs: 120000 }),
   runs: (coin) => request(`/api/runs${coin ? `?coin=${encodeURIComponent(coin)}` : ""}`),
   run: (runId) => request(`/api/runs/${runId}`),
   ragStats: () => request("/api/rag/stats"),

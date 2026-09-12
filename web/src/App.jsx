@@ -5,6 +5,7 @@ import { api } from "./api.js";
 import CoinSelect from "./CoinSelect.jsx";
 import PriceChart from "./PriceChart.jsx";
 import ScoreHistoryChart from "./ScoreHistoryChart.jsx";
+import AccuracyPanel from "./AccuracyPanel.jsx";
 import {
   IconAlert,
   IconCheck,
@@ -20,6 +21,7 @@ import {
   IconRefresh,
   IconSearch,
   IconSparkles,
+  IconTarget,
   IconWand,
   IconX,
 } from "./icons.jsx";
@@ -29,6 +31,7 @@ const TIMEFRAMES = ["15m", "30m", "1h", "4h", "1d", "1w"];
 const TABS = [
   { id: "overview", label: "Genel Bakış", icon: IconChart },
   { id: "findings", label: "Araştırma Bulguları", icon: IconSparkles },
+  { id: "accuracy", label: "İsabet", icon: IconTarget },
   { id: "report", label: "Rapor", icon: IconDoc },
   { id: "prompt", label: "Prompt Çıktısı", icon: IconWand },
   { id: "rag", label: "Kaynak Arama", icon: IconSearch },
@@ -67,6 +70,17 @@ const TAB_INTROS = {
       "Ağırlık, kriterin genel skora katkı katsayısıdır; yüksek ağırlık daha belirleyici demektir.",
       "Aynı analiz modülünü paylaşan kriterler tek sinyal sayılır; kısmi veri yarım ağırlıkla katkı verir.",
       "Derin araştırma çalıştırılmadan önce bu sekmede 66 kriterin tümü açıklamalarıyla listelenir.",
+    ],
+  },
+  accuracy: {
+    title: "İsabet",
+    summary: "Geçmiş koşuların skorlarının sonraki 1/7/30 günlük fiyat getirileriyle karşılaştırılması.",
+    points: [
+      "İsabet oranı yalnızca yön sinyali üreten koşular (|skor| ≥ 0,05) üzerinden hesaplanır.",
+      "Getiri, koşu anındaki fiyattan vade sonundaki günlük kapanışa göre ölçülür; işlem maliyeti içermez.",
+      "Yükseliş/düşüş sinyallerinin ortalama getirisi ayrı gösterilir; nötr koşular yön tahmini sayılmaz.",
+      "Örneklem küçükken oranlar oynaktır; yorum için en az 10–15 yönlü koşu birikmesini bekleyin.",
+      "Vadesi dolmamış koşular tabloda '—' görünür ve zamanla otomatik dolar.",
     ],
   },
   report: {
@@ -1143,6 +1157,13 @@ export default function App() {
                 </>
               )}
               {run && <FindingsTable items={run.items} />}
+            </>
+          )}
+
+          {tab === "accuracy" && (
+            <>
+              <PageIntro id="accuracy" />
+              <AccuracyPanel coin={coin} />
             </>
           )}
 

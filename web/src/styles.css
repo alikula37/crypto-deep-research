@@ -481,3 +481,30 @@ button { display: inline-flex; align-items: center; gap: 6px; justify-content: c
 .shortcut-list li { display: flex; align-items: center; gap: 10px; font-size: 12.5px; color: var(--muted); }
 .shortcut-list kbd { background: var(--bg-soft); border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 6px; padding: 2px 8px; font-size: 11px; color: var(--text); font-family: inherit; white-space: nowrap; }
 .sidebar-footer .mini-btn { margin-top: 8px; }
+
+/* Isabet panosu */
+.accuracy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.accuracy-card { margin: 0; }
+.accuracy-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.accuracy-head h3 { margin: 0; font-size: 14px; }
+.accuracy-head .muted { font-size: 11px; }
+.accuracy-rate { font-size: 30px; font-weight: 700; margin: 6px 0 8px; display: flex; align-items: baseline; gap: 7px; }
+.accuracy-rate.up { color: var(--green); }
+.accuracy-rate.down { color: var(--red); }
+.accuracy-rate.muted { color: var(--muted); }
+.accuracy-rate-label { font-size: 11px; font-weight: 400; color: var(--muted); }
+.accuracy-rows { display: grid; gap: 5px; font-size: 12px; }
+.accuracy-rows > div { display: flex; justify-content: space-between; gap: 8px; }
+.accuracy-empty-note { margin-bottom: 14px; }
+.accuracy-empty-note h3 { margin: 0 0 6px; font-size: 14px; }
+.accuracy-empty-note p { margin: 0; font-size: 12.5px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.accuracy-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.accuracy-table th, .accuracy-table td { padding: 8px 10px; text-align: left; white-space: nowrap; }
+.accuracy-table thead th { background: var(--bg-soft); color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
+.accuracy-table tbody tr { border-top: 1px solid var(--border); }
+.accuracy-table tbody tr:hover { background: rgba(76, 141, 255, 0.05); }
+.accuracy-symbol { font-weight: 600; color: var(--accent); }
+.hit-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 12px; font-weight: 700; }
+.hit-badge.hit-true { color: var(--green); background: rgba(46, 204, 143, 0.12); border: 1px solid rgba(46, 204, 143, 0.4); }
+.hit-badge.hit-false { color: var(--red); background: rgba(255, 93, 108, 0.1); border: 1px solid rgba(255, 93, 108, 0.4); }

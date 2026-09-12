@@ -17,6 +17,7 @@ from crypto_deep_research.analysis.base import AnalysisContext
 from crypto_deep_research.analysis.engine import available_analyses, run_analyses
 from crypto_deep_research.api.jobs import Job, JobManager
 from crypto_deep_research.config import get_settings
+from crypto_deep_research.deep_research.accuracy import compute_accuracy
 from crypto_deep_research.deep_research.engine import DeepResearchEngine, DeepResearchOutput
 from crypto_deep_research.deep_research.registry import registry_summary
 from crypto_deep_research.llm import OpenRouterClient, OpenRouterError
@@ -355,6 +356,16 @@ async def run_detail(run_id: str) -> dict[str, Any]:
     if not run:
         raise HTTPException(status_code=404, detail="Kosu bulunamadı")
     return json.loads(run.model_dump_json())
+
+
+@app.get("/api/accuracy")
+async def accuracy(coin: str | None = None) -> dict[str, Any]:
+    """Gecmis kosularin skorlarini sonraki fiyat getirileriyle karsilastirir."""
+    settings, db, providers = _services()
+    try:
+        return await compute_accuracy(providers, db, coin=coin)
+    finally:
+        await providers.aclose()
 
 
 @app.get("/api/contexts")

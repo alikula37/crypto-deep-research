@@ -90,8 +90,39 @@ class ExchangeProvider:
             },
             ttl=self.settings.ttl_ohlcv,
         )
+        return self._parse_klines(data)
+
+    async def klines_range(
+        self,
+        symbol: str,
+        interval: str = "1d",
+        *,
+        start_ms: int,
+        end_ms: int,
+        quote: str | None = "USDT",
+    ) -> list[Kline]:
+        """Gecmis zaman araligi icin mumlar (isabet/backtest analizi)."""
+        if interval not in BINANCE_INTERVALS:
+            interval = "1d"
+        pair = self._binance_symbol(symbol) if quote else symbol.upper()
+        data = await self.http.get_json(
+            "binance",
+            f"{BINANCE_SPOT}/api/v3/klines",
+            params={
+                "symbol": pair,
+                "interval": interval,
+                "startTime": int(start_ms),
+                "endTime": int(end_ms),
+                "limit": 1000,
+            },
+            ttl=3600,
+        )
+        return self._parse_klines(data)
+
+    @staticmethod
+    def _parse_klines(rows: list | None) -> list[Kline]:
         klines: list[Kline] = []
-        for row in data or []:
+        for row in rows or []:
             try:
                 klines.append(
                     Kline(
