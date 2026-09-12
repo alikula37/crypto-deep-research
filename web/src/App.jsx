@@ -6,6 +6,7 @@ import CoinSelect from "./CoinSelect.jsx";
 import PriceChart from "./PriceChart.jsx";
 import ScoreHistoryChart from "./ScoreHistoryChart.jsx";
 import AccuracyPanel from "./AccuracyPanel.jsx";
+import ComparePanel from "./ComparePanel.jsx";
 import {
   IconAlert,
   IconCheck,
@@ -32,6 +33,7 @@ const TABS = [
   { id: "overview", label: "Genel Bakış", icon: IconChart },
   { id: "findings", label: "Araştırma Bulguları", icon: IconSparkles },
   { id: "accuracy", label: "İsabet", icon: IconTarget },
+  { id: "compare", label: "Karşılaştır", icon: IconCoins },
   { id: "report", label: "Rapor", icon: IconDoc },
   { id: "prompt", label: "Prompt Çıktısı", icon: IconWand },
   { id: "rag", label: "Kaynak Arama", icon: IconSearch },
@@ -81,6 +83,16 @@ const TAB_INTROS = {
       "Yükseliş/düşüş sinyallerinin ortalama getirisi ayrı gösterilir; nötr koşular yön tahmini sayılmaz.",
       "Örneklem küçükken oranlar oynaktır; yorum için en az 10–15 yönlü koşu birikmesini bekleyin.",
       "Vadesi dolmamış koşular tabloda '—' görünür ve zamanla otomatik dolar.",
+    ],
+  },
+  compare: {
+    title: "Karşılaştır",
+    summary: "2–4 varlığı fiyat, momentum ve son araştırma skoruyla yan yana kıyaslar.",
+    points: [
+      "Skor ve yükseliş olasılığı, her coin için en son derin araştırma koşusundan gelir; koşu yoksa '—' görünür.",
+      "Farklı tarihlerde yapılmış koşuları kıyaslarken 'Son Koşu' sütunundaki tarihlere dikkat edin.",
+      "Skor çubuğu merkez çizgisinden sağa (pozitif) veya sola (negatif) uzanır.",
+      "Coin eklemek için arama kutusuna yazıp listeden seçin; kaldırmak için satır sonundaki × düğmesini kullanın.",
     ],
   },
   report: {
@@ -1164,6 +1176,13 @@ export default function App() {
             <>
               <PageIntro id="accuracy" />
               <AccuracyPanel coin={coin} />
+            </>
+          )}
+
+          {tab === "compare" && (
+            <>
+              <PageIntro id="compare" />
+              <ComparePanel initialCoin={coin} />
             </>
           )}
 

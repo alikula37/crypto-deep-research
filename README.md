@@ -168,6 +168,10 @@ GitHub Actions, private repo faturalandırma limiti nedeniyle devre dışıdır;
 değişiklikleri push etmeden önce `make check` çalıştırın. Dependabot güncellemeleri haftalık
 açılmaya devam eder, birleştirme öncesi testleri yerelde doğrulayın.
 
+Docker diski dolarsa (`no space left on device`): `docker image prune -f` ve
+`docker builder prune -af` eski katmanları temizler; veriler (`cdr-state` birimi ve `./data`)
+korunur.
+
 ## Lisans
 
 MIT

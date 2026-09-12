@@ -422,6 +422,8 @@ class Database:
                     "weighted_score": payload.get("weighted_score"),
                     "up_probability": payload.get("up_probability"),
                     "down_probability": payload.get("down_probability"),
+                    "expected_low": payload.get("expected_low"),
+                    "expected_high": payload.get("expected_high"),
                     "current_price": payload.get("current_price"),
                 }
             )

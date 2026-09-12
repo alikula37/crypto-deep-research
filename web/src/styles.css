@@ -508,3 +508,22 @@ button { display: inline-flex; align-items: center; gap: 6px; justify-content: c
 .hit-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; font-size: 12px; font-weight: 700; }
 .hit-badge.hit-true { color: var(--green); background: rgba(46, 204, 143, 0.12); border: 1px solid rgba(46, 204, 143, 0.4); }
 .hit-badge.hit-false { color: var(--red); background: rgba(255, 93, 108, 0.1); border: 1px solid rgba(255, 93, 108, 0.4); }
+
+/* Karsilastirma modu */
+.compare-toolbar .coin-select { max-width: 280px; }
+.compare-empty h3 { margin: 0 0 6px; font-size: 14px; }
+.compare-empty p { margin: 0; font-size: 12.5px; }
+.compare-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.compare-table th, .compare-table td { padding: 10px; text-align: left; white-space: nowrap; }
+.compare-table thead th { background: var(--bg-soft); color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
+.compare-table tbody tr { border-top: 1px solid var(--border); }
+.compare-table tbody tr:hover { background: rgba(76, 141, 255, 0.05); }
+.compare-table tr.is-loading { opacity: 0.55; }
+.compare-symbol { font-weight: 600; color: var(--accent); }
+.error-inline { display: inline-flex; align-items: center; gap: 5px; color: var(--red); }
+.score-bar { position: relative; display: inline-flex; align-items: center; gap: 8px; min-width: 96px; height: 18px; }
+.score-bar::before { content: ""; position: absolute; left: 50%; top: 2px; bottom: 2px; width: 1px; background: var(--border); }
+.score-bar i { position: absolute; top: 5px; height: 8px; border-radius: 3px; }
+.score-bar .bar-up { background: var(--green); }
+.score-bar .bar-down { background: var(--red); }
+.score-bar b { position: relative; margin-left: 14px; font-size: 12px; }
