@@ -15,6 +15,9 @@ from collections.abc import Iterable
 from typing import Any
 
 from crypto_deep_research.config import Settings
+from crypto_deep_research.formatting import price as fmt_price
+from crypto_deep_research.formatting import price_range
+from crypto_deep_research.formatting import score as fmt_score
 from crypto_deep_research.models import (
     AnalysisResult,
     ContextObject,
@@ -70,7 +73,7 @@ class ContextControlPlane:
     def register_item(self, coin_id: str, item: ItemResult) -> ContextObject:
         content = (
             f"{item.item_id}. {item.title_tr}\nDurum: {item.status}\n{item.summary}\n"
-            f"Skor: {item.score} (güven: {item.confidence})"
+            f"Skor: {fmt_score(item.score)} (güven: {item.confidence:.2f})"
         )
         obj = ContextObject(
             key=f"item:{coin_id}:{item.item_id}",
@@ -271,9 +274,9 @@ class ContextControlPlane:
         lines = [
             f"Kosu {run.run_id} - {run.coin.name} ({run.coin.symbol.upper()})",
             f"Tarih: {run.created_at.isoformat()}",
-            f"Fiyat: ${run.current_price:,.6g}" if run.current_price else "",
-            f"Ağırlıklı skor: {run.weighted_score}",
-            f"Yükseliş olasılığı: %{run.up_probability}" if run.up_probability else "",
-            f"Beklenen aralık: {run.expected_low} - {run.expected_high}",
+            f"Fiyat: {fmt_price(run.current_price)}" if run.current_price else "",
+            f"Ağırlıklı skor: {fmt_score(run.weighted_score)}",
+            f"Yükseliş olasılığı: %{run.up_probability:.1f}" if run.up_probability else "",
+            f"Beklenen aralık: {price_range(run.expected_low, run.expected_high)}",
         ]
         return "\n".join(line for line in lines if line)

@@ -15,6 +15,16 @@ from crypto_deep_research.analysis.engine import ANALYSIS_REGISTRY, available_an
 from crypto_deep_research.config import get_settings
 from crypto_deep_research.deep_research.engine import DeepResearchEngine
 from crypto_deep_research.deep_research.registry import registry_summary
+from crypto_deep_research.formatting import (
+    money,
+    pct,
+)
+from crypto_deep_research.formatting import (
+    price as fmt_price,
+)
+from crypto_deep_research.formatting import (
+    score as fmt_score,
+)
 from crypto_deep_research.llm import OpenRouterClient
 from crypto_deep_research.providers.registry import build_providers
 from crypto_deep_research.rag.engine import RAGEngine
@@ -53,17 +63,17 @@ def snapshot(coin: str = typer.Argument(..., help="Coin sembolu veya id (btc, bi
     table.add_column("Alan")
     table.add_column("Değer", justify="right")
     rows = [
-        ("Fiyat", f"${data['price_usd']:,.6f}"),
-        ("Piyasa değeri", f"${data.get('market_cap_usd') or 0:,.0f}"),
-        ("Sira", str(data.get("rank"))),
-        ("24s hacim", f"${data.get('volume_24h_usd') or 0:,.0f}"),
-        ("24s değişim", f"%{data.get('change_24h_pct') or 0:.2f}"),
-        ("7g değişim", f"%{data.get('change_7d_pct') or 0:.2f}"),
-        ("30g değişim", f"%{data.get('change_30d_pct') or 0:.2f}"),
-        ("ATH", f"${data.get('ath_usd') or 0:,.6f}"),
-        ("ATH uzaklık", f"%{data.get('ath_change_pct') or 0:.2f}"),
-        ("ATL", f"${data.get('atl_usd') or 0:,.6f}"),
-        ("ATL uzaklık", f"%{data.get('atl_change_pct') or 0:.2f}"),
+        ("Fiyat", fmt_price(data["price_usd"])),
+        ("Piyasa değeri", money(data.get("market_cap_usd"))),
+        ("Sıra", str(data.get("rank") or "-")),
+        ("24s hacim", money(data.get("volume_24h_usd"))),
+        ("24s değişim", pct(data.get("change_24h_pct"), signed=True)),
+        ("7g değişim", pct(data.get("change_7d_pct"), signed=True)),
+        ("30g değişim", pct(data.get("change_30d_pct"), signed=True)),
+        ("ATH", fmt_price(data.get("ath_usd"))),
+        ("ATH uzaklık", pct(data.get("ath_change_pct"))),
+        ("ATL", fmt_price(data.get("atl_usd"))),
+        ("ATL uzaklık", pct(data.get("atl_change_pct"))),
     ]
     for label, value in rows:
         table.add_row(label, value)
@@ -103,11 +113,18 @@ def analyze(
         console.print_json(json.dumps([result.model_dump(mode="json") for result in results]))
         return
     for result in results:
-        score = f"{result.score:+.2f}" if result.score is not None else "n/a"
+        score = fmt_score(result.score)
         color = "green" if (result.score or 0) > 0.15 else "red" if (result.score or 0) < -0.15 else "yellow"
+        status_label = {
+            "ok": "Tam",
+            "partial": "Kısmi",
+            "no_data": "Veri yok",
+            "error": "Hata",
+        }.get(result.status, result.status)
         console.print(
             Panel(
-                f"{result.summary}\n\nSkor: {score} | Güven: {result.confidence:.2f} | Durum: {result.status}",
+                f"{result.summary}\n\nSkor: {score} | Güven: {result.confidence:.2f} | "
+                f"Durum: {status_label}",
                 title=f"[bold]{result.title}[/bold]",
                 border_style=color,
             )

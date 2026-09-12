@@ -5,6 +5,7 @@ from __future__ import annotations
 from statistics import mean
 
 from crypto_deep_research.analysis.base import AnalysisContext, clamp, trend_score
+from crypto_deep_research.formatting import money, pct, ratio
 from crypto_deep_research.models import AnalysisResult
 from crypto_deep_research.providers.base import ProviderError, source
 
@@ -96,8 +97,8 @@ async def analyze_marketcap(ctx: AnalysisContext) -> AnalysisResult:
             reasons.append(f"Mcap 365 gün ortalamasının %{(ratio_vs_avg - 1) * 100:.0f} üzerinde")
 
     summary = (
-        f"Güncel mcap ${current_mcap:,.0f}; 30 gün oranı {ratio_30d and f'{ratio_30d:.3f}' or 'n/a'}, "
-        f"365 günlük yüzdelik {percentile * 100:.0f}, zirveden uzaklık %{drawdown_from_max:.1f}."
+        f"Güncel mcap {money(current_mcap)}; 30 gün mcap oranı {ratio(ratio_30d)}, "
+        f"365 günlük yüzdelik %{percentile * 100:.0f}, zirveden uzaklık {pct(drawdown_from_max)}."
     )
 
     return ctx.result(

@@ -6,6 +6,7 @@ import asyncio
 from typing import Any
 
 from crypto_deep_research.analysis.base import AnalysisContext, clamp
+from crypto_deep_research.formatting import money, pct
 from crypto_deep_research.models import AnalysisResult
 from crypto_deep_research.providers.base import source
 
@@ -85,14 +86,14 @@ async def analyze_revenue(ctx: AnalysisContext) -> AnalysisResult:
         reasons.append(data_note)
 
     summary = (
-        f"Günlük fee ${daily_fees:,.0f}" if daily_fees else "Günlük fee verisi yok"
+        f"Günlük fee {money(daily_fees)}" if daily_fees else "Günlük fee verisi yok"
     )
     if annualized_fees:
-        summary += f" (yıllık ~${annualized_fees:,.0f})"
+        summary += f" (yıllık ~{money(annualized_fees)})"
     if fee_yield is not None:
-        summary += f"; fee/mcap getirisi %{fee_yield:.2f}"
+        summary += f"; fee/mcap getirisi {pct(fee_yield, digits=2)}"
     if revenue_daily:
-        summary += f"; günlük gelir ${revenue_daily:,.0f}"
+        summary += f"; günlük gelir {money(revenue_daily)}"
 
     return ctx.result(
         "revenue",

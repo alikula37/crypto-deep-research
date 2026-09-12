@@ -52,7 +52,7 @@ def _item(item_id: int) -> ItemResult:
 def test_prompt_contains_all_items_and_placeholders():
     prompt = build_prompt(_run(), [_analysis()], [_item(i) for i in range(1, 67)])
     assert "Bitcoin" in prompt
-    assert "96,000" in prompt
+    assert "$96.000" in prompt
     assert "66 MADDELİK DETAYLI" in prompt
     for number in (1, 33, 66):
         assert f"{number}. Madde {number}" in prompt
@@ -67,3 +67,17 @@ def test_prompt_marks_no_data_items():
     item.confidence = 0.0
     prompt = build_prompt(_run(), [], [item])
     assert "veri yok" in prompt.lower() or "no_data" in prompt
+
+
+def test_prompt_has_no_scientific_notation_or_none():
+    item = _item(1)
+    item.data = {
+        "indicators": {"price": 3.31e-06, "ema_20": 77044.1179303021, "macd": -6.72e-08},
+        "reasons": ["test"],
+    }
+    item.summary = "Fiyat $0,00000331"
+    prompt = build_prompt(_run(), [], [item])
+    assert "e-06" not in prompt
+    assert "e-08" not in prompt
+    assert "None" not in prompt
+    assert "77044.1" in prompt

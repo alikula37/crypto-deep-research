@@ -39,5 +39,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - name: Bagimliliklari kur
         run: npm ci || npm install
+      - name: Birim testleri
+        run: npm test
       - name: Derle
         run: npm run build

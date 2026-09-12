@@ -36,6 +36,20 @@ BINANCE_INTERVALS = {
     "1M": "1M",
 }
 
+# Binance futures'ta 1000x carpanli listelenen kontratlar
+PERP_SYMBOL_OVERRIDES: dict[str, str] = {
+    "PEPE": "1000PEPEUSDT",
+    "SHIB": "1000SHIBUSDT",
+    "BONK": "1000BONKUSDT",
+    "FLOKI": "1000FLOKIUSDT",
+    "LUNC": "1000LUNCUSDT",
+    "XEC": "1000XECUSDT",
+    "SATS": "1000SATSUSDT",
+    "RATS": "1000RATSUSDT",
+    "CHEEMS": "1000CHEEMSUSDT",
+    "X": "1000XUSDT",
+}
+
 
 class ExchangeProvider:
     """Binance ağırlıklı, çoklu borsa public veri sağlayıcısi."""
@@ -48,6 +62,17 @@ class ExchangeProvider:
     def _binance_symbol(self, symbol: str) -> str:
         symbol = symbol.upper()
         return symbol if symbol.endswith("USDT") else f"{symbol}USDT"
+
+    def perp_symbol(self, symbol: str) -> str:
+        """Binance futures sembolu; 1000x carpanli kontratlari da kapsar."""
+        token = symbol.upper()
+        if token in PERP_SYMBOL_OVERRIDES:
+            return PERP_SYMBOL_OVERRIDES[token]
+        return self._binance_symbol(token)
+
+    @staticmethod
+    def perp_multiplier(perp_symbol: str) -> float:
+        return 1000.0 if perp_symbol.startswith("1000") else 1.0
 
     async def klines(
         self, symbol: str, interval: str = "1d", limit: int = 500, quote: str | None = "USDT"
@@ -90,36 +115,44 @@ class ExchangeProvider:
             ttl=self.settings.ttl_price,
         )
 
-    async def binance_funding(self, symbol: str) -> float | None:
+    async def binance_funding(self, symbol: str, perp_symbol: str | None = None) -> float | None:
         try:
             data = await self.http.get_json(
                 "binance",
                 f"{BINANCE_FUTURES}/fapi/v1/premiumIndex",
-                params={"symbol": self._binance_symbol(symbol)},
+                params={"symbol": perp_symbol or self.perp_symbol(symbol)},
                 ttl=self.settings.ttl_derivatives,
             )
             return float(data.get("lastFundingRate"))
         except (ProviderError, ValueError, TypeError):
             return None
 
-    async def binance_open_interest(self, symbol: str) -> float | None:
+    async def binance_open_interest(
+        self, symbol: str, perp_symbol: str | None = None
+    ) -> float | None:
         try:
             data = await self.http.get_json(
                 "binance",
                 f"{BINANCE_FUTURES}/fapi/v1/openInterest",
-                params={"symbol": self._binance_symbol(symbol)},
+                params={"symbol": perp_symbol or self.perp_symbol(symbol)},
                 ttl=self.settings.ttl_derivatives,
             )
             return float(data.get("openInterest"))
         except (ProviderError, ValueError, TypeError):
             return None
 
-    async def binance_long_short_ratio(self, symbol: str, period: str = "1h") -> float | None:
+    async def binance_long_short_ratio(
+        self, symbol: str, period: str = "1h", perp_symbol: str | None = None
+    ) -> float | None:
         try:
             data = await self.http.get_json(
                 "binance",
                 f"{BINANCE_FUTURES}/futures/data/globalLongShortAccountRatio",
-                params={"symbol": self._binance_symbol(symbol), "period": period, "limit": 1},
+                params={
+                    "symbol": perp_symbol or self.perp_symbol(symbol),
+                    "period": period,
+                    "limit": 1,
+                },
                 ttl=self.settings.ttl_derivatives,
             )
             if data:

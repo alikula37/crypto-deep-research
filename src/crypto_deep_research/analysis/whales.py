@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from crypto_deep_research.analysis.base import AnalysisContext, clamp
+from crypto_deep_research.formatting import num, pct
 from crypto_deep_research.models import AnalysisResult, WhaleFlow
 from crypto_deep_research.providers.base import ProviderError, source
 
@@ -108,12 +109,26 @@ async def analyze_whales(ctx: AnalysisContext) -> AnalysisResult:
         )
 
     top_flows = sorted(flows, key=lambda flow: flow.amount, reverse=True)[:10]
-    summary = (
-        f"{len(flows)} büyük transfer tarandı. Borsaya giriş {exchange_in:.2f} {ctx.coin.symbol.upper()}, "
-        f"çıkış {exchange_out:.2f}. "
-    )
-    if stable_change is not None:
-        summary += f"Stablecoin arzı 7g değişimi %{stable_change:.2f}."
+    if chain is None:
+        summary_parts = [
+            f"{ctx.coin.symbol.upper()} için zincir-üstü büyük cüzdan taraması mevcut değil "
+            "(ücretsiz veri yalnızca BTC/ETH için sağlanıyor)."
+        ]
+        if stable_change is not None:
+            summary_parts.append(f"Stablecoin arzı 7 günlük değişimi {pct(stable_change, signed=True)}.")
+        summary = " ".join(summary_parts)
+    else:
+        summary = (
+            f"{len(flows)} büyük transfer tarandı. Borsaya giriş {num(exchange_in, 4)} "
+            f"{ctx.coin.symbol.upper()}, çıkış {num(exchange_out, 4)} {ctx.coin.symbol.upper()}."
+        )
+        if not flows:
+            summary = (
+                "Son bloklarda eşiği aşan büyük transfer bulunamadı "
+                "(bu, sıfır akış anlamına gelmez; örneklem sınırlıdır)."
+            )
+        if stable_change is not None:
+            summary += f" Stablecoin arzı 7 günlük değişimi {pct(stable_change, signed=True)}."
 
     return ctx.result(
         "whales",

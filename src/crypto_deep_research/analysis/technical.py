@@ -11,6 +11,7 @@ from crypto_deep_research.analysis.indicators import (
     indicator_snapshot,
     to_dataframe,
 )
+from crypto_deep_research.formatting import num, price, truncate
 from crypto_deep_research.models import AnalysisResult
 from crypto_deep_research.providers.base import source
 
@@ -50,9 +51,10 @@ async def analyze_technical(ctx: AnalysisContext) -> AnalysisResult:
         reasons.append(f"Destek bölgesine çok yakın (%{distance_support:.2f})")
 
     summary = (
-        f"Fiyat {snapshot['price']:.6g}; RSI {snapshot.get('rsi_14', 0):.1f}, "
-        f"MACD histogram {snapshot.get('macd_histogram', 0):.4g}. "
-        f"En yakın destek {levels.get('nearest_support')}, en yakın direnç {levels.get('nearest_resistance')}."
+        f"Fiyat {price(snapshot['price'])}; RSI {num(snapshot.get('rsi_14'), 3)}, "
+        f"MACD histogram {num(snapshot.get('macd_histogram'), 3)}. "
+        f"En yakın destek {price(levels.get('nearest_support'))}, "
+        f"en yakın direnç {price(levels.get('nearest_resistance'))}."
     )
     if candles:
         summary += " Mum formasyonları: " + ", ".join(candles) + "."
@@ -66,7 +68,7 @@ async def analyze_technical(ctx: AnalysisContext) -> AnalysisResult:
     return ctx.result(
         "technical",
         "Teknik Analiz",
-        summary=summary,
+        summary=truncate(summary, 900),
         data={
             "indicators": snapshot,
             "levels": levels,

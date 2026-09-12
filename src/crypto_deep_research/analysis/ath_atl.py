@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from crypto_deep_research.analysis.base import AnalysisContext, clamp
 from crypto_deep_research.analysis.indicators import to_dataframe
+from crypto_deep_research.formatting import pct
+from crypto_deep_research.formatting import price as fmt_price
 from crypto_deep_research.models import AnalysisResult
 from crypto_deep_research.providers.base import source
 
@@ -87,9 +89,10 @@ async def analyze_ath_atl(ctx: AnalysisContext) -> AnalysisResult:
             reasons.append("Yüksek konum + pozitif 30g momentum: trend devam edebilir")
 
     summary = (
-        f"Fiyat ${price:,.4f}. ATH'e uzaklık %{distance_ath:.1f}, ATL'e uzaklık %{distance_atl:.1f}."
+        f"Fiyat {fmt_price(price)}. ATH'e uzaklık {pct(distance_ath)}, "
+        f"ATL'e uzaklık {pct(distance_atl)}."
         if distance_ath is not None and distance_atl is not None
-        else f"Fiyat ${price:,.4f}; ATH/ATL verisi kısmi."
+        else f"Fiyat {fmt_price(price)}; ATH/ATL verisi kısmi."
     )
     if percentile is not None:
         summary += f" Yerel 500 mum aralık konumu: %{percentile * 100:.0f}."

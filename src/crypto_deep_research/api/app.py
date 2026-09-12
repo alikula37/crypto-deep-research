@@ -19,6 +19,7 @@ from crypto_deep_research.config import get_settings
 from crypto_deep_research.deep_research.engine import DeepResearchEngine
 from crypto_deep_research.deep_research.registry import registry_summary
 from crypto_deep_research.llm import OpenRouterClient, OpenRouterError
+from crypto_deep_research.models import Kline
 from crypto_deep_research.providers.registry import build_providers
 from crypto_deep_research.rag.engine import RAGEngine
 from crypto_deep_research.storage.db import Database
@@ -164,6 +165,57 @@ async def deep_research(request: DeepResearchRequest) -> dict[str, Any]:
         }
     except Exception as exc:
         logger.exception("Deep research hatası")
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    finally:
+        await providers.aclose()
+
+
+@app.get("/api/ohlcv/{coin}")
+async def ohlcv(coin: str, timeframe: str = "1d", limit: int = 300) -> dict[str, Any]:
+    """Timeframe bazli mum verisi (Binance, yedek CoinGecko)."""
+    settings, db, providers = _services()
+    try:
+        ref = await providers.coingecko.resolve(coin)
+        klines: list[Kline] = await providers.exchange.klines(
+            ref.symbol, timeframe, min(max(limit, 30), 1000)
+        )
+        source_name = "Binance"
+        if not klines:
+            days_map = {"15m": 1, "30m": 1, "1h": 7, "4h": 14, "1d": 90, "1w": 365}
+            days = days_map.get(timeframe, 90)
+            chart = await providers.coingecko.market_chart(ref.id, days=days)
+            prices = [pair for pair in chart.get("prices") or [] if pair and pair[1]]
+            klines = [
+                Kline(
+                    ts=__import__("datetime").datetime.fromtimestamp(
+                        pair[0] / 1000, tz=__import__("datetime").timezone.utc
+                    ),
+                    open=float(pair[1]),
+                    high=float(pair[1]),
+                    low=float(pair[1]),
+                    close=float(pair[1]),
+                    volume=0.0,
+                )
+                for pair in prices[-min(max(limit, 30), 1000) :]
+            ]
+            source_name = "CoinGecko (kapanis fiyatlari)"
+        return {
+            "coin": ref.model_dump(),
+            "timeframe": timeframe,
+            "source": source_name,
+            "candles": [
+                {
+                    "t": kline.ts.isoformat(),
+                    "o": kline.open,
+                    "h": kline.high,
+                    "l": kline.low,
+                    "c": kline.close,
+                    "v": kline.volume,
+                }
+                for kline in klines
+            ],
+        }
+    except Exception as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     finally:
         await providers.aclose()

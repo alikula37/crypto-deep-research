@@ -15,6 +15,9 @@ import numpy as np
 from crypto_deep_research.analysis.base import AnalysisContext, clamp, trend_score
 from crypto_deep_research.analysis.indicators import atr, to_dataframe
 from crypto_deep_research.deep_research.registry import ItemSpec
+from crypto_deep_research.formatting import money
+from crypto_deep_research.formatting import pct as fmt_pct
+from crypto_deep_research.formatting import price as fmt_price
 from crypto_deep_research.models import AnalysisResult, ItemResult
 from crypto_deep_research.providers.base import ProviderError, source
 
@@ -333,7 +336,8 @@ async def sector(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemRe
     return result_from(
         spec,
         summary=(
-            f"Sektör '{match.get('name')}': 24s mcap değişimi %{change_24h if change_24h is not None else 'n/a'}."
+            f"Sektör '{match.get('name')}': 24s mcap değişimi "
+            f"{fmt_pct(change_24h, signed=True) if change_24h is not None else 'veri yok'}."
         ),
         data={
             "categories": categories,
@@ -524,17 +528,23 @@ async def psych_levels(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> 
     reasons: list[str] = []
     if distance_resistance is not None and distance_resistance < 1.0:
         score -= 0.2
-        reasons.append(f"Yuvarlak sayı direnci {nearest_resistance:.6g} çok yakın (%{distance_resistance:.2f})")
+        reasons.append(
+            f"Yuvarlak sayı direnci {fmt_price(nearest_resistance)} çok yakın "
+            f"(mesafe {fmt_pct(distance_resistance)})"
+        )
     if distance_support is not None and distance_support < 1.0:
         score += 0.15
-        reasons.append(f"Yuvarlak sayı desteği {nearest_support:.6g} çok yakın")
+        reasons.append(f"Yuvarlak sayı desteği {fmt_price(nearest_support)} çok yakın")
     if distance_resistance is not None and 1.0 <= distance_resistance < 3:
         score += 0.1
         reasons.append("Yuvarlak direnç kırılirsa hızlı hareket potansiyeli")
 
     return result_from(
         spec,
-        summary=f"Psikolojik seviyeler: destek {nearest_support}, direnç {nearest_resistance}.",
+        summary=(
+            f"Psikolojik seviyeler: destek {fmt_price(nearest_support)}, "
+            f"direnç {fmt_price(nearest_resistance)}."
+        ),
         data={
             "nearest_support": nearest_support,
             "nearest_resistance": nearest_resistance,
@@ -696,7 +706,8 @@ async def volatility_model(ctx: AnalysisContext, spec: ItemSpec, analyses: dict)
         spec,
         summary=(
             f"EWMA volatilite %{current_vol:.2f}; 30g dagilim yüzdeliği "
-            f"{'%' + str(round((percentile or 0) * 100)) if percentile is not None else 'n/a'}; ATR %{atr_pct:.2f}."
+            f"{'%' + str(round((percentile or 0) * 100)) if percentile is not None else 'veri yok'}; "
+            f"ATR {fmt_pct(atr_pct)}."
         ),
         data={
             "ewma_vol_daily_pct": round(current_vol, 4),
@@ -991,7 +1002,10 @@ async def stablecoin_flows(ctx: AnalysisContext, spec: ItemSpec, analyses: dict)
         reasons.append(f"Stablecoin arzında 7 günde %{change_7d:+.2f} (piyasaya nakit {direction})")
     return result_from(
         spec,
-        summary=f"Stablecoin toplam arzı ${total_now:,.0f}; 7g değişim %{change_7d if change_7d is not None else 'n/a'}.",
+        summary=(
+            f"Stablecoin toplam arzı {money(total_now)}; 7 günlük değişim "
+            f"{fmt_pct(change_7d, signed=True) if change_7d is not None else 'veri yok'}."
+        ),
         data={
             "stablecoin_total_usd": total_now,
             "changes_pct": changes,
@@ -1241,7 +1255,7 @@ async def cross_chain(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> I
     total = sum(value for _, value in volumes)
     return result_from(
         spec,
-        summary=f"Cross-chain: 24s kopru hacmi ~${total:,.0f} ({len(volumes)} kopru).",
+        summary=f"Cross-chain: 24s köprü hacmi ~{money(total)} ({len(volumes)} köprü).",
         data={
             "total_bridge_volume_24h_usd": total,
             "top_bridges": [
@@ -1367,7 +1381,7 @@ async def news_velocity(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
         spec,
         summary=(
             f"Haber hızı: son 6s {velocity.get('last_6h')} haber, önceki 6s {velocity.get('prev_6h')} "
-            f"(oran {ratio if ratio is not None else 'n/a'})."
+            f"(oran {ratio if ratio is not None else '—'})."
         ),
         data={"velocity": velocity, "velocity_ratio_6h": ratio},
         sources=[source("GDELT", "https://api.gdeltproject.org"), source("Haber RSS", kind="rss")],
@@ -1608,7 +1622,7 @@ async def energy_costs(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> 
     reasons: list[str] = []
     if oil:
         change = oil.get("change_30d_pct")
-        reasons.append(f"Petrol 30g %{change if change is not None else 'n/a'}")
+        reasons.append(f"Petrol 30g {fmt_pct(change, signed=True) if change is not None else 'veri yok'}")
         if change is not None:
             score += clamp(-change / 30.0) * 0.25
     mining = await mining_energy(ctx, spec, analyses)
@@ -1698,13 +1712,13 @@ async def evaluate_item(
             elif spec.id == 16:
                 fib = (analysis.data.get("levels") or {}).get("fibonacci") or {}
                 summary = "Fibonacci seviyeleri: " + ", ".join(
-                    f"{key}={value:.6g}" for key, value in list(fib.items())[:6]
+                    f"{key}={fmt_price(value)}" for key, value in list(fib.items())[:6]
                 )
             elif spec.id == 19:
                 levels = analysis.data.get("levels") or {}
-                summary = (
-                    f"Destekler: {levels.get('support', [])[:3]}, dirençler: {levels.get('resistance', [])[:3]}"
-                )
+                supports = ", ".join(fmt_price(v) for v in (levels.get("support") or [])[:3])
+                resistances = ", ".join(fmt_price(v) for v in (levels.get("resistance") or [])[:3])
+                summary = f"Destekler: {supports or '—'} | Dirençler: {resistances or '—'}"
         return result_from(
             spec,
             status=analysis.status,

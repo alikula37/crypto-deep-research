@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api } from "./api.js";
+import PriceChart from "./PriceChart.jsx";
+import { DASH, formatDateTime, money, pct, price, priceRange, score } from "./format.js";
 
 const TIMEFRAMES = ["15m", "30m", "1h", "4h", "1d", "1w"];
 const TABS = [
@@ -13,16 +15,11 @@ const TABS = [
   { id: "history", label: "Geçmiş" },
 ];
 
-function scoreColor(score) {
-  if (score === null || score === undefined) return "neutral";
-  if (score > 0.15) return "positive";
-  if (score < -0.15) return "negative";
+function scoreColor(value) {
+  if (value === null || value === undefined) return "neutral";
+  if (value > 0.15) return "positive";
+  if (value < -0.15) return "negative";
   return "neutral";
-}
-
-function formatNumber(value, digits = 2) {
-  if (value === null || value === undefined || Number.isNaN(value)) return "-";
-  return Number(value).toLocaleString("tr-TR", { maximumFractionDigits: digits });
 }
 
 function Badge({ status }) {
@@ -30,37 +27,77 @@ function Badge({ status }) {
   return <span className={`badge badge-${status}`}>{labels[status] || status}</span>;
 }
 
-function ScorePill({ score }) {
-  if (score === null || score === undefined) return <span className="score neutral">-</span>;
-  return <span className={`score ${scoreColor(score)}`}>{score >= 0 ? "+" : ""}{score.toFixed(3)}</span>;
+function ScorePill({ value }) {
+  if (value === null || value === undefined) return <span className="score neutral">—</span>;
+  return <span className={`score ${scoreColor(value)}`}>{score(value)}</span>;
+}
+
+function ProbabilityBar({ up, down }) {
+  if (up === null || up === undefined) return null;
+  const upValue = Math.max(0, Math.min(100, Number(up)));
+  const downValue = Math.max(0, Math.min(100, Number(down ?? 100 - upValue)));
+  return (
+    <div className="prob">
+      <div className="prob-labels">
+        <span className="up">Yükseliş %{upValue.toFixed(1)}</span>
+        <span className="down">Düşüş %{downValue.toFixed(1)}</span>
+      </div>
+      <div className="prob-bar">
+        <div className="prob-up" style={{ width: `${upValue}%` }} />
+        <div className="prob-down" style={{ width: `${downValue}%` }} />
+      </div>
+    </div>
+  );
 }
 
 function SnapshotCard({ data }) {
   if (!data) return null;
   const s = data.snapshot;
   const g = data.global;
-  const items = [
-    ["Fiyat", `$${formatNumber(s.price_usd, s.price_usd < 1 ? 6 : 2)}`],
-    ["Piyasa değeri", `$${formatNumber(s.market_cap_usd, 0)}`],
-    ["Sira", `#${s.rank ?? "-"}`],
-    ["24s hacim", `$${formatNumber(s.volume_24h_usd, 0)}`],
-    ["24s", `${formatNumber(s.change_24h_pct)}%`],
-    ["7g", `${formatNumber(s.change_7d_pct)}%`],
-    ["30g", `${formatNumber(s.change_30d_pct)}%`],
-    ["ATH uzaklık", `${formatNumber(s.ath_change_pct)}%`],
-    ["ATL uzaklık", `${formatNumber(s.atl_change_pct)}%`],
-    ["BTC dominance", `${formatNumber(g?.btc_dominance)}%`],
-    ["ETH dominance", `${formatNumber(g?.eth_dominance)}%`],
-    ["Toplam mcap", `$${formatNumber(g?.total_market_cap_usd, 0)}`],
+  const stats = [
+    ["Fiyat", price(s.price_usd)],
+    ["Piyasa değeri", money(s.market_cap_usd)],
+    ["Sıra", s.rank ? `#${s.rank}` : DASH],
+    ["24s hacim", money(s.volume_24h_usd)],
+    ["24s", pct(s.change_24h_pct, { signed: true })],
+    ["7g", pct(s.change_7d_pct, { signed: true })],
+    ["30g", pct(s.change_30d_pct, { signed: true })],
+    ["ATH uzaklık", pct(s.ath_change_pct)],
+    ["ATL uzaklık", pct(s.atl_change_pct)],
+    ["BTC dominance", g?.btc_dominance != null ? `%${g.btc_dominance.toFixed(1)}` : DASH],
+    ["ETH dominance", g?.eth_dominance != null ? `%${g.eth_dominance.toFixed(1)}` : DASH],
+    ["Toplam mcap", money(g?.total_market_cap_usd)],
   ];
   return (
-    <div className="snapshot-grid">
-      {items.map(([label, value]) => (
+    <div
+      className="snapshot-grid"
+      title={`Tam değerler: fiyat ${s.price_usd} USD · mcap ${s.market_cap_usd} USD`}
+    >
+      {stats.map(([label, value]) => (
         <div className="stat" key={label}>
           <span className="stat-label">{label}</span>
           <span className="stat-value">{value}</span>
         </div>
       ))}
+    </div>
+  );
+}
+
+function ScoreDistribution({ items }) {
+  const counts = { positive: 0, negative: 0, neutral: 0 };
+  for (const item of items) {
+    if (item.score === null || item.score === undefined || !item.confidence) continue;
+    if (item.score > 0.15) counts.positive += 1;
+    else if (item.score < -0.15) counts.negative += 1;
+    else counts.neutral += 1;
+  }
+  const total = counts.positive + counts.negative + counts.neutral;
+  if (!total) return null;
+  return (
+    <div className="distribution">
+      <span className="chip positive-chip">Pozitif {counts.positive}</span>
+      <span className="chip neutral-chip">Nötr {counts.neutral}</span>
+      <span className="chip negative-chip">Negatif {counts.negative}</span>
     </div>
   );
 }
@@ -73,8 +110,8 @@ function AnalysisCard({ result }) {
         <h3>{result.title}</h3>
         <div className="card-meta">
           <Badge status={result.status} />
-          <ScorePill score={result.score} />
-          <span className="confidence">güven {result.confidence.toFixed(2)}</span>
+          <ScorePill value={result.score} />
+          <span className="confidence">güven {(result.confidence ?? 0).toFixed(2)}</span>
         </div>
       </div>
       <p className="summary">{result.summary}</p>
@@ -98,11 +135,31 @@ function AnalysisCard({ result }) {
 
 function ItemsTable({ items }) {
   const [filter, setFilter] = useState("all");
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState("order");
+
   const filtered = useMemo(() => {
-    if (filter === "all") return items;
-    if (filter === "scored") return items.filter((i) => i.score !== null && i.confidence > 0);
-    return items.filter((i) => i.status === filter);
-  }, [items, filter]);
+    let list = items;
+    if (filter === "scored") list = list.filter((item) => item.score !== null && item.confidence > 0);
+    else if (filter !== "all") list = list.filter((item) => item.status === filter);
+    if (query.trim()) {
+      const needle = query.trim().toLowerCase();
+      list = list.filter(
+        (item) =>
+          item.title_tr.toLowerCase().includes(needle) ||
+          (item.summary || "").toLowerCase().includes(needle)
+      );
+    }
+    if (sort === "score-desc") {
+      list = [...list].sort((a, b) => (b.score ?? -99) - (a.score ?? -99));
+    } else if (sort === "score-asc") {
+      list = [...list].sort((a, b) => (a.score ?? 99) - (b.score ?? 99));
+    } else if (sort === "confidence") {
+      list = [...list].sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0));
+    }
+    return list;
+  }, [items, filter, query, sort]);
+
   return (
     <div>
       <div className="filter-row">
@@ -121,6 +178,18 @@ function ItemsTable({ items }) {
             {label}
           </button>
         ))}
+        <input
+          className="search-input"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Madde ara…"
+        />
+        <select value={sort} onChange={(event) => setSort(event.target.value)} className="sort-select">
+          <option value="order">Sıra</option>
+          <option value="score-desc">Skor (yüksek → düşük)</option>
+          <option value="score-asc">Skor (düşük → yüksek)</option>
+          <option value="confidence">Güven</option>
+        </select>
         <span className="muted">{filtered.length} madde</span>
       </div>
       <div className="items-grid">
@@ -132,13 +201,13 @@ function ItemsTable({ items }) {
               </h4>
               <div className="card-meta">
                 <Badge status={item.status} />
-                <ScorePill score={item.score} />
+                <ScorePill value={item.score} />
               </div>
             </div>
-            <p className="summary">{item.summary}</p>
+            <p className="summary clamp-3">{item.summary}</p>
             <div className="item-footer">
               <span className="muted">
-                {item.category} | ağırlık {item.weight} | güven {item.confidence.toFixed(2)}
+                {item.category} | ağırlık {item.weight} | güven {(item.confidence ?? 0).toFixed(2)}
               </span>
               {item.sources?.length > 0 && (
                 <span className="muted">
@@ -157,6 +226,20 @@ function Markdown({ children }) {
   return (
     <div className="markdown">
       <ReactMarkdown remarkPlugins={[remarkGfm]}>{children || ""}</ReactMarkdown>
+    </div>
+  );
+}
+
+function Skeleton() {
+  return (
+    <div className="grid">
+      {[0, 1, 2, 3].map((key) => (
+        <div className="card skeleton-card" key={key}>
+          <div className="skeleton-line short" />
+          <div className="skeleton-line" />
+          <div className="skeleton-line" />
+        </div>
+      ))}
     </div>
   );
 }
@@ -182,6 +265,7 @@ export default function App() {
   const [reports, setReports] = useState([]);
   const [ragStats, setRagStats] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [copied, setCopied] = useState("");
 
   useEffect(() => {
     api.health().then(setHealth).catch(() => {});
@@ -192,9 +276,7 @@ export default function App() {
   }, []);
 
   const toggleAnalysis = (key) => {
-    setSelected((prev) =>
-      prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key]
-    );
+    setSelected((prev) => (prev.includes(key) ? prev.filter((item) => item !== key) : [...prev, key]));
   };
 
   const loadSnapshot = async () => {
@@ -219,10 +301,7 @@ export default function App() {
         lookback_days: Number(lookback),
         analyses: selected.length ? selected : null,
       };
-      const [snapshot, analysis] = await Promise.all([
-        api.snapshot(coin),
-        api.analyze(payload),
-      ]);
+      const [snapshot, analysis] = await Promise.all([api.snapshot(coin), api.analyze(payload)]);
       setSnapshotData(snapshot);
       setAnalysisResults(analysis.analyses);
       setDeep(null);
@@ -266,11 +345,9 @@ export default function App() {
     setError("");
     try {
       if (mode === "rag-ask") {
-        const result = await api.ragAsk({ query: ragQuery, coin, k: 8 });
-        setRagAnswer(result);
+        setRagAnswer(await api.ragAsk({ query: ragQuery, coin, k: 8 }));
       } else {
-        const result = await api.ragSearch({ query: ragQuery, coin, k: 10 });
-        setRagResults(result.results);
+        setRagResults((await api.ragSearch({ query: ragQuery, coin, k: 10 })).results);
         setRagAnswer(null);
       }
     } catch (err) {
@@ -294,6 +371,15 @@ export default function App() {
   const copyPrompt = async () => {
     if (!deep?.prompt) return;
     await navigator.clipboard.writeText(deep.prompt);
+    setCopied("prompt");
+    setTimeout(() => setCopied(""), 2000);
+  };
+
+  const copyReport = async () => {
+    if (!deep?.markdown) return;
+    await navigator.clipboard.writeText(deep.markdown);
+    setCopied("report");
+    setTimeout(() => setCopied(""), 2000);
   };
 
   const run = deep?.run;
@@ -315,7 +401,7 @@ export default function App() {
             value={coin}
             onChange={(event) => setCoin(event.target.value)}
             onBlur={loadSnapshot}
-            placeholder="bitcoin, eth, sol..."
+            placeholder="bitcoin, eth, pepe..."
           />
         </label>
 
@@ -369,15 +455,15 @@ export default function App() {
         </div>
 
         <button className="primary" onClick={runAnalyze} disabled={!!busy}>
-          {busy === "analyze" ? "Analiz ediliyor..." : "Analiz Et"}
+          {busy === "analyze" ? "Analiz ediliyor…" : "Analiz Et"}
         </button>
         <button className="accent" onClick={runDeepResearch} disabled={!!busy}>
-          {busy === "deep" ? "Araştırma sürüyor (dakikalar)..." : "Deep Research + Prompt"}
+          {busy === "deep" ? "Araştırma sürüyor (dakikalar)…" : "Deep Research + Prompt"}
         </button>
 
         {snapshotData && (
           <div className="sidebar-price">
-            {snapshotData.snapshot.coin.symbol.toUpperCase()} ${formatNumber(snapshotData.snapshot.price_usd, 4)}
+            {snapshotData.snapshot.coin.symbol.toUpperCase()} {price(snapshotData.snapshot.price_usd)}
           </div>
         )}
 
@@ -385,7 +471,7 @@ export default function App() {
           {health && (
             <>
               <div className="muted small">
-                Anahtarlar: {Object.entries(health.keys).filter(([, v]) => v).map(([k]) => k).join(", ") || "yok"}
+                Anahtarlar: {Object.entries(health.keys).filter(([, value]) => value).map(([key]) => key).join(", ") || "yok"}
               </div>
               <div className="muted small">
                 OpenRouter: {health.openrouter ? "aktif" : "yok (prompt üretilir)"}
@@ -413,30 +499,44 @@ export default function App() {
           </nav>
           {run && (
             <div className="score-summary">
-              <span className={scoreColor(run.weighted_score)}>
-                skor {run.weighted_score ?? "-"}
-              </span>
-              <span className="up">yükseliş %{run.up_probability}</span>
-              <span className="down">düşüş %{run.down_probability}</span>
-              <span className="range">
-                {formatNumber(run.expected_low, 4)} - {formatNumber(run.expected_high, 4)}
-              </span>
+              <span className={scoreColor(run.weighted_score)}>skor {score(run.weighted_score)}</span>
+              <span className="up">yükseliş %{Number(run.up_probability).toFixed(1)}</span>
+              <span className="down">düşüş %{Number(run.down_probability).toFixed(1)}</span>
+              <span className="range">{priceRange(run.expected_low, run.expected_high)}</span>
             </div>
           )}
         </header>
 
         {error && <div className="error">{error}</div>}
-        {busy && <div className="progress">{busy === "deep" ? "Deep research çalışıyor; 66 madde ve tüm analizler toplaniyor..." : "Çalışıyor..."}</div>}
+        {busy && (
+          <div className="progress">
+            {busy === "deep"
+              ? "Deep research çalışıyor; 66 madde ve tüm analizler toplanıyor…"
+              : "Çalışıyor…"}
+          </div>
+        )}
 
         <section className="content">
           {tab === "overview" && (
             <>
               <SnapshotCard data={snapshotData} />
+              {(snapshotData || analysisResults.length > 0) && <PriceChart coin={coin} defaultTimeframe={timeframe} />}
+              {run && (
+                <div className="card">
+                  <h3>Olasılık ve Dağılım</h3>
+                  <ProbabilityBar up={run.up_probability} down={run.down_probability} />
+                  <div className="range-line">
+                    Beklenen aralık: <b>{priceRange(run.expected_low, run.expected_high)}</b>
+                  </div>
+                  <ScoreDistribution items={run.items} />
+                </div>
+              )}
               {!snapshotData && !busy && (
                 <div className="empty">
                   Soldan bir coin seçip <b>Analiz Et</b> veya <b>Deep Research</b> başlatın.
                 </div>
               )}
+              {(busy === "analyze" || busy === "deep") && analysisResults.length === 0 && <Skeleton />}
               <div className="grid">
                 {analysisResults.map((result) => (
                   <AnalysisCard key={result.key || result.title} result={result} />
@@ -447,9 +547,9 @@ export default function App() {
 
           {tab === "items" && (
             <>
-              {scoredItems.length === 0 && (
+              {!run && scoredItems.length === 0 && (
                 <div className="empty">
-                  66 maddenin tamamı için önce <b>Deep Research</b> çalıştırin. Böylece her madde
+                  66 maddenin tamamı için önce <b>Deep Research</b> çalıştırın. Böylece her madde
                   veri, kaynak ve skorla doldurulur.
                 </div>
               )}
@@ -460,10 +560,11 @@ export default function App() {
 
           {tab === "report" && (
             <>
-              {!deep && <div className="empty">Rapor için Deep Research çalıştırin.</div>}
+              {!deep && <div className="empty">Rapor için Deep Research çalıştırın.</div>}
               {deep && (
                 <>
                   <div className="toolbar">
+                    <button onClick={copyReport}>{copied === "report" ? "Kopyalandı ✓" : "Panoya kopyala"}</button>
                     <span className="muted">
                       {deep.report_path} | Context: {JSON.stringify(deep.context_stats?.groups || {})}
                     </span>
@@ -476,11 +577,11 @@ export default function App() {
 
           {tab === "prompt" && (
             <>
-              {!deep && <div className="empty">Prompt için Deep Research çalıştırin.</div>}
+              {!deep && <div className="empty">Prompt için Deep Research çalıştırın.</div>}
               {deep && (
                 <>
                   <div className="toolbar">
-                    <button onClick={copyPrompt}>Panoya kopyala</button>
+                    <button onClick={copyPrompt}>{copied === "prompt" ? "Kopyalandı ✓" : "Panoya kopyala"}</button>
                     <button onClick={downloadPrompt}>İndir</button>
                     <span className="muted">{deep.prompt?.length ?? 0} karakter</span>
                   </div>
@@ -496,14 +597,14 @@ export default function App() {
                 <input
                   value={ragQuery}
                   onChange={(event) => setRagQuery(event.target.value)}
-                  placeholder="Ornek: ETF akışları, likidasyon, regülasyon..."
+                  placeholder="Örnek: ETF akışları, likidasyon, regülasyon..."
                   onKeyDown={(event) => event.key === "Enter" && runRagSearch("rag-search")}
                 />
                 <button onClick={() => runRagSearch("rag-search")} disabled={!!busy}>
                   Ara
                 </button>
                 <button onClick={() => runRagSearch("rag-ask")} disabled={!!busy}>
-                  {health?.openrouter ? "AI ile Yanitla" : "RAG Prompt Oluştur"}
+                  {health?.openrouter ? "AI ile Yanıtla" : "RAG Prompt Oluştur"}
                 </button>
               </div>
               {ragAnswer && (
@@ -525,7 +626,7 @@ export default function App() {
                       <h4>{result.source || "kaynak"}</h4>
                       <span className="muted">{result.score?.toFixed(3)}</span>
                     </div>
-                    <p className="summary">{result.content}</p>
+                    <p className="summary break-anywhere">{result.content}</p>
                   </div>
                 ))}
               </div>
@@ -546,9 +647,9 @@ export default function App() {
                     onClick={async () => setSelectedReport(await api.report(report.name))}
                   >
                     <b>{report.coin}</b>
-                    <span>{report.name}</span>
+                    <span className="break-anywhere">{report.name}</span>
                     <span className="muted">
-                      {new Date(report.created_at * 1000).toLocaleString("tr-TR")}
+                      {formatDateTime(report.created_at ? report.created_at * 1000 : null)}
                     </span>
                   </button>
                 ))}
@@ -556,7 +657,7 @@ export default function App() {
               {selectedReport && (
                 <>
                   <div className="toolbar">
-                    <b>{selectedReport.name}</b>
+                    <b className="break-anywhere">{selectedReport.name}</b>
                     <button onClick={() => setSelectedReport(null)}>Kapat</button>
                   </div>
                   <Markdown>{selectedReport.markdown}</Markdown>

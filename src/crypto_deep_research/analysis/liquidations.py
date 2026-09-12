@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from crypto_deep_research.analysis.base import AnalysisContext, clamp
+from crypto_deep_research.formatting import price as fmt_price
 from crypto_deep_research.models import AnalysisResult
 from crypto_deep_research.providers.base import source
 
@@ -29,7 +30,7 @@ def _liquidation_map(price: float, open_interest_usd: float | None) -> list[dict
             {
                 "leverage": leverage,
                 "side": "long",
-                "price": round(long_liq, 6),
+                "price": long_liq,
                 "distance_pct": round((long_liq / price - 1) * 100, 2),
                 "notional_usd": round(notional * 0.5),
                 "share_of_oi": round(share * 0.5, 3),
@@ -39,7 +40,7 @@ def _liquidation_map(price: float, open_interest_usd: float | None) -> list[dict
             {
                 "leverage": leverage,
                 "side": "short",
-                "price": round(short_liq, 6),
+                "price": short_liq,
                 "distance_pct": round((short_liq / price - 1) * 100, 2),
                 "notional_usd": round(notional * 0.5),
                 "share_of_oi": round(share * 0.5, 3),
@@ -58,10 +59,12 @@ async def analyze_liquidations(ctx: AnalysisContext) -> AnalysisResult:
         source("Coinalyze", "https://coinalyze.net", note="likidasyon geçmişi"),
     ]
 
+    perp_symbol = ctx.providers.exchange.perp_symbol(symbol)
+    perp_multiplier = ctx.providers.exchange.perp_multiplier(perp_symbol)
     tasks = {
-        "funding": ctx.providers.exchange.binance_funding(symbol),
-        "oi": ctx.providers.exchange.binance_open_interest(symbol),
-        "ls_ratio": ctx.providers.exchange.binance_long_short_ratio(symbol),
+        "funding": ctx.providers.exchange.binance_funding(symbol, perp_symbol=perp_symbol),
+        "oi": ctx.providers.exchange.binance_open_interest(symbol, perp_symbol=perp_symbol),
+        "ls_ratio": ctx.providers.exchange.binance_long_short_ratio(symbol, perp_symbol=perp_symbol),
     }
     if ctx.providers.coinalyze.enabled:
         tasks["liq_history"] = ctx.providers.coinalyze.liquidation_history(symbol, hours=48)
@@ -70,7 +73,7 @@ async def analyze_liquidations(ctx: AnalysisContext) -> AnalysisResult:
         tasks["funding_history"] = ctx.providers.coinalyze.funding_history(symbol, hours=72)
 
     results = await asyncio.gather(*tasks.values(), return_exceptions=True)
-    data: dict[str, Any] = {}
+    data: dict[str, Any] = {"perp_symbol": perp_symbol}
     for key, value in zip(tasks.keys(), results, strict=False):
         if isinstance(value, Exception):
             logger.debug("likidasyon verisi alınamadı (%s): %s", key, value)
@@ -78,7 +81,7 @@ async def analyze_liquidations(ctx: AnalysisContext) -> AnalysisResult:
         data[key] = value
 
     oi_amount = data.get("oi")
-    oi_usd = float(oi_amount) * price if oi_amount else None
+    oi_usd = float(oi_amount) * perp_multiplier * price if oi_amount else None
     if oi_usd:
         data["open_interest_usd_estimate"] = oi_usd
 
@@ -149,7 +152,7 @@ async def analyze_liquidations(ctx: AnalysisContext) -> AnalysisResult:
                 change = (last / first - 1) * 100
                 data["open_interest_change_72h_pct"] = round(change, 2)
                 if change > 10 and price:
-                    reasons.append(f"Open interest 72s'de %{change:.1f} arttı: kaldıraç birikimi")
+                    reasons.append(f"Açık pozisyon (OI) 72 saatte %{change:.1f} arttı: kaldıraç birikimi")
         except (ValueError, TypeError, IndexError):
             pass
 
@@ -158,12 +161,25 @@ async def analyze_liquidations(ctx: AnalysisContext) -> AnalysisResult:
         [lvl for lvl in liquidation_levels],
         key=lambda item: abs(item["distance_pct"]),
     )[:6]
-    summary = (
-        f"Fiyat {price:.6g}. En yakın likidasyon seviyeleri: "
-        + ", ".join(f"{lvl['price']:.6g} ({lvl['side']} {lvl['leverage']}x)" for lvl in nearest_levels[:4])
-        if nearest_levels
-        else "Likidasyon seviyeleri için yeterli türev verisi yok."
-    )
+    if nearest_levels:
+        summary = (
+            f"Fiyat {fmt_price(price)}. En yakın likidasyon seviyeleri: "
+            + ", ".join(
+                f"{fmt_price(lvl['price'])} ({lvl['side']} {lvl['leverage']}x)"
+                for lvl in nearest_levels[:4]
+            )
+            + "."
+        )
+    elif oi_amount is not None:
+        summary = (
+            f"Fiyat {fmt_price(price)}. Açık pozisyon verisi alındı ancak likidasyon "
+            "kümeleri hesaplanamadı."
+        )
+    else:
+        summary = (
+            f"{symbol.upper()} için Binance vadeli piyasasında veri bulunamadı "
+            "(1000x kontrat eşlemesi denendi)."
+        )
 
     return ctx.result(
         "liquidations",

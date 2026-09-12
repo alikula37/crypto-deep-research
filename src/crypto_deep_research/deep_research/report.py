@@ -1,10 +1,10 @@
-"""Markdown rapor üretimi (Turkce)."""
+"""Markdown rapor uretimi (Turkce, tr-TR sayi bicimi)."""
 
 from __future__ import annotations
 
-import json
 from datetime import timezone
 
+from crypto_deep_research.formatting import price, price_range, score, truncate
 from crypto_deep_research.models import AnalysisResult, ItemResult, ResearchRun
 
 STATUS_LABELS = {
@@ -14,6 +14,13 @@ STATUS_LABELS = {
     "error": "Hata",
 }
 
+TABLE_SUMMARY_LIMIT = 220
+
+
+def _summary_cell(text: str | None, limit: int = TABLE_SUMMARY_LIMIT) -> str:
+    cleaned = (text or "").replace("|", "/").replace("\n", " ").strip()
+    return truncate(cleaned, limit)
+
 
 def render_report(
     run: ResearchRun,
@@ -21,17 +28,23 @@ def render_report(
     items: list[ItemResult],
     prompt: str | None = None,
 ) -> str:
-    now = run.created_at.astimezone(timezone.utc)
-    price = run.current_price or 0.0
+    created = run.created_at.astimezone(timezone.utc)
+    ok_count = sum(1 for item in items if item.status == "ok")
+    partial_count = sum(1 for item in items if item.status == "partial")
+    missing_count = sum(1 for item in items if item.status in ("no_data", "error"))
+    scored = [item for item in items if item.score is not None and item.confidence > 0]
+
     lines: list[str] = [
         f"# {run.coin.name} ({run.coin.symbol.upper()}) - Kripto Deep Research Raporu",
         "",
-        f"- **Tarih:** {now.strftime('%d.%m.%Y %H:%M UTC')}",
-        f"- **Fiyat:** ${price:,.6f}".rstrip("0").rstrip("."),
+        f"- **Tarih:** {created.strftime('%d.%m.%Y %H:%M')} UTC",
+        f"- **Fiyat:** {price(run.current_price)}",
         f"- **Timeframe:** {run.timeframe} | **Geçmiş penceresi:** {run.lookback_days} gün",
-        f"- **Ağırlıklı skor:** {run.weighted_score}",
-        f"- **Yükseliş / Düşüş olasılığı:** %{run.up_probability} / %{run.down_probability}",
-        f"- **Beklenen aralık:** {run.expected_low} - {run.expected_high} USD",
+        f"- **Ağırlıklı skor:** {score(run.weighted_score)}",
+        f"- **Yükseliş / Düşüş olasılığı:** %{run.up_probability:.1f} / %{run.down_probability:.1f}",
+        f"- **Beklenen aralık:** {price_range(run.expected_low, run.expected_high)}",
+        f"- **66 madde:** {ok_count} tam, {partial_count} kısmi, {missing_count} veri yok "
+        f"({len(scored)} madde skorlandı)",
         "",
         "> Bu rapor otomatik üretilmiştir ve yatırım tavsiyesi değildir. Skorlar veri ağırlıklı",
         "> tahminlerdir; kesinlik iddiası taşımaz.",
@@ -42,24 +55,24 @@ def render_report(
         "| --- | --- | --- | --- | --- |",
     ]
     for analysis in analyses:
-        summary = (analysis.summary or "").replace("|", "/").replace("\n", " ")[:160]
-        score = f"{analysis.score:+.2f}" if analysis.score is not None else "-"
         lines.append(
             f"| {analysis.title} | {STATUS_LABELS.get(analysis.status, analysis.status)} | "
-            f"{score} | {analysis.confidence:.2f} | {summary} |"
+            f"{score(analysis.score)} | {analysis.confidence:.2f} | {_summary_cell(analysis.summary)} |"
         )
     lines.append("")
 
     for analysis in analyses:
         lines.append(f"### {analysis.title}")
         lines.append("")
-        lines.append(analysis.summary or "_Ozet yok_")
+        lines.append(analysis.summary or "_Özet yok_")
         lines.append("")
         reasons = (analysis.data or {}).get("reasons")
         if reasons:
             lines.append("**Nedenler:**")
             for reason in reasons[:10]:
                 lines.append(f"- {reason}")
+            if len(reasons) > 10:
+                lines.append(f"- … ve {len(reasons) - 10} neden daha")
             lines.append("")
         if analysis.sources:
             lines.append(
@@ -76,11 +89,9 @@ def render_report(
         ]
     )
     for item in items:
-        summary = (item.summary or "").replace("|", "/").replace("\n", " ")[:120]
-        score = f"{item.score:+.2f}" if item.score is not None else "-"
         lines.append(
             f"| {item.item_id} | {item.title_tr} | {STATUS_LABELS.get(item.status, item.status)} | "
-            f"{score} | {item.confidence:.2f} | {summary} |"
+            f"{score(item.score)} | {item.confidence:.2f} | {_summary_cell(item.summary)} |"
         )
     lines.append("")
 
@@ -90,10 +101,8 @@ def render_report(
         lines.append(f"### {item.item_id}. {item.title_tr}")
         lines.append("")
         lines.append(f"- **Durum:** {STATUS_LABELS.get(item.status, item.status)}")
-        lines.append(
-            f"- **Skor / Güven:** {item.score if item.score is not None else '-'} / {item.confidence:.2f}"
-        )
-        lines.append(f"- **Özet:** {item.summary or '-'}")
+        lines.append(f"- **Skor / Güven:** {score(item.score)} / {item.confidence:.2f}")
+        lines.append(f"- **Özet:** {item.summary or '—'}")
         reasons = (item.data or {}).get("reasons")
         if reasons:
             lines.append("- **Nedenler:** " + "; ".join(str(reason) for reason in reasons[:6]))
@@ -111,21 +120,31 @@ def render_report(
     lines.append("")
 
     if prompt:
-        lines.extend(["## Prompt Dosyasi", "", "Harici AI'a verilecek prompt aynı isimli `_prompt.txt` dosyasindadir.", ""])
+        lines.extend(
+            [
+                "## Prompt Dosyası",
+                "",
+                "Harici AI'a verilecek prompt aynı isimli `_prompt.txt` dosyasındadır.",
+                "",
+            ]
+        )
 
     lines.extend(
         [
             "## Metodoloji ve Sınırlamalar",
             "",
-            "- Veriler ücretsiz API katmanlarindan toplanır (CoinGecko, Binance, Coinalyze, DefiLlama,",
+            "- Veriler ücretsiz API katmanlarından toplanır (CoinGecko, Binance, Coinalyze, DefiLlama,",
             "  CryptoPanic, RSS, GDELT, alternative.me, Reddit, Google Trends, Blockchain.com,",
             "  mempool.space, Blockchair, Blockscout, Etherscan, yfinance, FRED, Deribit).",
-            "- Her madde veri + kaynak + güven ile raporlanir; verisi olmayan maddeler ortalamaya",
+            "- Her madde veri + kaynak + güven ile raporlanır; verisi olmayan maddeler ortalamaya",
             "  dahil edilmez ve raporda açıkça işaretlenir.",
-            "- Skorlar -1 (güçlü negatif) ile +1 (güçlü pozitif) arasındadir; ağırlıklı ortalama",
-            "  güven katsayisi ile hesaplanir.",
-            f"- Politika özeti (Context Control Plane): {json.dumps(run.notes, ensure_ascii=False)}",
+            "- Skorlar -1 (güçlü negatif) ile +1 (güçlü pozitif) arasındadır; ağırlıklı ortalama",
+            "  güven katsayısı ile hesaplanır.",
+            "- Sayılar tr-TR biçiminde gösterilir (binlik ayracı nokta, ondalık virgül).",
             "",
         ]
     )
+    for note in run.notes:
+        lines.append(f"> Not: {note}")
+    lines.append("")
     return "\n".join(lines)

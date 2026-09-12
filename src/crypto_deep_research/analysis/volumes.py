@@ -8,6 +8,7 @@ from typing import Any
 
 from crypto_deep_research.analysis.base import AnalysisContext, clamp
 from crypto_deep_research.analysis.indicators import to_dataframe
+from crypto_deep_research.formatting import money
 from crypto_deep_research.models import AnalysisResult
 from crypto_deep_research.providers.base import source
 
@@ -122,8 +123,8 @@ async def analyze_volumes(ctx: AnalysisContext) -> AnalysisResult:
         )
 
     summary = (
-        f"24s toplam hacim ~${volume_24h:,.0f}. En büyük borsalar: "
-        + ", ".join(f"{name} (${vol:,.0f})" for name, vol in top_exchanges[:4])
+        f"24s toplam hacim ~{money(volume_24h)}. En büyük borsalar: "
+        + ", ".join(f"{name} ({money(vol)})" for name, vol in top_exchanges[:4])
     )
 
     return ctx.result(

@@ -34,8 +34,11 @@ oluşturur.
   (`intfloat/multilingual-e5-large`). İnternet gerekmez, ek maliyet yok.
 - **MCP server**: Claude Desktop, Claude Code, Codex, Cursor gibi araçlara doğrudan veri ve
   analiz sunar.
-- **Web UI**: NotebookLM benzeri koyu tema; coin/timeframe/analiz seçimi, 66 madde tablosu,
-  rapor ve prompt görüntüleme, RAG arama, rapor geçmişi.
+- **Web UI**: NotebookLM benzeri koyu tema; coin/timeframe/analiz seçimi, **timeframe bazlı
+  interaktif SVG fiyat grafiği**, yükseliş/düşüş olasılık çubuğu, 66 madde tablosu (arama +
+  sıralama), rapor ve prompt görüntüleme, RAG arama, rapor geçmişi.
+- **tr-TR sayı biçimi**: Tüm çıktılarda binlik ayracı nokta, ondalık virgül; mikro fiyatlar
+  (ör. PEPE $0,00000338) bilimsel gösterime düşmeden ve sıfıra yuvarlanmadan gösterilir.
 - **Opsiyonel OpenRouter**: API anahtarı girilirse RAG soruları ve rapor üretimi LLM'e
   devredilebilir. Anahtar yoksa sistem yalnızca prompt üretir (varsayılan davranış).
 

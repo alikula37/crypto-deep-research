@@ -91,8 +91,10 @@ async def analyze_rankings(ctx: AnalysisContext) -> AnalysisResult:
         reasons.append(f"Top {universe} içinde mcap yüzdeliği %{mcap_percentile * 100:.0f}")
 
     summary = f"Güncel sıralama #{current_rank}."
-    if best_rank:
+    if best_rank and worst_rank and len(set(ranks)) > 1:
         summary += f" Gözlenen en iyi #{int(best_rank)}, en kötü #{int(worst_rank)}."
+    elif len(ranks) <= 1:
+        summary += " Geçmiş sıralama verisi henüz birikmedi."
     if mcap_percentile is not None:
         summary += f" Top {universe} mcap yüzdeliği %{mcap_percentile * 100:.0f}."
 

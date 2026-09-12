@@ -200,11 +200,13 @@ class CoinGeckoProvider:
         except ProviderError:
             return []
 
-    async def market_chart(self, coin_id: str, days: int = 365) -> dict[str, Any]:
+    async def market_chart(
+        self, coin_id: str, days: int = 365, vs_currency: str = "usd"
+    ) -> dict[str, Any]:
         ttl = self.settings.ttl_market if days <= 1 else self.settings.ttl_ohlcv * 2
         return await self._get(
             f"/coins/{coin_id}/market_chart",
-            {"vs_currency": "usd", "days": days},
+            {"vs_currency": vs_currency, "days": days},
             ttl=max(ttl, 300),
         )
 
