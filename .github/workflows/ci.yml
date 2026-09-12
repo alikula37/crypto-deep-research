@@ -24,6 +24,7 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
+          cache-suffix: py${{ matrix.python-version }}
       - name: Python ${{ matrix.python-version }} kurulumu
         run: uv python install ${{ matrix.python-version }}
       - name: Bagimliliklari kur (kilitli)
