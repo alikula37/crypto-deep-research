@@ -1,0 +1,148 @@
+const base = {
+  width: 16,
+  height: 16,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 2,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  "aria-hidden": "true",
+};
+
+export function IconPlay(props) {
+  return (
+    <svg {...base} {...props}>
+      <polygon points="6 3 20 12 6 21 6 3" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function IconSparkles(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 3l1.7 4.3L18 9l-4.3 1.7L12 15l-1.7-4.3L6 9l4.3-1.7L12 3z" />
+      <path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z" />
+    </svg>
+  );
+}
+
+export function IconCheck(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8.5 12.5l2.3 2.3 4.7-5.1" />
+    </svg>
+  );
+}
+
+export function IconAlert(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 3.5l9.5 16.5H2.5L12 3.5z" />
+      <path d="M12 10v4" />
+      <circle cx="12" cy="17" r=".6" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function IconX(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M9 9l6 6M15 9l-6 6" />
+    </svg>
+  );
+}
+
+export function IconChart(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+    </svg>
+  );
+}
+
+export function IconDoc(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M7 3h7l4 4v14H7z" />
+      <path d="M14 3v4h4M10 12h6M10 16h6" />
+    </svg>
+  );
+}
+
+export function IconHistory(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
+export function IconSearch(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" />
+    </svg>
+  );
+}
+
+export function IconCoins(props) {
+  return (
+    <svg {...base} {...props}>
+      <ellipse cx="12" cy="6" rx="7" ry="3" />
+      <path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6" />
+      <path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" />
+    </svg>
+  );
+}
+
+export function IconRefresh(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M20 11a8 8 0 1 0-2.3 5.7" />
+      <path d="M20 5v6h-6" />
+    </svg>
+  );
+}
+
+export function IconDownload(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M12 3v12" />
+      <path d="M7 10l5 5 5-5" />
+      <path d="M4 21h16" />
+    </svg>
+  );
+}
+
+export function IconCopy(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="9" y="9" width="12" height="12" rx="2" />
+      <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
+    </svg>
+  );
+}
+
+export function IconPrinter(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M7 8V3h10v5" />
+      <rect x="4" y="8" width="16" height="8" rx="2" />
+      <path d="M7 16h10v5H7z" />
+    </svg>
+  );
+}
+
+export function IconWand(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M15 4l1 3 3 1-3 1-1 3-1-3-3-1 3-1 1-3z" />
+      <path d="M4 20L14 10" />
+    </svg>
+  );
+}
