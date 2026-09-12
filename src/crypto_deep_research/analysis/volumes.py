@@ -1,4 +1,4 @@
-"""Borsa hacim analizi: tum borsalar, hacim trendi ve fiyat tutarliligi."""
+"""Borsa hacim analizi: tüm borsalar, hacim trendi ve fiyat tutarliligi."""
 
 from __future__ import annotations
 
@@ -15,10 +15,10 @@ from crypto_deep_research.providers.base import source
 async def analyze_volumes(ctx: AnalysisContext) -> AnalysisResult:
     snapshot = await ctx.snapshot()
     sources = [
-        source("CoinGecko", "https://www.coingecko.com", note="borsa bazli hacim dagilimi"),
-        source("Binance", "https://www.binance.com", note="hacim/fiyat dogrulama"),
-        source("OKX", "https://www.okx.com", note="hacim/fiyat dogrulama"),
-        source("Bybit", "https://www.bybit.com", note="hacim/fiyat dogrulama"),
+        source("CoinGecko", "https://www.coingecko.com", note="borsa bazlı hacim dagilimi"),
+        source("Binance", "https://www.binance.com", note="hacim/fiyat doğrulama"),
+        source("OKX", "https://www.okx.com", note="hacim/fiyat doğrulama"),
+        source("Bybit", "https://www.bybit.com", note="hacim/fiyat doğrulama"),
     ]
 
     tickers_task = ctx.providers.coingecko.tickers(ctx.coin.id)
@@ -74,22 +74,22 @@ async def analyze_volumes(ctx: AnalysisContext) -> AnalysisResult:
         confidence += 0.2
         if turnover > 0.3:
             score += 0.2
-            reasons.append(f"Hacim/mcap orani {turnover:.2f}: yuksek likidite")
+            reasons.append(f"Hacim/mcap oranı {turnover:.2f}: yüksek likidite")
         elif turnover < 0.02:
             score -= 0.2
-            reasons.append(f"Hacim/mcap orani {turnover:.3f}: dusuk likidite")
+            reasons.append(f"Hacim/mcap oranı {turnover:.3f}: düşük likidite")
 
     if price_deviation is not None:
         confidence += 0.15
         if price_deviation > 0.5:
             score -= 0.25
-            reasons.append(f"Borsalar arasi fiyat sapmasi %{price_deviation:.2f}: dikkat")
+            reasons.append(f"Borsalar arasi fiyat sapması %{price_deviation:.2f}: dikkat")
         else:
             reasons.append(f"Borsalar arasi fiyat tutarli (sapma %{price_deviation:.3f})")
 
     if isinstance(exchange_tickers, dict) and len(exchange_tickers) >= 2:
         confidence += 0.1
-        reasons.append("Binance/OKX/Bybit hacimleri dogrulandi")
+        reasons.append("Binance/OKX/Bybit hacimleri doğrulandi")
 
     klines = await ctx.klines(300)
     if len(klines) >= 25:
@@ -103,13 +103,13 @@ async def analyze_volumes(ctx: AnalysisContext) -> AnalysisResult:
             confidence += 0.15
             if volume_change > 25 and price_change > 0:
                 score += 0.35
-                reasons.append("Hacim artisi fiyat yukselisiyle destekleniyor (saglikli trend)")
+                reasons.append("Hacim artışı fiyat yükselişiyle destekleniyor (sağlıklı trend)")
             elif volume_change > 25 and price_change < 0:
                 score -= 0.35
-                reasons.append("Hacim artisi fiyat dususuyle: satis baskisi")
+                reasons.append("Hacim artışı fiyat düşüşüyle: satış baskısı")
             elif volume_change < -25 and price_change > 0:
                 score -= 0.2
-                reasons.append("Fiyat artiyor ama hacim dusuyor (zayif yukselis)")
+                reasons.append("Fiyat artıyor ama hacim düşüyor (zayıf yükseliş)")
             data["price_change_5_candle_pct"] = round(price_change, 2)
 
     if not by_exchange and not exchange_tickers:
@@ -117,18 +117,18 @@ async def analyze_volumes(ctx: AnalysisContext) -> AnalysisResult:
             "volumes",
             "Borsa Hacimleri",
             status="no_data",
-            summary="Hacim verisi alinamadi.",
+            summary="Hacim verisi alınamadı.",
             sources=sources,
         )
 
     summary = (
-        f"24s toplam hacim ~${volume_24h:,.0f}. En buyuk borsalar: "
+        f"24s toplam hacim ~${volume_24h:,.0f}. En büyük borsalar: "
         + ", ".join(f"{name} (${vol:,.0f})" for name, vol in top_exchanges[:4])
     )
 
     return ctx.result(
         "volumes",
-        "Tum Borsalardaki Hacimler",
+        "Tüm Borsalardaki Hacimler",
         summary=summary,
         data={"reasons": reasons, **data},
         sources=sources,

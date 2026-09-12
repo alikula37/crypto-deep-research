@@ -1,4 +1,4 @@
-"""Piyasa degeri analizi: gecmis mcap ile oran, kendi tarihine gore konum."""
+"""Piyasa değeri analizi: geçmiş mcap ile oran, kendi tarihine göre konum."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from crypto_deep_research.providers.base import ProviderError, source
 
 async def analyze_marketcap(ctx: AnalysisContext) -> AnalysisResult:
     snapshot = await ctx.snapshot()
-    sources = [source("CoinGecko", "https://www.coingecko.com", note="gecmis piyasa degeri serisi")]
+    sources = [source("CoinGecko", "https://www.coingecko.com", note="geçmiş piyasa değeri serisi")]
     try:
         chart = await ctx.providers.coingecko.market_chart(ctx.coin.id, days=365)
     except ProviderError:
@@ -22,9 +22,9 @@ async def analyze_marketcap(ctx: AnalysisContext) -> AnalysisResult:
     if not market_caps or not current_mcap:
         return ctx.result(
             "marketcap",
-            "Gecmis Mcap / Guncel Mcap Orani",
+            "Geçmiş Mcap / Güncel Mcap Oranı",
             status="no_data",
-            summary="Gecmis piyasa degeri serisi alinamadi.",
+            summary="Geçmiş piyasa değeri serisi alınamadı.",
             sources=sources,
         )
 
@@ -60,49 +60,49 @@ async def analyze_marketcap(ctx: AnalysisContext) -> AnalysisResult:
     if percentile < 0.2:
         score += 0.4
         reasons.append(
-            f"Guncel mcap 365 gunluk araligin alt %{percentile * 100:.0f}'inde: kendi tarihine gore dusuk"
+            f"Güncel mcap 365 günlük aralığın alt %{percentile * 100:.0f}'inde: kendi tarihine göre düşük"
         )
     elif percentile > 0.85:
         score -= 0.1
         reasons.append(
-            f"Guncel mcap 365 gunluk araligin ust %{(1 - percentile) * 100:.0f}'inde: tarihsel zirveye yakin"
+            f"Güncel mcap 365 günlük aralığın üst %{(1 - percentile) * 100:.0f}'inde: tarihsel zirveye yakın"
         )
     else:
-        reasons.append(f"Mcap 365 gunluk aralikta %{percentile * 100:.0f}. yuzdelikte")
+        reasons.append(f"Mcap 365 günlük aralıkta %{percentile * 100:.0f}. yüzdelikte")
 
     if ratio_30d is not None:
         confidence += 0.2
         trend_component = trend_score(snapshot.change_30d_pct, 30.0) * 0.3
         score += trend_component
-        direction = "uzerinde" if ratio_30d > 1 else "altinda"
-        reasons.append(f"Guncel mcap 30 gun onceki mcap'in %{abs(ratio_30d - 1) * 100:.1f} {direction}")
+        direction = "üzerinde" if ratio_30d > 1 else "altında"
+        reasons.append(f"Güncel mcap 30 gün önceki mcap'in %{abs(ratio_30d - 1) * 100:.1f} {direction}")
 
     if drawdown_from_max is not None:
         confidence += 0.15
         if drawdown_from_max < -70:
             score += 0.2
-            reasons.append(f"Mcap zirvesinden %{abs(drawdown_from_max):.0f} asagida: uzun vadeli toparlanma potansiyeli")
+            reasons.append(f"Mcap zirvesinden %{abs(drawdown_from_max):.0f} aşağıda: uzun vadeli toparlanma potansiyeli")
         elif drawdown_from_max > -5:
             score -= 0.15
-            reasons.append("Mcap neredeyse tarihsel zirvede: sinirli yukari alan")
+            reasons.append("Mcap neredeyse tarihsel zirvede: sınırlı yukari alan")
 
     if ratio_vs_avg is not None:
         confidence += 0.1
         if ratio_vs_avg < 0.6:
             score += 0.15
-            reasons.append(f"Mcap 365 gun ortalamasinin %{(ratio_vs_avg - 1) * 100:.0f} altinda")
+            reasons.append(f"Mcap 365 gün ortalamasının %{(ratio_vs_avg - 1) * 100:.0f} altında")
         elif ratio_vs_avg > 1.5:
             score -= 0.1
-            reasons.append(f"Mcap 365 gun ortalamasinin %{(ratio_vs_avg - 1) * 100:.0f} uzerinde")
+            reasons.append(f"Mcap 365 gün ortalamasının %{(ratio_vs_avg - 1) * 100:.0f} üzerinde")
 
     summary = (
-        f"Guncel mcap ${current_mcap:,.0f}; 30 gun orani {ratio_30d and f'{ratio_30d:.3f}' or 'n/a'}, "
-        f"365 gunluk yuzdelik {percentile * 100:.0f}, zirveden uzaklik %{drawdown_from_max:.1f}."
+        f"Güncel mcap ${current_mcap:,.0f}; 30 gün oranı {ratio_30d and f'{ratio_30d:.3f}' or 'n/a'}, "
+        f"365 günlük yüzdelik {percentile * 100:.0f}, zirveden uzaklık %{drawdown_from_max:.1f}."
     )
 
     return ctx.result(
         "marketcap",
-        "Gecmis Mcap / Guncel Mcap Orani",
+        "Geçmiş Mcap / Güncel Mcap Oranı",
         summary=summary,
         data={
             "current_market_cap_usd": current_mcap,

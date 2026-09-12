@@ -53,11 +53,11 @@ def test_prompt_contains_all_items_and_placeholders():
     prompt = build_prompt(_run(), [_analysis()], [_item(i) for i in range(1, 67)])
     assert "Bitcoin" in prompt
     assert "96,000" in prompt
-    assert "66 MADDELIK DETAYLI" in prompt
+    assert "66 MADDELİK DETAYLI" in prompt
     for number in (1, 33, 66):
         assert f"{number}. Madde {number}" in prompt
-    assert "Yukselis olasiligi: %61.3" in prompt
-    assert "tek cumlede" in prompt.lower()
+    assert "Yükseliş olasılığı: %61.3" in prompt
+    assert "tek cümlede" in prompt.lower()
 
 
 def test_prompt_marks_no_data_items():

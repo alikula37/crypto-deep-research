@@ -35,7 +35,7 @@ RUN uv sync --no-dev --frozen
 # Web UI'i statik olarak sunmak icin derlenmis dosyalari kopyala
 COPY --from=web /app/web/dist ./web/dist
 
-RUN mkdir -p /data/reports /data/prompts /data/vectors
+RUN mkdir -p /data/reports /data/prompts /state
 
 EXPOSE 8000
 VOLUME ["/data"]

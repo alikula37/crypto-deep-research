@@ -140,7 +140,7 @@ class RAGEngine:
     def build_context(self, query: str, coin: str | None = None, k: int = 8) -> str:
         results = self.search(query, coin=coin, k=k)
         if not results:
-            return "Ilgili kaynak bulunamadi."
+            return "Ilgili kaynak bulunamadı."
         lines = [f"Soru: {query}", ""]
         for index, item in enumerate(results, 1):
             when = item.timestamp.strftime("%Y-%m-%d %H:%M") if item.timestamp else "tarih yok"
@@ -148,11 +148,11 @@ class RAGEngine:
         return "\n".join(lines)
 
     def answer_prompt(self, query: str, coin: str | None = None) -> str:
-        """Harici LLM'e verilecek RAG prompt'u uretir."""
+        """Harici LLM'e verilecek RAG prompt'u üretir."""
         context = self.build_context(query, coin=coin)
         return (
-            "Asagidaki kaynaklara dayanarak soruyu Turkce, kaynak numaralarina atif yaparak yanitla.\n"
-            "Bilgi yoksa bunu acikca belirt, uydurma.\n\n"
+            "Aşağıdaki kaynaklara dayanarak soruyu Turkce, kaynak numaralarina atif yaparak yanitla.\n"
+            "Bilgi yoksa bunu açıkça belirt, uydurma.\n\n"
             f"{context}\n\nSorunun cevabi:"
         )
 

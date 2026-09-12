@@ -1,4 +1,4 @@
-"""Haber ve sentiment analizi: son haberler, duygu skorlari, haber hizi."""
+"""Haber ve sentiment analizi: son haberler, duygu skorları, haber hızı."""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ async def analyze_news(ctx: AnalysisContext) -> AnalysisResult:
     articles = await ctx.articles(hours=72)
     sources = [
         source("CryptoPanic", "https://cryptopanic.com", note="haber + topluluk sentiment"),
-        source("RSS (CoinDesk/Cointelegraph/Decrypt/The Block)", note="haber akislari", kind="rss"),
+        source("RSS (CoinDesk/Cointelegraph/Decrypt/The Block)", note="haber akışları", kind="rss"),
         source("GDELT", "https://api.gdeltproject.org", note="haber hacmi/jeopolitik"),
     ]
     if not articles:
@@ -22,7 +22,7 @@ async def analyze_news(ctx: AnalysisContext) -> AnalysisResult:
             "news",
             "Son Haberler ve Sentiment",
             status="no_data",
-            summary="Haber kaynaklarina ulasilamadi.",
+            summary="Haber kaynaklarına ulaşilamadi.",
             sources=sources,
         )
 
@@ -75,17 +75,17 @@ async def analyze_news(ctx: AnalysisContext) -> AnalysisResult:
     if avg_sentiment > 0.15:
         reasons.append(f"24s haber sentiment pozitif ({avg_sentiment:.2f}): iyimserlik")
     elif avg_sentiment < -0.15:
-        reasons.append(f"24s haber sentiment negatif ({avg_sentiment:.2f}): kotumserlik")
+        reasons.append(f"24s haber sentiment negatif ({avg_sentiment:.2f}): kötümserlik")
     else:
-        reasons.append(f"24s haber sentiment notr ({avg_sentiment:.2f})")
+        reasons.append(f"24s haber sentiment nötr ({avg_sentiment:.2f})")
 
     if velocity_ratio is not None:
         if velocity_ratio > 1.5:
             reasons.append(
-                f"Haber yazilma hizi artti (son 6s onceki 6s'in {velocity_ratio:.1f}x): volatilite riski"
+                f"Haber yazilma hızı arttı (son 6s önceki 6s'in {velocity_ratio:.1f}x): volatilite riski"
             )
         elif velocity_ratio < 0.5:
-            reasons.append("Haber akisi yavasladi: sakin donem")
+            reasons.append("Haber akışı yavaşladı: sakin dönem")
 
     channel_sentiment = {}
     for channel in ("Binance", "Coinbase", "ETF"):
@@ -102,7 +102,7 @@ async def analyze_news(ctx: AnalysisContext) -> AnalysisResult:
 
     return ctx.result(
         "news",
-        "Son Haberler ve Sentiment Skorlari",
+        "Son Haberler ve Sentiment Skorları",
         summary=summary,
         data={
             "sentiment_24h": sentiment_24h,

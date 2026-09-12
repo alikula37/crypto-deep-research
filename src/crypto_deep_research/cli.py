@@ -22,7 +22,7 @@ from crypto_deep_research.storage.db import Database
 
 app = typer.Typer(
     name="cdr",
-    help="Kripto Deep Research: yerel RAG, 66 maddelik arastirma ve MCP server.",
+    help="Kripto Deep Research: yerel RAG, 66 maddelik araştırma ve MCP server.",
     no_args_is_help=True,
 )
 console = Console()
@@ -47,23 +47,23 @@ async def _snapshot(coin: str) -> dict:
 
 @app.command()
 def snapshot(coin: str = typer.Argument(..., help="Coin sembolu veya id (btc, bitcoin...)")):
-    """Anlik piyasa ozeti."""
+    """Anlık piyasa özeti."""
     data = asyncio.run(_snapshot(coin))
     table = Table(title=f"{data['coin']['name']} ({data['coin']['symbol'].upper()})")
     table.add_column("Alan")
-    table.add_column("Deger", justify="right")
+    table.add_column("Değer", justify="right")
     rows = [
         ("Fiyat", f"${data['price_usd']:,.6f}"),
-        ("Piyasa degeri", f"${data.get('market_cap_usd') or 0:,.0f}"),
+        ("Piyasa değeri", f"${data.get('market_cap_usd') or 0:,.0f}"),
         ("Sira", str(data.get("rank"))),
         ("24s hacim", f"${data.get('volume_24h_usd') or 0:,.0f}"),
-        ("24s degisim", f"%{data.get('change_24h_pct') or 0:.2f}"),
-        ("7g degisim", f"%{data.get('change_7d_pct') or 0:.2f}"),
-        ("30g degisim", f"%{data.get('change_30d_pct') or 0:.2f}"),
+        ("24s değişim", f"%{data.get('change_24h_pct') or 0:.2f}"),
+        ("7g değişim", f"%{data.get('change_7d_pct') or 0:.2f}"),
+        ("30g değişim", f"%{data.get('change_30d_pct') or 0:.2f}"),
         ("ATH", f"${data.get('ath_usd') or 0:,.6f}"),
-        ("ATH uzaklik", f"%{data.get('ath_change_pct') or 0:.2f}"),
+        ("ATH uzaklık", f"%{data.get('ath_change_pct') or 0:.2f}"),
         ("ATL", f"${data.get('atl_usd') or 0:,.6f}"),
-        ("ATL uzaklik", f"%{data.get('atl_change_pct') or 0:.2f}"),
+        ("ATL uzaklık", f"%{data.get('atl_change_pct') or 0:.2f}"),
     ]
     for label, value in rows:
         table.add_row(label, value)
@@ -90,13 +90,13 @@ async def _analyze(coin: str, types: list[str], timeframe: str, days: int) -> li
 def analyze(
     coin: str = typer.Argument(...),
     types: str | None = typer.Option(
-        None, "--types", "-t", help="Virgulle ayrilmis analizler: " + ", ".join(ANALYSIS_REGISTRY)
+        None, "--types", "-t", help="Virgulle ayrılmis analizler: " + ", ".join(ANALYSIS_REGISTRY)
     ),
     timeframe: str = typer.Option("1d", "--timeframe", "-f"),
     days: int = typer.Option(365, "--days", "-d"),
-    json_output: bool = typer.Option(False, "--json", help="Ham JSON cikti"),
+    json_output: bool = typer.Option(False, "--json", help="Ham JSON çıktı"),
 ):
-    """Secili analizleri calistirir."""
+    """Seçili analizleri çalıştırir."""
     selected = [item.strip() for item in types.split(",")] if types else None
     results = asyncio.run(_analyze(coin, selected, timeframe, days))
     if json_output:
@@ -107,7 +107,7 @@ def analyze(
         color = "green" if (result.score or 0) > 0.15 else "red" if (result.score or 0) < -0.15 else "yellow"
         console.print(
             Panel(
-                f"{result.summary}\n\nSkor: {score} | Guven: {result.confidence:.2f} | Durum: {result.status}",
+                f"{result.summary}\n\nSkor: {score} | Güven: {result.confidence:.2f} | Durum: {result.status}",
                 title=f"[bold]{result.title}[/bold]",
                 border_style=color,
             )
@@ -144,7 +144,7 @@ def deep_research(
     platform: str = typer.Option("generic", "--platform", help="generic|claude|codex|chatgpt"),
     json_output: bool = typer.Option(False, "--json"),
 ):
-    """66 maddelik deep research calistirir; rapor ve prompt uretir."""
+    """66 maddelik deep research çalıştırir; rapor ve prompt üretir."""
     selected = [item.strip() for item in types.split(",")] if types else None
     result = asyncio.run(_deep_research(coin, selected, timeframe, days, platform))
     if json_output:
@@ -153,10 +153,10 @@ def deep_research(
     run = result["run"]
     console.print(
         Panel(
-            f"Agirlikli skor: {run['weighted_score']}\n"
-            f"Yukselis olasiligi: %{run['up_probability']} | Dusus: %{run['down_probability']}\n"
-            f"Beklenen aralik: {run['expected_low']} - {run['expected_high']} USD",
-            title="[bold]Deep Research Sonucu[/bold]",
+            f"Ağırlıklı skor: {run['weighted_score']}\n"
+            f"Yükseliş olasılığı: %{run['up_probability']} | Düşüş: %{run['down_probability']}\n"
+            f"Beklenen aralık: {run['expected_low']} - {run['expected_high']} USD",
+            title="[bold]Deep Research Sonuçu[/bold]",
             border_style="cyan",
         )
     )
@@ -167,13 +167,13 @@ def deep_research(
 
 @app.command()
 def items():
-    """66 maddelik kayit defterini listeler."""
-    table = Table(title="66 Maddelik Arastirma Listesi")
+    """66 maddelik kayıt defterini listeler."""
+    table = Table(title="66 Maddelik Araştırma Listesi")
     table.add_column("#", justify="right")
     table.add_column("Madde")
     table.add_column("Kategori")
     table.add_column("Kaynak")
-    table.add_column("Agirlik", justify="right")
+    table.add_column("Ağırlık", justify="right")
     for item in registry_summary():
         table.add_row(
             str(item["id"]), item["title"], item["category"], item["source"], f"{item['weight']:.2f}"
@@ -186,7 +186,7 @@ def search(
     query: str = typer.Argument(...),
     coin: str | None = typer.Option(None, "--coin", "-c"),
     k: int = typer.Option(8, "--k"),
-    prompt: bool = typer.Option(False, "--prompt", help="LLM icin RAG prompt'u uret"),
+    prompt: bool = typer.Option(False, "--prompt", help="LLM için RAG prompt'u üret"),
 ):
     """Yerel RAG deposunda arama yapar."""
     settings = get_settings()
@@ -197,7 +197,7 @@ def search(
         return
     results = engine.search(query, coin=coin, k=k)
     if not results:
-        console.print("[yellow]Sonuc bulunamadi. Once deep-research calistirin.[/yellow]")
+        console.print("[yellow]Sonuç bulunamadı. Once deep-research çalıştırin.[/yellow]")
         return
     for index, result in enumerate(results, 1):
         when = result.timestamp.strftime("%Y-%m-%d %H:%M") if result.timestamp else "?"
@@ -211,14 +211,14 @@ def ask(
     coin: str | None = typer.Option(None, "--coin", "-c"),
     model: str | None = typer.Option(None, "--model"),
 ):
-    """RAG baglamiyla OpenRouter uzerinden soru sorar (anahtar yoksa prompt yazdirir)."""
+    """RAG bağlamıyla OpenRouter üzerinden soru sorar (anahtar yoksa prompt yazdırir)."""
     settings = get_settings()
     db = Database(settings.db_path)
     rag = RAGEngine(db, settings)
     prompt = rag.answer_prompt(question, coin=coin)
     client = OpenRouterClient(settings)
     if not client.enabled:
-        console.print("[yellow]OpenRouter anahtari yok; uretilen prompt:[/yellow]\n")
+        console.print("[yellow]OpenRouter anahtari yok; üretilen prompt:[/yellow]\n")
         console.print(prompt)
         return
     answer = asyncio.run(client.complete(prompt, model=model))
@@ -227,7 +227,7 @@ def ask(
 
 @app.command()
 def mcp():
-    """MCP server'i stdio uzerinden calistirir."""
+    """MCP server'i stdio üzerinden çalıştırir."""
     from crypto_deep_research.mcp_server import run_stdio
 
     run_stdio()
@@ -256,17 +256,17 @@ def cache_command(
     clear: bool = typer.Option(False, "--clear"),
     provider: str | None = typer.Option(None, "--provider"),
 ):
-    """HTTP onbellegini yonetir."""
+    """HTTP onbellegini yönetir."""
     settings = get_settings()
     db = Database(settings.db_path)
     if clear:
         count = db.cache_clear(provider)
-        console.print(f"[green]{count} onbellek kaydi silindi.[/green]")
+        console.print(f"[green]{count} önbellek kaydi silindi.[/green]")
         return
-    table = Table(title="Onbellek Istatistikleri")
-    table.add_column("Saglayici")
-    table.add_column("Kayit", justify="right")
-    table.add_column("Son guncelleme")
+    table = Table(title="Önbellek İstatistikleri")
+    table.add_column("Sağlayıcı")
+    table.add_column("Kayıt", justify="right")
+    table.add_column("Son güncelleme")
     for row in db.cache_stats():
         table.add_row(
             row["provider"],
@@ -278,7 +278,7 @@ def cache_command(
 
 @app.command("rag-stats")
 def rag_stats():
-    """RAG deposunun durumunu gosterir."""
+    """RAG deposunun durumunu gösterir."""
     settings = get_settings()
     db = Database(settings.db_path)
     engine = RAGEngine(db, settings)
@@ -287,7 +287,7 @@ def rag_stats():
 
 @app.command("analyses")
 def analyses_command():
-    """Kullanilabilir analiz anahtarlarini listeler."""
+    """Kullanılabilir analiz anahtarlarini listeler."""
     for item in available_analyses():
         console.print(f"- [bold]{item['key']}[/bold]: {item['title']}")
 

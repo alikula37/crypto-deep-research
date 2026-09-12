@@ -1,4 +1,4 @@
-"""MCP server: Claude, Codex, Cursor gibi araclara veri ve analiz sunar."""
+"""MCP server: Claude, Codex, Cursor gibi araçlara veri ve analiz sunar."""
 
 from __future__ import annotations
 
@@ -19,9 +19,9 @@ from crypto_deep_research.storage.db import Database
 server = MCPServer(
     name="crypto-deep-research",
     instructions=(
-        "Kripto paralar icin ucretsiz veri kaynaklarindan beslenen analiz, RAG ve 66 maddelik "
-        "deep research araclari sunar. Skorlar -1 (negatif) ile +1 (pozitif) arasindadir; "
-        "yatirim tavsiyesi degildir."
+        "Kripto paralar için ücretsiz veri kaynaklarından beslenen analiz, RAG ve 66 maddelik "
+        "deep research araçlari sunar. Skorlar -1 (negatif) ile +1 (pozitif) arasındadir; "
+        "yatırım tavsiyesi değildir."
     ),
     version="0.1.0",
 )
@@ -36,7 +36,7 @@ def _context():
 
 @server.tool()
 def list_analyses() -> list[dict[str, str]]:
-    """Kullanilabilir analiz anahtarlarini listeler."""
+    """Kullanılabilir analiz anahtarlarini listeler."""
     from crypto_deep_research.analysis.engine import available_analyses
 
     return available_analyses()
@@ -44,7 +44,7 @@ def list_analyses() -> list[dict[str, str]]:
 
 @server.tool()
 def list_research_items() -> list[dict[str, Any]]:
-    """66 maddelik arastirma listesini dondurur."""
+    """66 maddelik araştırma listesini döndürür."""
     return registry_summary()
 
 
@@ -61,7 +61,7 @@ async def resolve_coin(query: str) -> dict[str, str]:
 
 @server.tool()
 async def get_market_snapshot(coin: str) -> dict[str, Any]:
-    """Anlik fiyat, piyasa degeri, ATH/ATL mesafesi ve degisimleri dondurur."""
+    """Anlık fiyat, piyasa değeri, ATH/ATL mesafesi ve değişimleri döndürür."""
     settings, db, providers = _context()
     try:
         ref = await providers.coingecko.resolve(coin)
@@ -79,7 +79,7 @@ async def get_market_snapshot(coin: str) -> dict[str, Any]:
 async def run_analysis(
     coin: str, analysis: str = "technical", timeframe: str = "1d", lookback_days: int = 365
 ) -> dict[str, Any]:
-    """Tek bir analizi calistirir (ornek: technical, liquidations, news, volumes, whales...)."""
+    """Tek bir analizi çalıştırir (ornek: technical, liquidations, news, volumes, whales...)."""
     settings, db, providers = _context()
     try:
         ref = await providers.coingecko.resolve(coin)
@@ -104,7 +104,7 @@ async def deep_research(
     platform: str = "generic",
     include_prompt: bool = False,
 ) -> dict[str, Any]:
-    """66 maddelik arastirmayi calistirir; skor, olasilik, rapor ve prompt uretir."""
+    """66 maddelik araştırmayı çalıştırir; skor, olasılık, rapor ve prompt üretir."""
     settings, db, providers = _context()
     engine = DeepResearchEngine(providers, settings, db)
     try:
@@ -159,7 +159,7 @@ def search_context(query: str, coin: str | None = None, k: int = 8) -> list[dict
 
 @server.tool()
 def list_reports(limit: int = 20) -> list[dict[str, Any]]:
-    """Uretilmis raporlari listeler."""
+    """Üretilmiş raporlari listeler."""
     settings = get_settings()
     db = Database(settings.db_path)
     return db.list_reports(limit=limit)
@@ -171,19 +171,26 @@ def get_report(name: str) -> dict[str, Any]:
     settings = get_settings()
     db = Database(settings.db_path)
     report = db.get_report(name)
-    if not report:
+    if report:
+        return {"name": report["name"], "coin": report["coin"], "markdown": report["markdown"]}
+    path = settings.reports_dir / f"{name}.md"
+    if not path.exists():
         return {"error": "rapor bulunamadi"}
-    return {"name": report["name"], "coin": report["coin"], "markdown": report["markdown"]}
+    return {
+        "name": name,
+        "coin": name.split("_")[0].lower(),
+        "markdown": path.read_text(encoding="utf-8"),
+    }
 
 
 @server.tool()
 def get_run(run_id: str) -> dict[str, Any]:
-    """Kosu detaylarini (66 madde sonuclari dahil) dondurur."""
+    """Kosu detaylarıni (66 madde sonuçları dahil) döndürür."""
     settings = get_settings()
     db = Database(settings.db_path)
     run = db.get_run(run_id)
     if not run:
-        return {"error": "kosu bulunamadi"}
+        return {"error": "kosu bulunamadı"}
     return json.loads(run.model_dump_json())
 
 

@@ -1,4 +1,4 @@
-"""Analiz baglami ve yardimci fonksiyonlar."""
+"""Analiz bağlamı ve yardımci fonksiyonlar."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from crypto_deep_research.providers.registry import Providers
 
 @dataclass
 class AnalysisContext:
-    """Tum analizlere verilen ortak baglam."""
+    """Tüm analizlere verilen ortak bağlam."""
 
     coin: CoinRef
     providers: Providers
@@ -124,7 +124,7 @@ def pct_change(current: float | None, previous: float | None) -> float | None:
 
 
 def rank_to_score(rank: int | None, baseline: int = 100) -> float:
-    """Kucuk rank (yuksek mcap) pozitif; rank kotulesince negatif."""
+    """Küçük rank (yüksek mcap) pozitif; rank kötülesince negatif."""
     if rank is None:
         return 0.0
     return clamp((baseline - rank) / baseline)

@@ -1,4 +1,4 @@
-"""Analiz motoru: secili analizleri paralel calistirir."""
+"""Analiz motoru: seçili analizleri paralel çalıştırir."""
 
 from __future__ import annotations
 
@@ -25,15 +25,15 @@ AnalysisFn = Callable[[AnalysisContext], Awaitable[AnalysisResult]]
 
 ANALYSIS_REGISTRY: dict[str, tuple[str, AnalysisFn]] = {
     "technical": ("Teknik Analiz", analyze_technical),
-    "liquidations": ("Likidasyon Haritasi ve Turev Piyasalar", analyze_liquidations),
-    "whales": ("Balina Alim-Satim / Toplam Arz", analyze_whales),
-    "volumes": ("Tum Borsalardaki Hacimler", analyze_volumes),
-    "revenue": ("Gelirler, Fee'ler ve Mcap Orani", analyze_revenue),
+    "liquidations": ("Likidasyon Haritası ve Türev Piyasalar", analyze_liquidations),
+    "whales": ("Balina Alım-Satım / Toplam Arz", analyze_whales),
+    "volumes": ("Tüm Borsalardaki Hacimler", analyze_volumes),
+    "revenue": ("Gelirler, Fee'ler ve Mcap Oranı", analyze_revenue),
     "news": ("Son Haberler ve Sentiment", analyze_news),
-    "marketcap": ("Gecmis Mcap / Guncel Mcap", analyze_marketcap),
-    "parity": ("BTC/ETH Paritesi ve Direnc", analyze_parity),
+    "marketcap": ("Geçmiş Mcap / Güncel Mcap", analyze_marketcap),
+    "parity": ("BTC/ETH Paritesi ve Direnç", analyze_parity),
     "ath_atl": ("USD ATH/ATL Mesafesi", analyze_ath_atl),
-    "rankings": ("Mcap Siralamasi", analyze_rankings),
+    "rankings": ("Mcap Sıralaması", analyze_rankings),
 }
 
 DEFAULT_ANALYSES: list[str] = list(ANALYSIS_REGISTRY.keys())
@@ -55,13 +55,13 @@ async def run_analyses(
     for key, result in zip(selected, results, strict=False):
         title = ANALYSIS_REGISTRY[key][0]
         if isinstance(result, Exception):
-            logger.exception("Analiz hatasi (%s)", key)
+            logger.exception("Analiz hatası (%s)", key)
             output.append(
                 ctx.result(
                     key,
                     title,
                     status="error",
-                    summary=f"Analiz calistirilamadi: {result}",
+                    summary=f"Analiz çalıştırılamadı: {result}",
                     score=None,
                     confidence=0.0,
                 )

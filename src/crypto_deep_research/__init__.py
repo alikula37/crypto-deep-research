@@ -1,3 +1,3 @@
-"""Crypto Deep Research - kripto paralar icin yerel RAG ve derin arastirma sistemi."""
+"""Crypto Deep Research - kripto paralar için yerel RAG ve derin araştırma sistemi."""
 
 __version__ = "0.1.0"

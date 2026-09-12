@@ -10,7 +10,7 @@ const TABS = [
   { id: "report", label: "Rapor" },
   { id: "prompt", label: "Prompt" },
   { id: "rag", label: "RAG Arama" },
-  { id: "history", label: "Gecmis" },
+  { id: "history", label: "Geçmiş" },
 ];
 
 function scoreColor(score) {
@@ -26,7 +26,7 @@ function formatNumber(value, digits = 2) {
 }
 
 function Badge({ status }) {
-  const labels = { ok: "Tam", partial: "Kismi", no_data: "Veri yok", error: "Hata" };
+  const labels = { ok: "Tam", partial: "Kısmi", no_data: "Veri yok", error: "Hata" };
   return <span className={`badge badge-${status}`}>{labels[status] || status}</span>;
 }
 
@@ -41,14 +41,14 @@ function SnapshotCard({ data }) {
   const g = data.global;
   const items = [
     ["Fiyat", `$${formatNumber(s.price_usd, s.price_usd < 1 ? 6 : 2)}`],
-    ["Piyasa degeri", `$${formatNumber(s.market_cap_usd, 0)}`],
+    ["Piyasa değeri", `$${formatNumber(s.market_cap_usd, 0)}`],
     ["Sira", `#${s.rank ?? "-"}`],
     ["24s hacim", `$${formatNumber(s.volume_24h_usd, 0)}`],
     ["24s", `${formatNumber(s.change_24h_pct)}%`],
     ["7g", `${formatNumber(s.change_7d_pct)}%`],
     ["30g", `${formatNumber(s.change_30d_pct)}%`],
-    ["ATH uzaklik", `${formatNumber(s.ath_change_pct)}%`],
-    ["ATL uzaklik", `${formatNumber(s.atl_change_pct)}%`],
+    ["ATH uzaklık", `${formatNumber(s.ath_change_pct)}%`],
+    ["ATL uzaklık", `${formatNumber(s.atl_change_pct)}%`],
     ["BTC dominance", `${formatNumber(g?.btc_dominance)}%`],
     ["ETH dominance", `${formatNumber(g?.eth_dominance)}%`],
     ["Toplam mcap", `$${formatNumber(g?.total_market_cap_usd, 0)}`],
@@ -74,7 +74,7 @@ function AnalysisCard({ result }) {
         <div className="card-meta">
           <Badge status={result.status} />
           <ScorePill score={result.score} />
-          <span className="confidence">guven {result.confidence.toFixed(2)}</span>
+          <span className="confidence">güven {result.confidence.toFixed(2)}</span>
         </div>
       </div>
       <p className="summary">{result.summary}</p>
@@ -107,10 +107,10 @@ function ItemsTable({ items }) {
     <div>
       <div className="filter-row">
         {[
-          ["all", "Tumu"],
+          ["all", "Tümü"],
           ["scored", "Skorlananlar"],
           ["ok", "Tam"],
-          ["partial", "Kismi"],
+          ["partial", "Kısmi"],
           ["no_data", "Veri yok"],
         ].map(([id, label]) => (
           <button
@@ -138,7 +138,7 @@ function ItemsTable({ items }) {
             <p className="summary">{item.summary}</p>
             <div className="item-footer">
               <span className="muted">
-                {item.category} | agirlik {item.weight} | guven {item.confidence.toFixed(2)}
+                {item.category} | ağırlık {item.weight} | güven {item.confidence.toFixed(2)}
               </span>
               {item.sources?.length > 0 && (
                 <span className="muted">
@@ -306,7 +306,7 @@ export default function App() {
           Crypto<span>DeepResearch</span>
         </h1>
         <p className="muted small">
-          Yerel RAG + 66 maddelik arastirma. Veriler ucretsiz kaynaklardan toplanir.
+          Yerel RAG + 66 maddelik araştırma. Veriler ücretsiz kaynaklardan toplanır.
         </p>
 
         <label className="field">
@@ -329,7 +329,7 @@ export default function App() {
             </select>
           </label>
           <label className="field">
-            <span>Gecmis (gun)</span>
+            <span>Geçmiş (gün)</span>
             <input
               type="number"
               min="30"
@@ -341,7 +341,7 @@ export default function App() {
         </div>
 
         <div className="field">
-          <span>Analizler {selected.length ? `(${selected.length} secili)` : "(tumu)"}</span>
+          <span>Analizler {selected.length ? `(${selected.length} seçili)` : "(tümü)"}</span>
           <div className="checklist">
             {analysesList.map((analysis) => (
               <label key={analysis.key} className="check">
@@ -372,7 +372,7 @@ export default function App() {
           {busy === "analyze" ? "Analiz ediliyor..." : "Analiz Et"}
         </button>
         <button className="accent" onClick={runDeepResearch} disabled={!!busy}>
-          {busy === "deep" ? "Arastirma suruyor (dakikalar)..." : "Deep Research + Prompt"}
+          {busy === "deep" ? "Araştırma sürüyor (dakikalar)..." : "Deep Research + Prompt"}
         </button>
 
         {snapshotData && (
@@ -388,10 +388,10 @@ export default function App() {
                 Anahtarlar: {Object.entries(health.keys).filter(([, v]) => v).map(([k]) => k).join(", ") || "yok"}
               </div>
               <div className="muted small">
-                OpenRouter: {health.openrouter ? "aktif" : "yok (prompt uretilir)"}
+                OpenRouter: {health.openrouter ? "aktif" : "yok (prompt üretilir)"}
               </div>
               <div className="muted small">
-                Rapor: {health.reports} | Vektor: {ragStats?.vectors ?? 0}
+                Rapor: {health.reports} | Vektör: {ragStats?.vectors ?? 0}
               </div>
             </>
           )}
@@ -416,8 +416,8 @@ export default function App() {
               <span className={scoreColor(run.weighted_score)}>
                 skor {run.weighted_score ?? "-"}
               </span>
-              <span className="up">yukselis %{run.up_probability}</span>
-              <span className="down">dusus %{run.down_probability}</span>
+              <span className="up">yükseliş %{run.up_probability}</span>
+              <span className="down">düşüş %{run.down_probability}</span>
               <span className="range">
                 {formatNumber(run.expected_low, 4)} - {formatNumber(run.expected_high, 4)}
               </span>
@@ -426,7 +426,7 @@ export default function App() {
         </header>
 
         {error && <div className="error">{error}</div>}
-        {busy && <div className="progress">{busy === "deep" ? "Deep research calisiyor; 66 madde ve tum analizler toplaniyor..." : "Calisiyor..."}</div>}
+        {busy && <div className="progress">{busy === "deep" ? "Deep research çalışıyor; 66 madde ve tüm analizler toplaniyor..." : "Çalışıyor..."}</div>}
 
         <section className="content">
           {tab === "overview" && (
@@ -434,7 +434,7 @@ export default function App() {
               <SnapshotCard data={snapshotData} />
               {!snapshotData && !busy && (
                 <div className="empty">
-                  Soldan bir coin secip <b>Analiz Et</b> veya <b>Deep Research</b> baslatin.
+                  Soldan bir coin seçip <b>Analiz Et</b> veya <b>Deep Research</b> başlatın.
                 </div>
               )}
               <div className="grid">
@@ -449,7 +449,7 @@ export default function App() {
             <>
               {scoredItems.length === 0 && (
                 <div className="empty">
-                  66 maddenin tamami icin once <b>Deep Research</b> calistirin. Boylece her madde
+                  66 maddenin tamamı için önce <b>Deep Research</b> çalıştırin. Böylece her madde
                   veri, kaynak ve skorla doldurulur.
                 </div>
               )}
@@ -460,7 +460,7 @@ export default function App() {
 
           {tab === "report" && (
             <>
-              {!deep && <div className="empty">Rapor icin Deep Research calistirin.</div>}
+              {!deep && <div className="empty">Rapor için Deep Research çalıştırin.</div>}
               {deep && (
                 <>
                   <div className="toolbar">
@@ -476,12 +476,12 @@ export default function App() {
 
           {tab === "prompt" && (
             <>
-              {!deep && <div className="empty">Prompt icin Deep Research calistirin.</div>}
+              {!deep && <div className="empty">Prompt için Deep Research çalıştırin.</div>}
               {deep && (
                 <>
                   <div className="toolbar">
                     <button onClick={copyPrompt}>Panoya kopyala</button>
-                    <button onClick={downloadPrompt}>Indir</button>
+                    <button onClick={downloadPrompt}>İndir</button>
                     <span className="muted">{deep.prompt?.length ?? 0} karakter</span>
                   </div>
                   <textarea className="prompt-box" readOnly value={deep.prompt || ""} />
@@ -496,14 +496,14 @@ export default function App() {
                 <input
                   value={ragQuery}
                   onChange={(event) => setRagQuery(event.target.value)}
-                  placeholder="Ornek: ETF akislari, likidasyon, regülasyon..."
+                  placeholder="Ornek: ETF akışları, likidasyon, regülasyon..."
                   onKeyDown={(event) => event.key === "Enter" && runRagSearch("rag-search")}
                 />
                 <button onClick={() => runRagSearch("rag-search")} disabled={!!busy}>
                   Ara
                 </button>
                 <button onClick={() => runRagSearch("rag-ask")} disabled={!!busy}>
-                  {health?.openrouter ? "AI ile Yanitla" : "RAG Prompt Olustur"}
+                  {health?.openrouter ? "AI ile Yanitla" : "RAG Prompt Oluştur"}
                 </button>
               </div>
               {ragAnswer && (

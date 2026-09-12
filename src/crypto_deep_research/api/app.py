@@ -1,4 +1,4 @@
-"""FastAPI uygulamasi: NotebookLM benzeri web UI'in backend'i."""
+"""FastAPI uygulaması: NotebookLM benzeri web UI'in backend'i."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Crypto Deep Research",
-    description="Kripto paralar icin yerel RAG + 66 maddelik deep research sistemi",
+    description="Kripto paralar için yerel RAG + 66 maddelik deep research sistemi",
     version="0.1.0",
 )
 app.add_middleware(
@@ -163,7 +163,7 @@ async def deep_research(request: DeepResearchRequest) -> dict[str, Any]:
             "context_stats": output.context_stats,
         }
     except Exception as exc:
-        logger.exception("Deep research hatasi")
+        logger.exception("Deep research hatası")
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     finally:
         await providers.aclose()
@@ -186,7 +186,7 @@ async def rag_ask(request: RagAskRequest) -> dict[str, Any]:
     prompt = engine.answer_prompt(request.query, coin=request.coin)
     client = OpenRouterClient(settings)
     if not client.enabled:
-        return {"answer": None, "prompt": prompt, "note": "OpenRouter anahtari tanimli degil."}
+        return {"answer": None, "prompt": prompt, "note": "OpenRouter anahtari tanımli değil."}
     try:
         answer = await client.complete(prompt, model=request.model)
         return {"answer": answer, "prompt": prompt}
@@ -198,7 +198,21 @@ async def rag_ask(request: RagAskRequest) -> dict[str, Any]:
 async def reports() -> list[dict[str, Any]]:
     settings = get_settings()
     db = Database(settings.db_path)
-    return db.list_reports(limit=200)
+    rows = db.list_reports(limit=200)
+    known = {str(row["name"]) for row in rows}
+    for path in settings.reports_dir.glob("*.md"):
+        if path.stem in known:
+            continue
+        rows.append(
+            {
+                "name": path.stem,
+                "run_id": None,
+                "coin": path.stem.split("_")[0].lower(),
+                "created_at": path.stat().st_mtime,
+            }
+        )
+    rows.sort(key=lambda row: row.get("created_at") or 0, reverse=True)
+    return rows[:200]
 
 
 @app.get("/api/reports/{name}")
@@ -206,9 +220,19 @@ async def report(name: str) -> dict[str, Any]:
     settings = get_settings()
     db = Database(settings.db_path)
     data = db.get_report(name)
-    if not data:
-        raise HTTPException(status_code=404, detail="Rapor bulunamadi")
-    return data
+    if data:
+        return data
+    path = settings.reports_dir / f"{name}.md"
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="Rapor bulunamadı")
+    return {
+        "name": name,
+        "run_id": None,
+        "coin": name.split("_")[0].lower(),
+        "created_at": path.stat().st_mtime,
+        "markdown": path.read_text(encoding="utf-8"),
+        "meta": None,
+    }
 
 
 @app.get("/api/runs")
@@ -224,7 +248,7 @@ async def run_detail(run_id: str) -> dict[str, Any]:
     db = Database(settings.db_path)
     run = db.get_run(run_id)
     if not run:
-        raise HTTPException(status_code=404, detail="Kosu bulunamadi")
+        raise HTTPException(status_code=404, detail="Kosu bulunamadı")
     return json.loads(run.model_dump_json())
 
 
@@ -242,7 +266,7 @@ async def context_detail(key: str) -> dict[str, Any]:
     db = Database(settings.db_path)
     obj = db.get_context(key)
     if not obj:
-        raise HTTPException(status_code=404, detail="Context bulunamadi")
+        raise HTTPException(status_code=404, detail="Context bulunamadı")
     return obj.model_dump(mode="json")
 
 
@@ -266,7 +290,7 @@ def _mount_web() -> None:
         async def index() -> JSONResponse:
             return JSONResponse(
                 {
-                    "message": "Web UI derlenmemis. 'cd web && npm install && npm run build' calistirin.",
+                    "message": "Web UI derlenmemis. 'cd web && npm install && npm run build' çalıştırin.",
                     "api_docs": "/docs",
                 }
             )

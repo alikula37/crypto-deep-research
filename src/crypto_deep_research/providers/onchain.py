@@ -1,4 +1,4 @@
-"""Zincir-ustu (on-chain) saglayicilar: Blockchain.com, mempool.space, Blockchair, Blockscout/Etherscan, balina taramasi."""
+"""Zincir-Üstü (on-chain) sağlayıcılar: Blockchain.com, mempool.space, Blockchair, Blockscout/Etherscan, balina taraması."""
 
 from __future__ import annotations
 
@@ -30,8 +30,8 @@ BLOCKCHAIN_CHARTS: dict[str, str] = {
     "total_bitcoins": "total-bitcoins",
 }
 
-# Kamuya acik, bilinen buyuk borsa cuzdanlari (adres etiketleri kamu kaynaklarindan;
-# etiketler dogrulama gerektirebilir, yanlis atif riskine karsi "known label" olarak isaretlenir).
+# Kamuya açık, bilinen büyük borsa cüzdanları (adres etiketleri kamu kaynaklarından;
+# etiketler doğrulama gerektirebilir, yanlis atif riskine karsi "known label" olarak işaretlenir).
 KNOWN_EXCHANGE_ADDRESSES: dict[str, dict[str, str]] = {
     "ethereum": {
         "0x28c6c06298d514db089934071355e5743bf21d60": "Binance 14",
@@ -132,9 +132,9 @@ class OnChainProvider:
         except ProviderError:
             return None
 
-    # ------------------------------------------------------------------ Balina taramasi
+    # ------------------------------------------------------------------ Balina taraması
     async def btc_large_transactions(self, min_btc: float = 50.0, limit: int = 100) -> list[WhaleFlow]:
-        """Son bloklardaki buyuk BTC transferlerini tarar (mempool.space, yedek: blockchain.info)."""
+        """Son bloklardaki büyük BTC transferlerini tarar (mempool.space, yedek: blockchain.info)."""
         flows = await self._mempool_space_large(min_btc)
         if flows:
             return flows[:limit]
@@ -230,7 +230,7 @@ class OnChainProvider:
         return flows
 
     async def eth_large_transactions(self, min_eth: float = 1000.0, pages: int = 1) -> list[WhaleFlow]:
-        """Blockscout ile son bloklardaki buyuk ETH transferlerini tarar."""
+        """Blockscout ile son bloklardaki büyük ETH transferlerini tarar."""
         try:
             blocks = await self.http.get_json(
                 "blockscout", f"{BLOCKSCOUT_ETH}/blocks", ttl=60

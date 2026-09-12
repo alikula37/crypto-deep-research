@@ -1,4 +1,4 @@
-"""DefiLlama saglayicisi: protokol gelirleri, fee, stablecoin ve bridge verileri (ucretsiz)."""
+"""DefiLlama sağlayıcısi: protokol gelirleri, fee, stablecoin ve bridge verileri (ücretsiz)."""
 
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ class DefiLlamaProvider:
         return SLUG_ALIASES.get(coin_id, coin_id)
 
     async def fees_summary(self, coin_id: str, data_type: str = "dailyFees") -> dict[str, Any] | None:
-        """Protokol/zincir ucret ve gelir ozeti."""
+        """Protokol/zincir ücret ve gelir özeti."""
         slug = self.slug_for(coin_id)
         for path in (f"/summary/fees/{slug}", f"/overview/fees/{slug}"):
             try:
@@ -117,7 +117,7 @@ class DefiLlamaProvider:
 
     @staticmethod
     def summarize_fees(data: dict[str, Any] | None) -> dict[str, Any]:
-        """DefiLlama fee/gelir verisini ozetler."""
+        """DefiLlama fee/gelir verisini özetler."""
         if not data:
             return {}
         total_24h = data.get("total24h")

@@ -2,7 +2,7 @@
 
 Kripto paralar için **yerel RAG + 66 maddelik deep research** sistemi. NotebookLM benzeri bir
 yapı: seçili coinler için ücretsiz veri kaynaklarından veri toplar, analiz eder, kaynaklı rapor
-üretir ve harici AI'lara (Claude, Codex, ChatGPT...) yapıştırılabilecek detaylı Türkçe prompt
+üretir ve hariçi AI'lara (Claude, Codex, ChatGPT...) yapıştırılabilecek detaylı Türkçe prompt
 oluşturur.
 
 > Bu sistem yatırım tavsiyesi değildir. Üretilen skor ve olasılıklar araştırma amaçlıdır ve
@@ -70,10 +70,10 @@ uv run cdr analyze bitcoin --types technical,news,liquidations
 uv run cdr deep-research bitcoin --platform claude --json
 
 # RAG arama (haber + analiz + rapor deposu)
-uv run cdr search "ETF akislari" --coin bitcoin
+uv run cdr search "ETF akışları" --coin bitcoin
 
 # RAG + OpenRouter (anahtar varsa)
-uv run cdr ask "BTC icin likidasyon riski nedir?" --coin bitcoin
+uv run cdr ask "BTC için likidasyon riski nedir?" --coin bitcoin
 
 # MCP server (stdio)
 uv run cdr mcp
@@ -115,7 +115,7 @@ CLI komutları konteynerde:
 docker compose run --rm app cdr snapshot bitcoin
 docker compose run --rm app cdr analyze bitcoin -t technical,news
 docker compose run --rm app cdr deep-research bitcoin --platform claude
-docker compose exec app cdr search "ETF akislari" --coin bitcoin
+docker compose exec app cdr search "ETF akışları" --coin bitcoin
 ```
 
 MCP server (stdio) konteynerde:

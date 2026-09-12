@@ -1,4 +1,4 @@
-"""66 maddenin analiz edicileri: ozel hesaplamalar, haber sorgulari ve analiz eslemeleri."""
+"""66 maddenin analiz edicileri: özel hesaplamalar, haber sorgulari ve analiz eslemeleri."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ SpecialFn = Callable[
 ]
 
 
-# ---------------------------------------------------------------------- yardimcilar
+# ---------------------------------------------------------------------- yardımcilar
 def result_from(
     spec: ItemSpec,
     *,
@@ -83,7 +83,7 @@ async def _news_item(ctx: AnalysisContext, spec: ItemSpec) -> ItemResult:
         return result_from(
             spec,
             status="no_data",
-            summary="Haber kaynaklarina ulasilamadi.",
+            summary="Haber kaynaklarına ulaşilamadi.",
             score=None,
             confidence=0.0,
         )
@@ -91,10 +91,10 @@ async def _news_item(ctx: AnalysisContext, spec: ItemSpec) -> ItemResult:
         return result_from(
             spec,
             status="partial",
-            summary=f"Son 7 gunde '{', '.join(keywords[:3])}' ile ilgili haber bulunamadi (notr).",
+            summary=f"Son 7 günde '{', '.join(keywords[:3])}' ile ilgili haber bulunamadı (nötr).",
             data={"query": spec.query, "matched": 0, "total_articles": len(articles)},
             sources=[
-                source("RSS haber kaynaklari", kind="rss"),
+                source("RSS haber kaynakları", kind="rss"),
                 source("GDELT", "https://api.gdeltproject.org", kind="api"),
             ],
             score=0.0,
@@ -126,7 +126,7 @@ async def _news_item(ctx: AnalysisContext, spec: ItemSpec) -> ItemResult:
             ],
         },
         sources=[
-            source("RSS haber kaynaklari", kind="rss"),
+            source("RSS haber kaynakları", kind="rss"),
             source("CryptoPanic", "https://cryptopanic.com"),
             source("GDELT", "https://api.gdeltproject.org"),
         ],
@@ -164,20 +164,20 @@ async def fundamentals(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> 
         ratio = fdv / mcap
         if ratio < 1.2:
             score += 0.25
-            reasons.append(f"FDV/mcap {ratio:.2f}: dusuk seyreltme riski")
+            reasons.append(f"FDV/mcap {ratio:.2f}: düşük seyreltme riski")
         elif ratio > 2:
             score -= 0.3
-            reasons.append(f"FDV/mcap {ratio:.2f}: yuksek enflasyon/seyreltme riski")
+            reasons.append(f"FDV/mcap {ratio:.2f}: yüksek enflasyon/seyreltme riski")
         confidence += 0.15
     if circulating and total and total > 0:
         unlocked = circulating / total
         data["unlocked_pct"] = round(unlocked * 100, 2)
         if unlocked > 0.9:
             score += 0.15
-            reasons.append("Dolasimdaki arz toplam arzin %90+ (arz baskisi dusuk)")
+            reasons.append("Dolaşımdaki arz toplam arzın %90+ (arz baskısı düşük)")
         elif unlocked < 0.5:
             score -= 0.2
-            reasons.append("Toplam arzin yaridan azi dolasimda: kilit acilma baskisi riski")
+            reasons.append("Toplam arzın yaridan azi dolaşımda: kilit acilma baskısı riski")
         confidence += 0.1
     if revenue and revenue.score is not None:
         score += revenue.score * 0.35
@@ -185,8 +185,8 @@ async def fundamentals(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> 
         reasons.append(f"Gelir analizi skoru {revenue.score:+.2f}")
 
     summary = (
-        f"FDV/mcap {data.get('fdv_over_mcap')}; dolasim %{data.get('unlocked_pct', 'n/a')}; "
-        f"piyasa siralamasi #{snapshot.rank}."
+        f"FDV/mcap {data.get('fdv_over_mcap')}; dolaşım %{data.get('unlocked_pct', 'n/a')}; "
+        f"piyasa sıralaması #{snapshot.rank}."
     )
     return result_from(
         spec,
@@ -216,17 +216,17 @@ async def market_sensitivity(ctx: AnalysisContext, spec: ItemSpec, analyses: dic
         confidence += 0.25
         if current.value <= 25:
             score += 0.35
-            reasons.append(f"Korku endeksi {current.value}: asiri korku, kontrarian firsat")
+            reasons.append(f"Korku endeksi {current.value}: aşırı korku, kontrarian fırsat")
         elif current.value >= 75:
             score -= 0.35
-            reasons.append(f"Korku endeksi {current.value}: asiri acgozluluk, duzeltme riski")
+            reasons.append(f"Korku endeksi {current.value}: aşırı acgozluluk, düzeltme riski")
         if len(fng) > 3 and fng[0].value != fng[-1].value:
             data["fear_greed_trend"] = fng[0].value - fng[-1].value
 
     if liquidations and liquidations.score is not None:
         score += liquidations.score * 0.4
         confidence += 0.2
-        reasons.append(f"Turev piyasa skoru {liquidations.score:+.2f}")
+        reasons.append(f"Türev piyasa skoru {liquidations.score:+.2f}")
     if news and news.score is not None:
         score += news.score * 0.3
         confidence += 0.15
@@ -234,7 +234,7 @@ async def market_sensitivity(ctx: AnalysisContext, spec: ItemSpec, analyses: dic
 
     return result_from(
         spec,
-        summary="Duyarlilik: " + ("; ".join(reasons[:3]) if reasons else "veri kismi"),
+        summary="Duyarlılık: " + ("; ".join(reasons[:3]) if reasons else "veri kısmi"),
         data={"reasons": reasons, **data},
         sources=[
             source("alternative.me Fear & Greed", "https://alternative.me/crypto/fear-and-greed-index/"),
@@ -259,10 +259,10 @@ async def investor_behavior(ctx: AnalysisContext, spec: ItemSpec, analyses: dict
         confidence += 0.2
         if current > avg_30 + 10:
             score += 0.2
-            reasons.append("Iyimserlik 30 gun ortalamasinin uzerinde: momentum")
+            reasons.append("Iyimserlik 30 gün ortalamasının üzerinde: momentum")
         elif current < avg_30 - 10:
             score -= 0.15
-            reasons.append("Iyimserlik 30 gun ortalamasinin altinda")
+            reasons.append("Iyimserlik 30 gün ortalamasının altında")
 
     chain = ctx.coin.id
     if chain == "bitcoin":
@@ -276,9 +276,9 @@ async def investor_behavior(ctx: AnalysisContext, spec: ItemSpec, analyses: dict
             if addresses.get("change_pct") is not None:
                 change = addresses["change_pct"]
                 score += trend_score(change, 20.0) * 0.25
-                reasons.append(f"Aktif adres degisimi %{change:.1f}")
+                reasons.append(f"Aktif adres değişimi %{change:.1f}")
             if txs.get("change_pct") is not None:
-                reasons.append(f"Islem sayisi degisimi %{txs['change_pct']:.1f}")
+                reasons.append(f"İşlem sayısı değişimi %{txs['change_pct']:.1f}")
     elif chain == "ethereum":
         stats = await ctx.providers.onchain.eth_stats()
         sources.append(source("Blockscout", "https://eth.blockscout.com"))
@@ -290,13 +290,13 @@ async def investor_behavior(ctx: AnalysisContext, spec: ItemSpec, analyses: dict
                 "transactions_today": stats.get("transactions_today"),
                 "network_utilization": stats.get("network_utilization_percentage"),
             }
-            reasons.append("ETH ag istatistikleri alindi")
+            reasons.append("ETH ag istatistikleri alındı")
     else:
-        reasons.append("Bu varlik icin ucretsiz ag aktivite verisi sinirli")
+        reasons.append("Bu varlık için ücretsiz ag aktivite verisi sınırlı")
 
     return result_from(
         spec,
-        summary="Yatirimci davranisi: " + ("; ".join(reasons[:3]) if reasons else "veri kismi"),
+        summary="Yatırımcı davranisi: " + ("; ".join(reasons[:3]) if reasons else "veri kısmi"),
         data={"reasons": reasons, **data},
         sources=sources,
         score=round(clamp(score), 4),
@@ -316,12 +316,12 @@ async def sector(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemRe
         if match:
             break
     if not categories:
-        return result_from(spec, status="no_data", summary="Sektor/kategori bilgisi bulunamadi.", confidence=0.0)
+        return result_from(spec, status="no_data", summary="Sektör/kategori bilgisi bulunamadı.", confidence=0.0)
     if not match:
         return result_from(
             spec,
             status="partial",
-            summary=f"Kategoriler: {', '.join(categories[:4])}. Kategori performans verisi bulunamadi.",
+            summary=f"Kategoriler: {', '.join(categories[:4])}. Kategori performans verisi bulunamadı.",
             data={"categories": categories},
             sources=[source("CoinGecko Categories", "https://www.coingecko.com/en/categories")],
             score=0.0,
@@ -333,7 +333,7 @@ async def sector(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemRe
     return result_from(
         spec,
         summary=(
-            f"Sektor '{match.get('name')}': 24s mcap degisimi %{change_24h if change_24h is not None else 'n/a'}."
+            f"Sektör '{match.get('name')}': 24s mcap değişimi %{change_24h if change_24h is not None else 'n/a'}."
         ),
         data={
             "categories": categories,
@@ -386,17 +386,17 @@ async def technology(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> It
                 }
             )
             confidence += 0.3
-            reasons.append(f"GitHub: {repo_data.get('stargazers_count')} yildiz, son push {str(repo_data.get('pushed_at'))[:10]}")
+            reasons.append(f"GitHub: {repo_data.get('stargazers_count')} yıldız, son push {str(repo_data.get('pushed_at'))[:10]}")
             if repo_data.get("archived"):
                 score -= 0.4
-                reasons.append("Depo arsivlenmis: gelistirme durmus")
+                reasons.append("Depo arşivlenmis: geliştirme durmus")
         except ProviderError:
-            reasons.append("GitHub verisi alinamadi")
+            reasons.append("GitHub verisi alınamadı")
     if dev.get("commit_count_4_weeks"):
         commits = float(dev["commit_count_4_weeks"])
         if commits > 30:
             score += 0.3
-            reasons.append(f"Son 4 haftada {commits:.0f} commit: aktif gelistirme")
+            reasons.append(f"Son 4 haftada {commits:.0f} commit: aktif geliştirme")
         elif commits < 5:
             score -= 0.2
             reasons.append("Son 4 haftada az commit")
@@ -405,7 +405,7 @@ async def technology(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> It
         return result_from(
             spec,
             status="partial",
-            summary="Teknoloji verisi sinirli (GitHub/dokumantasyon baglantisi yok).",
+            summary="Teknoloji verisi sınırlı (GitHub/dokumantasyon bağlantısı yok).",
             data=data,
             sources=[source("CoinGecko", "https://www.coingecko.com"), source("GitHub", "https://api.github.com")],
             score=0.0,
@@ -428,19 +428,19 @@ async def tradingview_proxy(ctx: AnalysisContext, spec: ItemSpec, analyses: dict
         return result_from(spec, status="no_data", summary="Teknik veri yok.", confidence=0.0)
     score = technical.score or 0.0
     if score > 0.45:
-        rating = "Guclu Alis"
+        rating = "Güçlü Alis"
     elif score > 0.15:
         rating = "Alis"
     elif score < -0.45:
-        rating = "Guclu Satis"
+        rating = "Güçlü Satış"
     elif score < -0.15:
-        rating = "Satis"
+        rating = "Satış"
     else:
-        rating = "Notr"
+        rating = "Nötr"
     data = {
         "rating": rating,
         "score": score,
-        "method": "Yerel indikator toplulugu (TradingView derecelendirme vekili)",
+        "method": "Yerel indikatör topluluğu (TradingView derecelendirme vekili)",
     }
     indicators = (technical.data or {}).get("indicators") or {}
     data["key_indicators"] = {
@@ -454,14 +454,14 @@ async def tradingview_proxy(ctx: AnalysisContext, spec: ItemSpec, analyses: dict
         sources=[source("Yerel hesaplama (TradingView vekili)", kind="computed")],
         score=round(score, 4),
         confidence=round(min(0.6, technical.confidence), 3),
-        warnings=["TradingView resmi API'si ucretsiz olmadigi icin yerel derecelendirme kullanildi."],
+        warnings=["TradingView resmi API'si ücretsiz olmadığı için yerel derecelendirme kullanıldı."],
     )
 
 
 async def fractal(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemResult:
     klines = await ctx.klines(500)
     if len(klines) < 120:
-        return result_from(spec, status="no_data", summary="Fraktal analiz icin veri yetersiz.", confidence=0.0)
+        return result_from(spec, status="no_data", summary="Fraktal analiz için veri yetersiz.", confidence=0.0)
     df = to_dataframe(klines)
     log_returns = np.log(df["close"] / df["close"].shift(1)).dropna().values
     if len(log_returns) < 100:
@@ -483,8 +483,8 @@ async def fractal(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemR
         reasons.append(f"Hurst {hurst:.2f}: trend devam egilimi")
     elif hurst < 0.42:
         score = -clamp(trend_30d / 20.0) * 0.5
-        regime = "ortalamaya donus rejimi"
-        reasons.append(f"Hurst {hurst:.2f}: ortalamaya donus egilimi")
+        regime = "ortalamaya dönüş rejimi"
+        reasons.append(f"Hurst {hurst:.2f}: ortalamaya dönüş egilimi")
     else:
         regime = "rastgele yuruyus"
         reasons.append(f"Hurst {hurst:.2f}: belirgin rejim yok")
@@ -524,17 +524,17 @@ async def psych_levels(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> 
     reasons: list[str] = []
     if distance_resistance is not None and distance_resistance < 1.0:
         score -= 0.2
-        reasons.append(f"Yuvarlak sayi direnci {nearest_resistance:.6g} cok yakin (%{distance_resistance:.2f})")
+        reasons.append(f"Yuvarlak sayı direnci {nearest_resistance:.6g} çok yakın (%{distance_resistance:.2f})")
     if distance_support is not None and distance_support < 1.0:
         score += 0.15
-        reasons.append(f"Yuvarlak sayi destegi {nearest_support:.6g} cok yakin")
+        reasons.append(f"Yuvarlak sayı desteği {nearest_support:.6g} çok yakın")
     if distance_resistance is not None and 1.0 <= distance_resistance < 3:
         score += 0.1
-        reasons.append("Yuvarlak direnc kirilirsa hizli hareket potansiyeli")
+        reasons.append("Yuvarlak direnç kırılirsa hızlı hareket potansiyeli")
 
     return result_from(
         spec,
-        summary=f"Psikolojik seviyeler: destek {nearest_support}, direnc {nearest_resistance}.",
+        summary=f"Psikolojik seviyeler: destek {nearest_support}, direnç {nearest_resistance}.",
         data={
             "nearest_support": nearest_support,
             "nearest_resistance": nearest_resistance,
@@ -543,7 +543,7 @@ async def psych_levels(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> 
             "levels": round_levels,
             "reasons": reasons,
         },
-        sources=[source("Yerel hesaplama (yuvarlak sayilar)", kind="computed")],
+        sources=[source("Yerel hesaplama (yuvarlak sayılar)", kind="computed")],
         score=round(clamp(score), 4),
         confidence=0.4,
     )
@@ -553,13 +553,13 @@ async def psych_levels(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> 
 async def historical_similarity(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemResult:
     klines = await ctx.klines(1000)
     if len(klines) < 120:
-        return result_from(spec, status="no_data", summary="Tarihsel benzerlik icin veri yetersiz.", confidence=0.0)
+        return result_from(spec, status="no_data", summary="Tarihsel benzerlik için veri yetersiz.", confidence=0.0)
     df = to_dataframe(klines)
     closes = df["close"].values
     returns = np.diff(np.log(closes))
     window = 20
     if len(returns) < window + 40:
-        return result_from(spec, status="no_data", summary="Getiri serisi kisa.", confidence=0.0)
+        return result_from(spec, status="no_data", summary="Getiri serisi kısa.", confidence=0.0)
     current = returns[-window:]
     candidates: list[tuple[float, float]] = []
     for end in range(window, len(returns) - 10):
@@ -576,7 +576,7 @@ async def historical_similarity(ctx: AnalysisContext, spec: ItemSpec, analyses: 
     return result_from(
         spec,
         summary=(
-            f"En benzer {len(top)} tarihsel pencerede 10 gunluk ortalama getiri %{avg_forward:.2f} "
+            f"En benzer {len(top)} tarihsel pencerede 10 günlük ortalama getiri %{avg_forward:.2f} "
             f"(pozitif oran %{positive_ratio * 100:.0f})."
         ),
         data={
@@ -584,7 +584,7 @@ async def historical_similarity(ctx: AnalysisContext, spec: ItemSpec, analyses: 
             "avg_forward_return_10d_pct": round(avg_forward, 2),
             "positive_ratio": round(positive_ratio, 3),
             "forward_returns": [round(value, 2) for value in forward_returns],
-            "method": "20 gunluk log-getiri vektoru, Oklid mesafesi",
+            "method": "20 günlük log-getiri vektörü, Oklid mesafesi",
         },
         sources=[source("Yerel hesaplama (tarihsel benzerlik)", kind="computed")],
         score=round(clamp(score), 4),
@@ -599,7 +599,7 @@ async def seasonality(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> I
         klines = await ctx.klines(500)
         prices = [kline.close for kline in klines]
     if len(prices) < 90:
-        return result_from(spec, status="no_data", summary="Mevsimsellik icin veri yetersiz.", confidence=0.0)
+        return result_from(spec, status="no_data", summary="Mevsimsellik için veri yetersiz.", confidence=0.0)
     now = datetime.now(timezone.utc)
     monthly: dict[int, list[float]] = {}
     daily_returns = []
@@ -620,26 +620,26 @@ async def seasonality(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> I
     return result_from(
         spec,
         summary=(
-            f"{now.strftime('%B')} ayi tarihsel ortalama gunluk getirisi "
-            f"%{current_month_return:.3f}." if current_month_return is not None else "Aylik veri yok."
+            f"{now.strftime('%B')} ayi tarihsel ortalama günlük getirisi "
+            f"%{current_month_return:.3f}." if current_month_return is not None else "Aylık veri yok."
         ),
         data={
             "current_month": now.month,
             "monthly_avg_daily_return_pct": {month: round(value, 4) for month, value in sorted(month_returns.items())},
             "weekday_avg_daily_return_pct": {day: round(value, 4) for day, value in sorted(weekday_avg.items())},
-            "method": "Gunluk getirilerin ay/gun bazli ortalamasi",
+            "method": "Günlük getirilerin ay/gün bazlı ortalaması",
         },
         sources=[source("CoinGecko", "https://www.coingecko.com"), source("Yerel hesaplama", kind="computed")],
         score=round(clamp(score), 4),
         confidence=0.3,
-        warnings=["Mevsimsellik zayif bir istatistiksel sinyaldir; tek basina kullanilmamalidir."],
+        warnings=["Mevsimsellik zayıf bir istatistiksel sinyaldır; tek başına kullanılmamalıdır."],
     )
 
 
 async def regression_trend(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemResult:
     klines = await ctx.klines(365)
     if len(klines) < 60:
-        return result_from(spec, status="no_data", summary="Regresyon icin veri yetersiz.", confidence=0.0)
+        return result_from(spec, status="no_data", summary="Regresyon için veri yetersiz.", confidence=0.0)
     df = to_dataframe(klines)
     y = np.log(df["close"].tail(90).values)
     x = np.arange(len(y))
@@ -653,7 +653,7 @@ async def regression_trend(ctx: AnalysisContext, spec: ItemSpec, analyses: dict)
     return result_from(
         spec,
         summary=(
-            f"90 gunluk log-lineer trend: gunluk %{daily_growth:.3f} (R2={r_squared:.2f})."
+            f"90 günlük log-lineer trend: günlük %{daily_growth:.3f} (R2={r_squared:.2f})."
         ),
         data={
             "daily_growth_pct": round(daily_growth, 4),
@@ -670,7 +670,7 @@ async def regression_trend(ctx: AnalysisContext, spec: ItemSpec, analyses: dict)
 async def volatility_model(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemResult:
     klines = await ctx.klines(400)
     if len(klines) < 60:
-        return result_from(spec, status="no_data", summary="Volatilite modeli icin veri yetersiz.", confidence=0.0)
+        return result_from(spec, status="no_data", summary="Volatilite modeli için veri yetersiz.", confidence=0.0)
     df = to_dataframe(klines)
     returns = np.diff(np.log(df["close"].values))
     lam = 0.94
@@ -695,7 +695,7 @@ async def volatility_model(ctx: AnalysisContext, spec: ItemSpec, analyses: dict)
     return result_from(
         spec,
         summary=(
-            f"EWMA volatilite %{current_vol:.2f}; 30g dagilim yuzdeligi "
+            f"EWMA volatilite %{current_vol:.2f}; 30g dagilim yüzdeliği "
             f"{'%' + str(round((percentile or 0) * 100)) if percentile is not None else 'n/a'}; ATR %{atr_pct:.2f}."
         ),
         data={
@@ -704,10 +704,10 @@ async def volatility_model(ctx: AnalysisContext, spec: ItemSpec, analyses: dict)
             "atr_pct": round(atr_pct, 4),
             "method": "EWMA(lambda=0.94) + ATR(14)",
         },
-        sources=[source("Yerel hesaplama (EWMA/GARCH yaklasimi)", kind="computed")],
+        sources=[source("Yerel hesaplama (EWMA/GARCH yaklaşımi)", kind="computed")],
         score=round(clamp(score), 4),
         confidence=0.45,
-        warnings=["Deneysel model; yatirim karari icin tek basina kullanilmamalidir."],
+        warnings=["Deneysel model; yatırım kararı için tek başına kullanılmamalıdır."],
     )
 
 
@@ -720,7 +720,7 @@ async def pipeline_meta(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
     return result_from(
         spec,
         summary=(
-            f"Veri hatti: {ok_count} tam, {partial_count} kismi, {error_count} hatali analiz; "
+            f"Veri hatti: {ok_count} tam, {partial_count} kısmi, {error_count} hatalı analiz; "
             f"{len(source_names)} farkli kaynak."
         ),
         data={
@@ -749,7 +749,7 @@ async def macro(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemRes
         return result_from(
             spec,
             status="partial",
-            summary="yfinance verisi alinamadi; makro tablo sinirli.",
+            summary="yfinance verisi alınamadı; makro tablo sınırlı.",
             sources=[source("yfinance", "https://finance.yahoo.com")],
             score=0.0,
             confidence=0.1,
@@ -762,24 +762,24 @@ async def macro(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemRes
     if dxy and dxy.get("change_30d_pct") is not None:
         if dxy["change_30d_pct"] < -1:
             score += 0.35
-            reasons.append(f"DXY 30g %{dxy['change_30d_pct']:.1f}: dolar zayif, risk varliklarina pozitif")
+            reasons.append(f"DXY 30g %{dxy['change_30d_pct']:.1f}: dolar zayıf, risk varlıklarına pozitif")
         elif dxy["change_30d_pct"] > 1:
             score -= 0.35
-            reasons.append(f"DXY 30g %{dxy['change_30d_pct']:.1f}: dolar guclu, risk varliklarina negatif")
+            reasons.append(f"DXY 30g %{dxy['change_30d_pct']:.1f}: dolar güçlü, risk varlıklarına negatif")
     if spx and spx.get("change_30d_pct") is not None:
         if spx["change_30d_pct"] > 2:
             score += 0.25
-            reasons.append(f"S&P 500 30g %{spx['change_30d_pct']:.1f}: risk istahi yuksek")
+            reasons.append(f"S&P 500 30g %{spx['change_30d_pct']:.1f}: risk istahi yüksek")
         elif spx["change_30d_pct"] < -2:
             score -= 0.25
-            reasons.append(f"S&P 500 30g %{spx['change_30d_pct']:.1f}: risk istahi dusuk")
+            reasons.append(f"S&P 500 30g %{spx['change_30d_pct']:.1f}: risk istahi düşük")
     if us10y and us10y.get("change_30d_pct") is not None and us10y["change_30d_pct"] > 5:
         score -= 0.15
-        reasons.append("ABD 10Y getirisi yukseliyor: likidite baskisi")
+        reasons.append("ABD 10Y getirisi yükseliyor: likidite baskısı")
 
     return result_from(
         spec,
-        summary="Makro: " + ("; ".join(reasons[:3]) if reasons else "notr gorunum"),
+        summary="Makro: " + ("; ".join(reasons[:3]) if reasons else "nötr görünüm"),
         data={"reasons": reasons, "macro": data},
         sources=[source("yfinance", "https://finance.yahoo.com")],
         score=round(clamp(score), 4),
@@ -790,7 +790,7 @@ async def macro(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemRes
 async def alternatives(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemResult:
     data = await _macro_data(ctx)
     if not data:
-        return result_from(spec, status="partial", summary="Alternatif varlik verisi yok.", confidence=0.1)
+        return result_from(spec, status="partial", summary="Alternatif varlık verisi yok.", confidence=0.1)
     returns = {
         label: data.get(label, {}).get("change_30d_pct")
         for label in ("GOLD", "SILVER", "OIL", "SPX", "NASDAQ")
@@ -800,7 +800,7 @@ async def alternatives(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> 
     score = clamp(avg / 15.0) * 0.5
     return result_from(
         spec,
-        summary=f"Alternatif varliklarin 30g ortalama getirisi %{avg:.2f}.",
+        summary=f"Alternatif varlıkların 30g ortalama getirisi %{avg:.2f}.",
         data={"returns_30d_pct": returns, "average_30d_pct": round(avg, 2)},
         sources=[source("yfinance", "https://finance.yahoo.com")],
         score=round(clamp(score), 4),
@@ -812,7 +812,7 @@ async def correlation(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> I
     macro_data = await _macro_data(ctx)
     klines = await _daily_closes(ctx)
     if not klines:
-        return result_from(spec, status="no_data", summary="Korelasyon icin fiyat serisi yok.", confidence=0.0)
+        return result_from(spec, status="no_data", summary="Korelasyon için fiyat serisi yok.", confidence=0.0)
     coin_returns = np.diff(np.log(np.array(klines)))
     correlations: dict[str, float | None] = {}
     for label in ("SPX", "NASDAQ", "GOLD", "DXY", "VIX", "US10Y"):
@@ -871,19 +871,19 @@ async def volatility_indices(ctx: AnalysisContext, spec: ItemSpec, analyses: dic
     if vix is not None:
         if vix > 25:
             score -= 0.35
-            reasons.append(f"VIX {vix:.1f}: yuksek korku, risk-off")
+            reasons.append(f"VIX {vix:.1f}: yüksek korku, risk-off")
         elif vix < 15:
             score += 0.2
-            reasons.append(f"VIX {vix:.1f}: dusuk oynaklik, risk-on")
+            reasons.append(f"VIX {vix:.1f}: düşük oynaklık, risk-on")
     if vix_change is not None and vix_change > 15:
         score -= 0.2
-        reasons.append(f"VIX 7 gunde %{vix_change:.0f} artti: stres artisi")
+        reasons.append(f"VIX 7 günde %{vix_change:.0f} arttı: stres artışı")
     if dvol:
-        reasons.append(f"Deribit DVOL (BTC) {dvol['current']:.1f}, 7g degisim {dvol['change_7d']:+.1f}")
+        reasons.append(f"Deribit DVOL (BTC) {dvol['current']:.1f}, 7g değişim {dvol['change_7d']:+.1f}")
 
     return result_from(
         spec,
-        summary="Volatilite: " + ("; ".join(reasons[:3]) if reasons else "veri kismi"),
+        summary="Volatilite: " + ("; ".join(reasons[:3]) if reasons else "veri kısmi"),
         data={
             "vix": vix,
             "vix_change_7d_pct": vix_change,
@@ -910,10 +910,10 @@ async def macro_risk(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> It
     if vix is not None:
         if vix > 28:
             score -= 0.4
-            reasons.append(f"VIX {vix:.1f}: makro stres yuksek")
+            reasons.append(f"VIX {vix:.1f}: makro stres yüksek")
         elif vix < 16:
             score += 0.2
-            reasons.append(f"VIX {vix:.1f}: makro stres dusuk")
+            reasons.append(f"VIX {vix:.1f}: makro stres düşük")
     if dxy_change is not None:
         score -= clamp(dxy_change / 4.0) * 0.2
         reasons.append(f"DXY 30g %{dxy_change:+.1f}")
@@ -924,7 +924,7 @@ async def macro_risk(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> It
             score -= 0.1
     return result_from(
         spec,
-        summary="Makro risk: " + ("; ".join(reasons[:3]) if reasons else "notr"),
+        summary="Makro risk: " + ("; ".join(reasons[:3]) if reasons else "nötr"),
         data={"vix": vix, "dxy_change_30d_pct": dxy_change, "fred": fred, "reasons": reasons},
         sources=[
             source("yfinance", "https://finance.yahoo.com"),
@@ -947,7 +947,7 @@ async def capital_flows(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
     if whales and whales.data.get("stablecoin_change_7d_pct") is not None:
         change = whales.data["stablecoin_change_7d_pct"]
         score += clamp(change / 3.0) * 0.35
-        reasons.append(f"Stablecoin arzi 7g %{change:+.2f}%")
+        reasons.append(f"Stablecoin arzı 7g %{change:+.2f}%")
         data["stablecoin_change_7d_pct"] = change
     dxy_change = (macro_data.get("DXY") or {}).get("change_30d_pct")
     if dxy_change is not None:
@@ -958,7 +958,7 @@ async def capital_flows(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
         reasons.append(f"ETF haber sentiment {etf_sentiment:+.2f} ({etf_count} haber)")
     return result_from(
         spec,
-        summary="Sermaye akislari: " + ("; ".join(reasons[:3]) if reasons else "veri kismi"),
+        summary="Sermaye akışları: " + ("; ".join(reasons[:3]) if reasons else "veri kısmi"),
         data={"reasons": reasons, **data},
         sources=[
             source("DefiLlama Stablecoins", "https://defillama.com/stablecoins"),
@@ -973,7 +973,7 @@ async def capital_flows(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
 async def stablecoin_flows(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemResult:
     charts = await ctx.providers.defillama.stablecoin_charts_all()
     if not charts:
-        return result_from(spec, status="partial", summary="Stablecoin verisi alinamadi.", confidence=0.1)
+        return result_from(spec, status="partial", summary="Stablecoin verisi alınamadı.", confidence=0.1)
     latest = charts[-1].get("totalCirculatingUSD") or {}
     total_now = sum(float(v) for v in latest.values()) if isinstance(latest, dict) else float(latest)
     changes = {}
@@ -987,11 +987,11 @@ async def stablecoin_flows(ctx: AnalysisContext, spec: ItemSpec, analyses: dict)
     score = clamp((change_7d or 0) / 3.0) * 0.6
     reasons = []
     if change_7d is not None:
-        direction = "girisi" if change_7d > 0 else "cikisi"
-        reasons.append(f"Stablecoin arzinda 7 gunde %{change_7d:+.2f} (piyasaya nakit {direction})")
+        direction = "girişi" if change_7d > 0 else "çıkışı"
+        reasons.append(f"Stablecoin arzında 7 günde %{change_7d:+.2f} (piyasaya nakit {direction})")
     return result_from(
         spec,
-        summary=f"Stablecoin toplam arzi ${total_now:,.0f}; 7g degisim %{change_7d if change_7d is not None else 'n/a'}.",
+        summary=f"Stablecoin toplam arzı ${total_now:,.0f}; 7g değişim %{change_7d if change_7d is not None else 'n/a'}.",
         data={
             "stablecoin_total_usd": total_now,
             "changes_pct": changes,
@@ -1003,7 +1003,7 @@ async def stablecoin_flows(ctx: AnalysisContext, spec: ItemSpec, analyses: dict)
     )
 
 
-# ---------------------------------------------------------------------- special: zincir-ustu
+# ---------------------------------------------------------------------- special: zincir-üstü
 async def anomalies(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemResult:
     data: dict[str, Any] = {}
     reasons: list[str] = []
@@ -1020,7 +1020,7 @@ async def anomalies(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> Ite
             data["mempool_fees"] = fees
             if fees.get("fastestFee", 0) > 100:
                 score -= 0.2
-                reasons.append(f"Mempool ucretleri cok yuksek ({fees.get('fastestFee')} sat/vB): ag tikali")
+                reasons.append(f"Mempool ücretleri çok yüksek ({fees.get('fastestFee')} sat/vB): ag tikali")
         if stats:
             values = [float(point.get("y") or 0) for point in stats]
             if values:
@@ -1029,7 +1029,7 @@ async def anomalies(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> Ite
                 data["mempool_size_percentile"] = round(percentile, 3)
                 if percentile > 0.95:
                     score -= 0.15
-                    reasons.append("Mempool boyutu tarihsel olarak cok yuksek: yogunluk anomalisi")
+                    reasons.append("Mempool boyutu tarihsel olarak çok yüksek: yoğunluk anomalisi")
         if blockchair:
             data["blockchair"] = {
                 "blocks": blockchair.get("blocks"),
@@ -1050,21 +1050,21 @@ async def anomalies(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> Ite
             utilization = stats.get("network_utilization_percentage")
             if utilization and float(utilization) > 95:
                 score -= 0.1
-                reasons.append("Ag kullanimi %95+: yogunluk")
+                reasons.append("Ag kullanımi %95+: yoğunluk")
         if gas:
             data["gas_oracle"] = gas
             if gas.get("ProposeGasPrice") and float(gas["ProposeGasPrice"]) > 50:
                 score -= 0.15
-                reasons.append("ETH gas ucretleri yuksek: ag yogun")
+                reasons.append("ETH gas ücretleri yüksek: ag yoğun")
     else:
-        reasons.append("Bu varlik icin ucretsiz zincir-ustu anomali verisi sinirli")
+        reasons.append("Bu varlık için ücretsiz zincir-üstü anomali verisi sınırlı")
 
     return result_from(
         spec,
         status="ok" if data else "partial",
-        summary="Anomali taramasi: " + ("; ".join(reasons[:3]) if reasons else "belirgin anomali yok"),
+        summary="Anomali taraması: " + ("; ".join(reasons[:3]) if reasons else "belirgin anomali yok"),
         data={"reasons": reasons, **data},
-        sources=sources or [source("Zincir ustu gezginler", kind="page")],
+        sources=sources or [source("Zincir üstü gezginler", kind="page")],
         score=round(clamp(score), 4),
         confidence=0.4 if data else 0.15,
     )
@@ -1092,7 +1092,7 @@ async def wallet_growth(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
                     }
                 )
                 score = clamp(change / 30.0) * 0.5
-                reasons.append(f"Yeni adres olusumu 90 gunluk donemde %{change:+.1f} degisti")
+                reasons.append(f"Yeni adres oluşumu 90 günlük dönemde %{change:+.1f} değişti")
     elif ctx.coin.id == "ethereum":
         stats = await ctx.providers.onchain.eth_stats()
         sources.append(source("Blockscout", "https://eth.blockscout.com"))
@@ -1104,22 +1104,22 @@ async def wallet_growth(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
                 }
             )
             reasons.append(
-                f"Toplam ETH adresi {stats.get('total_addresses')} (buyume orani icin gecmis kosulara ihtiyac var)"
+                f"Toplam ETH adresi {stats.get('total_addresses')} (büyüme oranı için geçmiş kosulara ihtiyaç var)"
             )
     else:
         return result_from(
             spec,
             status="no_data",
-            summary="Cuzdan buyume verisi yalnizca BTC/ETH icin ucretsiz mevcut.",
+            summary="Cüzdan büyüme verisi yalnızca BTC/ETH için ücretsiz mevcut.",
             confidence=0.05,
-            warnings=["Diger coinler icin ucretsiz adres buyume API'si bulunmuyor."],
+            warnings=["Diger coinler için ücretsiz adres büyüme API'si bulunmuyor."],
         )
 
     if not data:
-        return result_from(spec, status="partial", summary="Cuzdan verisi alinamadi.", confidence=0.1)
+        return result_from(spec, status="partial", summary="Cüzdan verisi alınamadı.", confidence=0.1)
     return result_from(
         spec,
-        summary="Cuzdan buyumesi: " + ("; ".join(reasons[:2]) if reasons else "veri kismi"),
+        summary="Cüzdan büyümesi: " + ("; ".join(reasons[:2]) if reasons else "veri kısmi"),
         data={"reasons": reasons, **data},
         sources=sources,
         score=round(clamp(score), 4),
@@ -1165,7 +1165,7 @@ async def mining_energy(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
         return result_from(spec, status="no_data", summary="Madencilik/enerji verisi yok.", confidence=0.05)
     return result_from(
         spec,
-        summary="Madencilik/enerji: " + ("; ".join(reasons[:3]) if reasons else "veri kismi"),
+        summary="Madencilik/enerji: " + ("; ".join(reasons[:3]) if reasons else "veri kısmi"),
         data={"reasons": reasons, **data},
         sources=sources,
         score=round(clamp(score), 4),
@@ -1210,14 +1210,14 @@ async def smart_contracts(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) 
         confidence += 0.25
     if count:
         confidence += 0.2
-        reasons.append(f"{count} guvenlik/denetim haberi, sentiment {exploit_sentiment:+.2f}")
+        reasons.append(f"{count} güvenlik/denetim haberi, sentiment {exploit_sentiment:+.2f}")
         if exploit_sentiment < -0.2:
-            reasons.append("Guvenlik haberleri negatif: teknoloji riski")
+            reasons.append("Güvenlik haberleri negatif: teknoloji riski")
     if not protocol and not count:
-        return result_from(spec, status="partial", summary="Akilli kontrat verisi sinirli.", confidence=0.1)
+        return result_from(spec, status="partial", summary="Akıllı kontrat verisi sınırlı.", confidence=0.1)
     return result_from(
         spec,
-        summary="Akilli kontratlar: " + ("; ".join(reasons) if reasons else "belirgin risk sinyali yok"),
+        summary="Akıllı kontratlar: " + ("; ".join(reasons) if reasons else "belirgin risk sinyali yok"),
         data={"reasons": reasons, **data},
         sources=[
             source("DefiLlama", "https://defillama.com"),
@@ -1231,7 +1231,7 @@ async def smart_contracts(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) 
 async def cross_chain(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemResult:
     bridges = await ctx.providers.defillama.bridges()
     if not bridges:
-        return result_from(spec, status="partial", summary="Bridge verisi alinamadi.", confidence=0.1)
+        return result_from(spec, status="partial", summary="Bridge verisi alınamadı.", confidence=0.1)
     volumes = []
     for bridge in bridges:
         volume = bridge.get("last24hVolume") or bridge.get("volumePrevDay")
@@ -1310,34 +1310,34 @@ async def crowd_psychology(ctx: AnalysisContext, spec: ItemSpec, analyses: dict)
         confidence += 0.3
         if current.value < 20:
             score += 0.45
-            reasons.append(f"Asiri korku ({current.value}): kalabalik satiyor, kontrarian pozitif")
+            reasons.append(f"Aşırı korku ({current.value}): kalabalik satiyor, kontrarian pozitif")
         elif current.value < 40:
             score += 0.15
-            reasons.append(f"Korku bolgesi ({current.value})")
+            reasons.append(f"Korku bölgesi ({current.value})")
         elif current.value > 80:
             score -= 0.45
-            reasons.append(f"Asiri acgozluluk ({current.value}): kalabalik aliyor, risk yuksek")
+            reasons.append(f"Aşırı acgozluluk ({current.value}): kalabalik aliyor, risk yüksek")
         elif current.value > 60:
             score -= 0.15
-            reasons.append(f"Acgozluluk bolgesi ({current.value})")
+            reasons.append(f"Acgozluluk bölgesi ({current.value})")
         if current.value > avg + 15:
             score -= 0.15
-            reasons.append("Duygu 30 gun ortalamasinin cok uzerinde: asiri iyimserlik")
+            reasons.append("Duygu 30 gün ortalamasının çok üzerinde: aşırı iyimserlik")
         elif current.value < avg - 15:
             score += 0.15
-            reasons.append("Duygu 30 gun ortalamasinin cok altinda: asiri kotumserlik")
+            reasons.append("Duygu 30 gün ortalamasının çok altında: aşırı kötümserlik")
     if liquidations and liquidations.data.get("long_short_ratio"):
         ratio = liquidations.data["long_short_ratio"]
         data["long_short_ratio"] = ratio
         confidence += 0.15
         if ratio > 2:
             score -= 0.2
-            reasons.append("Long/short orani asiri long: kalabalik ayni yonde")
+            reasons.append("Long/short oranı aşırı long: kalabalik aynı yönde")
         elif ratio < 0.8:
             score += 0.2
-            reasons.append("Long/short orani asiri short: kalabalik ayni yonde")
+            reasons.append("Long/short oranı aşırı short: kalabalik aynı yönde")
     if not reasons:
-        return result_from(spec, status="partial", summary="Kitle psikolojisi verisi kismi.", confidence=0.15)
+        return result_from(spec, status="partial", summary="Kitle psikolojisi verisi kısmi.", confidence=0.15)
     return result_from(
         spec,
         summary="Kitle psikolojisi: " + "; ".join(reasons[:3]),
@@ -1354,7 +1354,7 @@ async def crowd_psychology(ctx: AnalysisContext, spec: ItemSpec, analyses: dict)
 async def news_velocity(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> ItemResult:
     news = get_analysis(analyses, "news")
     if not news or not news.data.get("velocity"):
-        return result_from(spec, status="partial", summary="Haber hizi verisi yok.", confidence=0.1)
+        return result_from(spec, status="partial", summary="Haber hızı verisi yok.", confidence=0.1)
     velocity = news.data["velocity"]
     ratio = news.data.get("velocity_ratio_6h")
     score = 0.0
@@ -1366,7 +1366,7 @@ async def news_velocity(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
     return result_from(
         spec,
         summary=(
-            f"Haber hizi: son 6s {velocity.get('last_6h')} haber, onceki 6s {velocity.get('prev_6h')} "
+            f"Haber hızı: son 6s {velocity.get('last_6h')} haber, önceki 6s {velocity.get('prev_6h')} "
             f"(oran {ratio if ratio is not None else 'n/a'})."
         ),
         data={"velocity": velocity, "velocity_ratio_6h": ratio},
@@ -1382,15 +1382,15 @@ async def google_trends(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
         return result_from(
             spec,
             status="partial",
-            summary="Google Trends verisi alinamadi (servis limiti).",
+            summary="Google Trends verisi alınamadı (servis limiti).",
             confidence=0.05,
         )
     change = trends.get("change_vs_baseline_pct") or 0
     score = clamp(change / 50.0) * 0.4
-    direction = "artti" if change > 0 else "azaldi"
+    direction = "arttı" if change > 0 else "azaldı"
     return result_from(
         spec,
-        summary=f"Arama ilgisi 7 gunluk ortalamada %{change:+.1f} {direction}.",
+        summary=f"Arama ilgisi 7 günlük ortalamada %{change:+.1f} {direction}.",
         data=trends,
         sources=[source("Google Trends", "https://trends.google.com")],
         score=round(clamp(score), 4),
@@ -1412,15 +1412,15 @@ async def media_manipulation(ctx: AnalysisContext, spec: ItemSpec, analyses: dic
     warnings: list[str] = []
     if duplicate_ratio > 0.15:
         warnings.append(
-            f"Ayni haber {duplicates} kez farkli kaynaklarda tekrarlanmis: bilgi kirliligi/manipulasyon olabilir"
+            f"Aynı haber {duplicates} kez farkli kaynaklarda tekrarlanmis: bilgi kirliligi/manipülasyon olabilir"
         )
     if dispersion > 0.45:
-        warnings.append("Haber sentiment dagilimi cok genis: celiskili anlatilar")
+        warnings.append("Haber sentiment dagilimi çok genis: celiskili anlatilar")
     return result_from(
         spec,
         summary=(
-            f"Medya analizi: {len(articles)} haber, tekrar orani %{duplicate_ratio * 100:.1f}, "
-            f"sentiment sapmasi {dispersion:.2f}."
+            f"Medya analizi: {len(articles)} haber, tekrar oranı %{duplicate_ratio * 100:.1f}, "
+            f"sentiment sapması {dispersion:.2f}."
         ),
         data={
             "article_count": len(articles),
@@ -1442,7 +1442,7 @@ async def composite(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> Ite
         if result.score is not None and result.confidence > 0
     ]
     if not scores:
-        return result_from(spec, status="no_data", summary="Sentetik kiyaslama icin skor yok.", confidence=0.0)
+        return result_from(spec, status="no_data", summary="Sentetik kıyaslama için skor yok.", confidence=0.0)
     weighted = sum(score * confidence for _, score, confidence in scores)
     total_weight = sum(confidence for _, _, confidence in scores)
     composite_score = weighted / total_weight if total_weight else 0.0
@@ -1459,7 +1459,7 @@ async def composite(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> Ite
             "bullish_components": bullish,
             "bearish_components": bearish,
         },
-        sources=[source("Sentetik kiyaslama (pipeline)", kind="computed")],
+        sources=[source("Sentetik kıyaslama (pipeline)", kind="computed")],
         score=round(clamp(composite_score), 4),
         confidence=0.6,
     )
@@ -1480,10 +1480,10 @@ async def offchain(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> Item
     if liquidations and liquidations.score is not None:
         score += liquidations.score * 0.5
         confidence += 0.25
-        reasons.append(f"Turev skoru {liquidations.score:+.2f}")
+        reasons.append(f"Türev skoru {liquidations.score:+.2f}")
         data["funding_annualized_pct"] = (liquidations.data or {}).get("funding_annualized_pct")
     if not reasons:
-        return result_from(spec, status="partial", summary="Off-chain veri kismi.", confidence=0.1)
+        return result_from(spec, status="partial", summary="Off-chain veri kısmi.", confidence=0.1)
     return result_from(
         spec,
         summary="Off-chain veriler: " + "; ".join(reasons),
@@ -1520,10 +1520,10 @@ async def sell_pressure(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
         confidence += 0.3
         if imbalance < -0.15:
             score -= 0.4
-            reasons.append("Satis tarafi derinligi baskin: satis baskisi")
+            reasons.append("Satış tarafi derinligi baskın: satış baskısı")
         elif imbalance > 0.15:
             score += 0.4
-            reasons.append("Alis tarafi derinligi baskin: alim baskisi")
+            reasons.append("Alis tarafi derinligi baskın: alım baskısı")
     if liquidations and liquidations.data.get("liquidations_long_usd_48h"):
         long_liq = liquidations.data["liquidations_long_usd_48h"]
         short_liq = liquidations.data.get("liquidations_short_usd_48h") or 0
@@ -1533,10 +1533,10 @@ async def sell_pressure(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
             confidence += 0.2
             if long_share > 0.65:
                 score -= 0.35
-                reasons.append("Likidasyonlarin cogu long: satis baskisi")
+                reasons.append("Likidasyonların çoğu long: satış baskısı")
             elif long_share < 0.35:
                 score += 0.35
-                reasons.append("Likidasyonlarin cogu short: alim baskisi")
+                reasons.append("Likidasyonların çoğu short: alım baskısı")
     if news and news.data.get("sentiment_24h"):
         sentiment = news.data["sentiment_24h"]["avg_sentiment"]
         if sentiment < -0.2:
@@ -1547,10 +1547,10 @@ async def sell_pressure(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) ->
             score += 0.2
             confidence += 0.15
     if not reasons:
-        return result_from(spec, status="partial", summary="Satis baskisi sinyali kismi.", confidence=0.1)
+        return result_from(spec, status="partial", summary="Satış baskısı sinyali kısmi.", confidence=0.1)
     return result_from(
         spec,
-        summary="Satis baskisi: " + "; ".join(reasons[:3]),
+        summary="Satış baskısı: " + "; ".join(reasons[:3]),
         data={"reasons": reasons, **data},
         sources=[
             source("Binance order book", "https://api.binance.com"),
@@ -1579,7 +1579,7 @@ async def dominance(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> Ite
         reasons.append(f"ETH dominance %{eth:.1f}")
     else:
         score = clamp((45 - btc) / 12.0) * 0.4
-        reasons.append(f"BTC dominance %{btc:.1f}: " + ("altcoinler icin elverisli" if btc < 50 else "BTC baskin"))
+        reasons.append(f"BTC dominance %{btc:.1f}: " + ("altcoinler için elverisli" if btc < 50 else "BTC baskın"))
     change = global_market.market_cap_change_24h_pct
     if change is not None:
         score += clamp(change / 5.0) * 0.2
@@ -1622,7 +1622,7 @@ async def energy_costs(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> 
     }
     return result_from(
         spec,
-        summary="Enerji maliyetleri: " + ("; ".join(data["reasons"][:3]) if data["reasons"] else "veri kismi"),
+        summary="Enerji maliyetleri: " + ("; ".join(data["reasons"][:3]) if data["reasons"] else "veri kısmi"),
         data=data,
         sources=mining.sources + [source("yfinance (enerji)", "https://finance.yahoo.com")],
         score=round(clamp(combined), 4),
@@ -1630,7 +1630,7 @@ async def energy_costs(ctx: AnalysisContext, spec: ItemSpec, analyses: dict) -> 
     )
 
 
-# ---------------------------------------------------------------------- kayit defteri
+# ---------------------------------------------------------------------- kayıt defteri
 def _daily_closes(ctx: AnalysisContext) -> Awaitable[list[float]]:
     async def _load() -> list[float]:
         klines = await ctx.providers.exchange.klines(ctx.coin.symbol, "1d", 200)
@@ -1682,19 +1682,19 @@ SPECIALS: dict[str, SpecialFn] = {
 async def evaluate_item(
     ctx: AnalysisContext, spec: ItemSpec, analyses: dict[str, AnalysisResult]
 ) -> ItemResult:
-    """Bir maddeyi kaynagina gore degerlendirir."""
+    """Bir maddeyi kaynağına göre değerlendirir."""
     if spec.source_type == "analysis" and spec.source_ref:
         analysis = analyses.get(spec.source_ref)
         if analysis is None:
-            return result_from(spec, status="no_data", summary="Ilgili analiz sonucu bulunamadi.", confidence=0.0)
+            return result_from(spec, status="no_data", summary="Ilgili analiz sonuçu bulunamadı.", confidence=0.0)
         summary = analysis.summary
         if spec.id in (14, 15, 16, 19) and analysis.data:
             if spec.id == 14:
                 patterns = analysis.data.get("candle_patterns") or []
-                summary = "Mum formasyonlari: " + (", ".join(patterns) if patterns else "belirgin formasyon yok")
+                summary = "Mum formasyonları: " + (", ".join(patterns) if patterns else "belirgin formasyon yok")
             elif spec.id == 15:
                 patterns = analysis.data.get("chart_patterns") or []
-                summary = "Grafik formasyonlari: " + (", ".join(patterns) if patterns else "belirgin formasyon yok")
+                summary = "Grafik formasyonları: " + (", ".join(patterns) if patterns else "belirgin formasyon yok")
             elif spec.id == 16:
                 fib = (analysis.data.get("levels") or {}).get("fibonacci") or {}
                 summary = "Fibonacci seviyeleri: " + ", ".join(
@@ -1718,33 +1718,33 @@ async def evaluate_item(
     if spec.source_type == "special" and spec.source_ref:
         fn = SPECIALS.get(spec.source_ref)
         if fn is None:
-            return result_from(spec, status="error", summary=f"Bilinmeyen ozel analiz: {spec.source_ref}")
+            return result_from(spec, status="error", summary=f"Bilinmeyen özel analiz: {spec.source_ref}")
         try:
             return await fn(ctx, spec, analyses)
         except ProviderError as exc:
-            return result_from(spec, status="partial", summary=f"Veri kaynagi hatasi: {exc}", confidence=0.05)
-        except Exception as exc:  # savunmaci: tek madde tum kosuyu bozmasin
-            logger.exception("Madde %s degerlendirilemedi", spec.id)
+            return result_from(spec, status="partial", summary=f"Veri kaynağı hatası: {exc}", confidence=0.05)
+        except Exception as exc:  # savunmaci: tek madde tüm kosuyu bozmasin
+            logger.exception("Madde %s değerlendirilemedi", spec.id)
             return result_from(
                 spec,
                 status="error",
-                summary=f"Degerlendirme hatasi: {exc}",
+                summary=f"Değerlendirme hatası: {exc}",
                 confidence=0.0,
-                warnings=["Bu madde hata verdi; agirlikli ortalamada dikkate alinmadi."],
+                warnings=["Bu madde hata verdi; ağırlıklı ortalamada dikkate alınmadı."],
             )
     if spec.source_type == "news":
         try:
             return await _news_item(ctx, spec)
         except Exception as exc:
-            logger.exception("Haber maddesi %s degerlendirilemedi", spec.id)
-            return result_from(spec, status="error", summary=f"Haber degerlendirme hatasi: {exc}", confidence=0.0)
+            logger.exception("Haber maddesi %s değerlendirilemedi", spec.id)
+            return result_from(spec, status="error", summary=f"Haber değerlendirme hatası: {exc}", confidence=0.0)
     return result_from(
         spec,
         status="no_data",
         summary=(
             spec.note
-            or "Bu madde icin ucretsiz ve dogrulanabilir veri kaynagi bulunmuyor; notr kabul edildi."
+            or "Bu madde için ücretsiz ve doğrulanabilir veri kaynağı bulunmuyor; nötr kabul edildi."
         ),
         confidence=0.0,
-        warnings=["Veri yok: agirlikli ortalamaya dahil edilmedi."],
+        warnings=["Veri yok: ağırlıklı ortalamaya dahil edilmedi."],
     )

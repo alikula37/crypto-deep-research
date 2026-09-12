@@ -1,8 +1,8 @@
 """Context Control Plane.
 
 Her context objesinin kimligi, scope'u, provenance'i, TTL'i ve versiyonu vardir.
-Politika kararlari: KEEP / COMPRESS / CACHE / OFFLOAD / DROP / PIN / PREFETCH.
-Offload geri alinabilir: tam veri SQLite blob'unda tutulur, gerektiginde rehydrate edilir.
+Politika kararları: KEEP / COMPRESS / CACHE / OFFLOAD / DROP / PIN / PREFETCH.
+Offload geri alınabilir: tam veri SQLite blob'unda tutulur, gerektiğinde rehydrate edilir.
 """
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ def _content_hash(content: str) -> str:
 
 
 class ContextControlPlane:
-    """Context lifecycle yonetimi: kayit, politika, offload/compress/rehydrate."""
+    """Context lifecycle yönetimi: kayıt, politika, offload/compress/rehydrate."""
 
     def __init__(
         self,
@@ -49,7 +49,7 @@ class ContextControlPlane:
         self.token_budget = token_budget
         self._prefetched: dict[str, list[ContextObject]] = {}
 
-    # ------------------------------------------------------------------ kayit
+    # ------------------------------------------------------------------ kayıt
     def register_analysis(self, coin_id: str, result: AnalysisResult) -> ContextObject:
         content = self._analysis_content(result)
         priority = 0.9 if result.status in {"ok", "partial"} else 0.3
@@ -70,7 +70,7 @@ class ContextControlPlane:
     def register_item(self, coin_id: str, item: ItemResult) -> ContextObject:
         content = (
             f"{item.item_id}. {item.title_tr}\nDurum: {item.status}\n{item.summary}\n"
-            f"Skor: {item.score} (guven: {item.confidence})"
+            f"Skor: {item.score} (güven: {item.confidence})"
         )
         obj = ContextObject(
             key=f"item:{coin_id}:{item.item_id}",
@@ -124,7 +124,7 @@ class ContextControlPlane:
     def apply_policy(
         self, objects: Iterable[ContextObject], token_budget: int | None = None
     ) -> dict[str, list[ContextObject]]:
-        """Objeleri politika kararlarina gore gruplar."""
+        """Objeleri politika kararlarına göre gruplar."""
         budget = token_budget or self.token_budget
         groups: dict[str, list[ContextObject]] = {
             action: [] for action in ("PIN", "KEEP", "COMPRESS", "CACHE", "OFFLOAD", "DROP", "PREFETCH")
@@ -153,7 +153,7 @@ class ContextControlPlane:
             seen.add(_content_hash(obj.content))
         return groups
 
-    # ------------------------------------------------------------------ islemler
+    # ------------------------------------------------------------------ işlemler
     def compress(self, obj: ContextObject, max_chars: int = 600) -> ContextObject:
         if len(obj.content) <= max_chars:
             return obj
@@ -220,7 +220,7 @@ class ContextControlPlane:
         parts: list[str] = []
         for action in ("PIN", "KEEP", "COMPRESS", "CACHE"):
             for obj in groups[action]:
-                tag = "ONEMLI" if action in ("PIN", "KEEP") else "OZET"
+                tag = "ÖNEMLİ" if action in ("PIN", "KEEP") else "ÖZET"
                 parts.append(f"[{tag}] {obj.content}")
         if groups["OFFLOAD"]:
             parts.append(
@@ -238,7 +238,7 @@ class ContextControlPlane:
 
     # ------------------------------------------------------------------ prefetch
     def mark_prefetch(self, keys: list[str]) -> list[ContextObject]:
-        """Sik kullanilacak tahmin edilen context'leri onceden yukler."""
+        """Sik kullanılacak tahmin edilen context'leri önceden yükler."""
         loaded = []
         for key in keys:
             obj = self.rehydrate(key) or self.db.get_context(key)
@@ -250,7 +250,7 @@ class ContextControlPlane:
     def prefetched(self, kind: str) -> list[ContextObject]:
         return self._prefetched.get(kind, [])
 
-    # ------------------------------------------------------------------ ic yardimcilar
+    # ------------------------------------------------------------------ ic yardımcilar
     @staticmethod
     def _analysis_content(result: AnalysisResult) -> str:
         lines = [
@@ -272,8 +272,8 @@ class ContextControlPlane:
             f"Kosu {run.run_id} - {run.coin.name} ({run.coin.symbol.upper()})",
             f"Tarih: {run.created_at.isoformat()}",
             f"Fiyat: ${run.current_price:,.6g}" if run.current_price else "",
-            f"Agirlikli skor: {run.weighted_score}",
-            f"Yukselis olasiligi: %{run.up_probability}" if run.up_probability else "",
-            f"Beklenen aralik: {run.expected_low} - {run.expected_high}",
+            f"Ağırlıklı skor: {run.weighted_score}",
+            f"Yükseliş olasılığı: %{run.up_probability}" if run.up_probability else "",
+            f"Beklenen aralık: {run.expected_low} - {run.expected_high}",
         ]
         return "\n".join(line for line in lines if line)

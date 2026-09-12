@@ -1,4 +1,4 @@
-"""Teknik analiz modulu: indikatorler, formasyonlar, destek/direnc, fibonacci."""
+"""Teknik analiz modulu: indikatörler, formasyonlar, destek/direnç, fibonacci."""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ async def analyze_technical(ctx: AnalysisContext) -> AnalysisResult:
             "technical",
             "Teknik Analiz",
             status="no_data",
-            summary="Yeterli OHLCV verisi alinamadi.",
+            summary="Yeterli OHLCV verisi alınamadı.",
             sources=[source("Binance", "https://api.binance.com", note="OHLCV")],
         )
     df = to_dataframe(klines)
@@ -35,29 +35,29 @@ async def analyze_technical(ctx: AnalysisContext) -> AnalysisResult:
     pattern_score = 0.0
     for pattern in candles + chart_patterns:
         lower = pattern.lower()
-        if any(word in lower for word in ("bullish", "dip", "yukselis", "kirilimi (breakout)", "double bottom")):
+        if any(word in lower for word in ("bullish", "dip", "yükseliş", "kırılımı (breakout)", "double bottom")):
             pattern_score += 0.15
-        if any(word in lower for word in ("bearish", "tepe", "dusus", "breakdown", "double top")):
+        if any(word in lower for word in ("bearish", "tepe", "düşüş", "breakdown", "double top")):
             pattern_score -= 0.15
     score = max(-1.0, min(1.0, score * 0.8 + pattern_score))
 
     distance_resistance = levels.get("distance_to_resistance_pct")
     distance_support = levels.get("distance_to_support_pct")
     if distance_resistance is not None and distance_resistance < 1.5:
-        reasons.append(f"Direnç bolgesine cok yakin (%{distance_resistance:.2f})")
+        reasons.append(f"Direnç bölgesine çok yakın (%{distance_resistance:.2f})")
         confidence = min(1.0, confidence + 0.05)
     if distance_support is not None and distance_support < 1.5:
-        reasons.append(f"Destek bolgesine cok yakin (%{distance_support:.2f})")
+        reasons.append(f"Destek bölgesine çok yakın (%{distance_support:.2f})")
 
     summary = (
         f"Fiyat {snapshot['price']:.6g}; RSI {snapshot.get('rsi_14', 0):.1f}, "
         f"MACD histogram {snapshot.get('macd_histogram', 0):.4g}. "
-        f"En yakin destek {levels.get('nearest_support')}, en yakin direnc {levels.get('nearest_resistance')}."
+        f"En yakın destek {levels.get('nearest_support')}, en yakın direnç {levels.get('nearest_resistance')}."
     )
     if candles:
-        summary += " Mum formasyonlari: " + ", ".join(candles) + "."
+        summary += " Mum formasyonları: " + ", ".join(candles) + "."
     if chart_patterns:
-        summary += " Grafik formasyonlari: " + ", ".join(chart_patterns) + "."
+        summary += " Grafik formasyonları: " + ", ".join(chart_patterns) + "."
 
     sources = [source("Binance", "https://api.binance.com", note=f"OHLCV {ctx.timeframe}")]
     if not any(True for _ in klines if _.volume) or not klines:

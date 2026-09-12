@@ -1,4 +1,4 @@
-"""Veri saglayicilari (provider) katmani."""
+"""Veri sağlayıcıları (provider) katmani."""
 
 from crypto_deep_research.providers.base import (
     CachedHTTP,

@@ -1,4 +1,4 @@
-"""Ortak HTTP istemcisi: TTL onbellek, rate limit, retry ve stale fallback."""
+"""Ortak HTTP istemcisi: TTL önbellek, rate limit, retry ve stale fallback."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from crypto_deep_research.storage.db import Database, stable_key
 
 logger = logging.getLogger(__name__)
 
-# Saglayici basina minimum istek araligi (saniye). Ucretsiz kotalari korumak icin.
+# Sağlayıcı başına minimum istek aralığı (saniye). Ücretsiz kotalari korumak için.
 MIN_INTERVALS: dict[str, float] = {
     "coingecko": 2.2,
     "binance": 0.2,
@@ -41,7 +41,7 @@ MIN_INTERVALS: dict[str, float] = {
 
 
 class ProviderError(RuntimeError):
-    """Bir saglayicidan veri alinamadiginda firlatilir."""
+    """Bir sağlayıcıdan veri alınamadığında firlatilir."""
 
     def __init__(self, provider: str, message: str, url: str | None = None) -> None:
         self.provider = provider
@@ -69,7 +69,7 @@ class RateLimiter:
 
 
 class CachedHTTP:
-    """httpx tabanli, SQLite onbellekli HTTP istemcisi."""
+    """httpx tabanlı, SQLite önbellekli HTTP istemcisi."""
 
     def __init__(self, db: Database, settings: Settings) -> None:
         self.db = db
@@ -114,7 +114,7 @@ class CachedHTTP:
         allow_stale: bool = True,
         limiter: bool = True,
     ) -> Any:
-        """JSON getirir; TTL icindeyse onbellekten, hata durumunda stale onbellekten doner."""
+        """JSON getirir; TTL içindeyse önbellekten, hata durumunda stale önbellekten döner."""
         params = params or {}
         cache_key = stable_key(provider, url, params)
         cached = self.db.cache_get(cache_key)
@@ -143,7 +143,7 @@ class CachedHTTP:
                 if attempt < self.settings.http_retries - 1:
                     await asyncio.sleep(1.0 * (attempt + 1))
         if cached and allow_stale:
-            logger.warning("%s basarisiz, stale onbellek kullaniliyor: %s", provider, url)
+            logger.warning("%s başarısız, stale önbellek kullanıliyor: %s", provider, url)
             return cached[0]
         raise ProviderError(provider, str(last_error), url)
 

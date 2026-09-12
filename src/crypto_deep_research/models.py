@@ -17,11 +17,11 @@ class CoinRef(BaseModel):
 
     id: str = Field(description="CoinGecko id, orn. bitcoin")
     symbol: str = Field(description="Sembol, orn. btc")
-    name: str = Field(description="Gorunen ad, orn. Bitcoin")
+    name: str = Field(description="Görünen ad, orn. Bitcoin")
 
 
 class SourceRef(BaseModel):
-    """Bir verinin kaynagi."""
+    """Bir verinin kaynağı."""
 
     name: str
     url: str | None = None
@@ -92,7 +92,7 @@ class NewsArticle(BaseModel):
     published_at: datetime | None = None
     summary: str | None = None
     currencies: list[str] = Field(default_factory=list)
-    sentiment_raw: float | None = Field(default=None, description="Kaynagin dogrudan sentiment degeri")
+    sentiment_raw: float | None = Field(default=None, description="Kaynağın doğrudan sentiment değeri")
     sentiment: float | None = Field(
         default=None, description="Hesaplanan sentiment -1 (negatif) .. 1 (pozitif)"
     )
@@ -140,7 +140,7 @@ class WhaleFlow(BaseModel):
 
 
 class AnalysisResult(BaseModel):
-    """Tek bir analiz modulunun sonucu."""
+    """Tek bir analiz modulunun sonuçu."""
 
     key: str
     title: str
@@ -155,7 +155,7 @@ class AnalysisResult(BaseModel):
 
 
 class ItemResult(AnalysisResult):
-    """66 maddelik arastirma listesindeki bir maddenin sonucu."""
+    """66 maddelik araştırma listesindeki bir maddenin sonuçu."""
 
     item_id: int
     title_tr: str = ""
@@ -190,7 +190,7 @@ PolicyAction = Literal[
 
 
 class ContextObject(BaseModel):
-    """Yonetilen context birimi (Context Control Plane).
+    """Yönetilen context birimi (Context Control Plane).
 
     Her context objesinin kimligi, scope'u, provenance'i, TTL'i ve versiyonu vardir.
     """

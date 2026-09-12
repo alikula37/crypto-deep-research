@@ -1,4 +1,4 @@
-"""Balina akislari analizi: buyuk zincir-ustu transferler ve stablecoin likiditesi."""
+"""Balina akışları analizi: büyük zincir-üstü transferler ve stablecoin likiditesi."""
 
 from __future__ import annotations
 
@@ -24,17 +24,17 @@ async def analyze_whales(ctx: AnalysisContext) -> AnalysisResult:
     if chain == "bitcoin":
         flows = await ctx.providers.onchain.btc_large_transactions(min_btc=50.0)
         sources.append(
-            source("blockchain.com", "https://api.blockchain.info", note="mempool buyuk BTC transferleri")
+            source("blockchain.com", "https://api.blockchain.info", note="mempool büyük BTC transferleri")
         )
     elif chain == "ethereum":
         flows = await ctx.providers.onchain.eth_large_transactions(min_eth=1000.0)
         sources.append(
-            source("Blockscout", "https://eth.blockscout.com", note="son bloklar buyuk ETH transferleri")
+            source("Blockscout", "https://eth.blockscout.com", note="son bloklar büyük ETH transferleri")
         )
     else:
         warnings.append(
-            f"{ctx.coin.symbol.upper()} icin ucretsiz buyuk cuzdan akis verisi yok; "
-            "stablecoin likiditesi ve haber verisi kullanildi."
+            f"{ctx.coin.symbol.upper()} için ücretsiz büyük cüzdan akış verisi yok; "
+            "stablecoin likiditesi ve haber verisi kullanıldı."
         )
 
     stablecoin_data: dict[str, Any] = {}
@@ -76,12 +76,12 @@ async def analyze_whales(ctx: AnalysisContext) -> AnalysisResult:
             net_ratio = net / (exchange_out + exchange_in)
             if net_ratio > 0.15:
                 score += 0.5
-                reasons.append("Borsalardan cikis baskin: birikim sinyali (bullish)")
+                reasons.append("Borsalardan çıkış baskın: birikim sinyali (bullish)")
             elif net_ratio < -0.15:
                 score -= 0.5
-                reasons.append("Borsalara giris baskin: satis baskisi sinyali (bearish)")
+                reasons.append("Borsalara giriş baskın: satış baskısı sinyali (bearish)")
         elif unknown:
-            reasons.append("Transfer yonu etiketlenemedi; hacim volatilite gostergesi olarak kullanildi")
+            reasons.append("Transfer yönü etiketlenemedi; hacim volatilite göstergesi olarak kullanıldı")
         whale_in = exchange_in or 0
         whale_out = exchange_out or 0
     else:
@@ -92,32 +92,32 @@ async def analyze_whales(ctx: AnalysisContext) -> AnalysisResult:
         confidence += 0.2
         if stable_change > 1.0:
             score += 0.3
-            reasons.append(f"Stablecoin arzi 7 gunde %{stable_change:.2f} artti: piyasaya nakit girisi")
+            reasons.append(f"Stablecoin arzı 7 günde %{stable_change:.2f} arttı: piyasaya nakit girişi")
         elif stable_change < -1.0:
             score -= 0.3
-            reasons.append(f"Stablecoin arzi 7 gunde %{stable_change:.2f} azaldi: nakit cikisi")
+            reasons.append(f"Stablecoin arzı 7 günde %{stable_change:.2f} azaldı: nakit çıkışı")
 
     if not flows and stable_change is None:
         return ctx.result(
             "whales",
-            "Balina Alim-Satim / Toplam Arz",
+            "Balina Alım-Satım / Toplam Arz",
             status="no_data",
-            summary="Bu coin icin ucretsiz balina akis verisi bulunamadi.",
+            summary="Bu coin için ücretsiz balina akış verisi bulunamadı.",
             sources=sources,
             warnings=warnings,
         )
 
     top_flows = sorted(flows, key=lambda flow: flow.amount, reverse=True)[:10]
     summary = (
-        f"{len(flows)} buyuk transfer tarandi. Borsaya giris {exchange_in:.2f} {ctx.coin.symbol.upper()}, "
-        f"cikis {exchange_out:.2f}. "
+        f"{len(flows)} büyük transfer tarandı. Borsaya giriş {exchange_in:.2f} {ctx.coin.symbol.upper()}, "
+        f"çıkış {exchange_out:.2f}. "
     )
     if stable_change is not None:
-        summary += f"Stablecoin arzi 7g degisimi %{stable_change:.2f}."
+        summary += f"Stablecoin arzı 7g değişimi %{stable_change:.2f}."
 
     return ctx.result(
         "whales",
-        "Balina Alim-Satim / Toplam Arz",
+        "Balina Alım-Satım / Toplam Arz",
         status="partial" if warnings else "ok",
         summary=summary,
         data={

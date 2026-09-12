@@ -10,13 +10,18 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Ortam degiskenleri ile yapilandirilir (CDR_ oneki)."""
+    """Ortam değişkenleri ile yapılandırılır (CDR_ oneki)."""
 
     model_config = SettingsConfigDict(env_prefix="CDR_", env_file=".env", extra="ignore")
 
     data_dir: Path = Field(default=Path("data"))
+    state_dir: Path | None = Field(
+        default=None,
+        description="SQLite ve vektor deposu icin ic durum dizini (varsayilan: data_dir). "
+        "Docker'da WAL guvenligi icin konteyner ici kalici birime isaret edilmelidir.",
+    )
 
-    # Ucretsiz API anahtarlari (opsiyonel)
+    # Ücretsiz API anahtarlari (opsiyonel)
     coingecko_api_key: str | None = None
     coinalyze_api_key: str | None = None
     cryptopanic_api_key: str | None = None
@@ -39,7 +44,7 @@ class Settings(BaseSettings):
     http_retries: int = 3
     user_agent: str = "crypto-deep-research/0.1 (+https://github.com/alikula37/crypto-deep-research)"
 
-    # Onbellek TTL varsayilanlari (saniye)
+    # Önbellek TTL varsayılanları (saniye)
     ttl_price: int = 60
     ttl_market: int = 300
     ttl_ohlcv: int = 300
@@ -51,12 +56,16 @@ class Settings(BaseSettings):
     ttl_static: int = 86400
 
     @property
+    def effective_state_dir(self) -> Path:
+        return self.state_dir or self.data_dir
+
+    @property
     def db_path(self) -> Path:
-        return self.data_dir / "crypto.db"
+        return self.effective_state_dir / "crypto.db"
 
     @property
     def vector_dir(self) -> Path:
-        return self.data_dir / "vectors"
+        return self.effective_state_dir / "vectors"
 
     @property
     def reports_dir(self) -> Path:
@@ -67,7 +76,13 @@ class Settings(BaseSettings):
         return self.data_dir / "prompts"
 
     def ensure_dirs(self) -> None:
-        for path in (self.data_dir, self.reports_dir, self.prompts_dir, self.vector_dir):
+        for path in (
+            self.data_dir,
+            self.reports_dir,
+            self.prompts_dir,
+            self.effective_state_dir,
+            self.vector_dir,
+        ):
             path.mkdir(parents=True, exist_ok=True)
 
 

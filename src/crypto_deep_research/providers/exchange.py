@@ -1,4 +1,4 @@
-"""Borsa saglayicilari: Binance, OKX, Bybit, Deribit (public REST)."""
+"""Borsa sağlayıcıları: Binance, OKX, Bybit, Deribit (public REST)."""
 
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ BINANCE_INTERVALS = {
 
 
 class ExchangeProvider:
-    """Binance agirlikli, coklu borsa public veri saglayicisi."""
+    """Binance ağırlıklı, çoklu borsa public veri sağlayıcısi."""
 
     def __init__(self, http: CachedHTTP, settings: Settings) -> None:
         self.http = http
@@ -164,7 +164,7 @@ class ExchangeProvider:
             return None
 
     async def multi_exchange_tickers(self, symbol: str) -> dict[str, dict[str, Any]]:
-        """Binance, OKX ve Bybit icin anlik hacim/fiyat ozeti."""
+        """Binance, OKX ve Bybit için anlık hacim/fiyat özeti."""
         out: dict[str, dict[str, Any]] = {}
         try:
             binance = await self.binance_ticker(symbol)
@@ -202,7 +202,7 @@ class ExchangeProvider:
 
     # ------------------------------------------------------------------ Deribit
     async def deribit_dvol(self, currency: str = "BTC") -> dict[str, Any] | None:
-        """Deribit volatilite endeksi (DVOL) son degeri."""
+        """Deribit volatilite endeksi (DVOL) son değeri."""
         try:
             now_ms = int(utcnow().timestamp() * 1000)
             data = await self.http.get_json(

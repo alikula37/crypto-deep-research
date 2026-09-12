@@ -1,4 +1,4 @@
-"""Haber saglayicilari: CryptoPanic, RSS kaynaklari ve GDELT + VADER sentiment."""
+"""Haber sağlayıcıları: CryptoPanic, RSS kaynakları ve GDELT + VADER sentiment."""
 
 from __future__ import annotations
 
@@ -65,7 +65,7 @@ _CRYPTO_LEXICON: dict[str, float] = {
 
 
 class NewsProvider:
-    """Coklu kaynaktan haber toplar, sentiment hesaplar ve onbellege yazar."""
+    """Çoklu kaynaktan haber toplar, sentiment hesaplar ve önbelleğe yazar."""
 
     name = "news"
 
@@ -220,7 +220,7 @@ class NewsProvider:
         return articles
 
     async def gdelt_volume(self, coin: CoinRef, hours: int = 24) -> list[dict[str, Any]]:
-        """Haber yazilma hizini zaman serisi olarak dondurur (GDELT timeline)."""
+        """Haber yazilma hızını zaman serisi olarak döndürür (GDELT timeline)."""
         try:
             data = await self.http.get_json(
                 "gdelt",
@@ -251,7 +251,7 @@ class NewsProvider:
         return False
 
     async def fetch_news(self, coin: CoinRef, hours: int = 72, limit: int = 200) -> list[NewsArticle]:
-        """Tum kaynaklardan haberleri toplar, tekilleştirir, sentiment hesaplar ve kaydeder."""
+        """Tüm kaynaklardan haberleri toplar, tekilleştirir, sentiment hesaplar ve kaydeder."""
         batches = await asyncio.gather(
             self.cryptopanic(coin),
             self.rss(),
@@ -292,7 +292,7 @@ class NewsProvider:
 
     @staticmethod
     def aggregate_sentiment(articles: list[NewsArticle], hours: int = 24) -> dict[str, Any]:
-        """Zaman agirlikli sentiment ozeti."""
+        """Zaman ağırlıklı sentiment özeti."""
         cutoff = utcnow() - timedelta(hours=hours)
         now = utcnow()
         weighted_sum = 0.0

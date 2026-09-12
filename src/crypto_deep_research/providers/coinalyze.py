@@ -1,4 +1,4 @@
-"""Coinalyze saglayicisi: likidasyon, open interest, funding, long/short (ucretsiz key)."""
+"""Coinalyze sağlayıcısi: likidasyon, open interest, funding, long/short (ücretsiz key)."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ BASE = "https://api.coinalyze.net/v1"
 
 
 class CoinalyzeProvider:
-    """Ucretsiz API anahtari ile calisir; anahtar yoksa bos sonuc doner."""
+    """Ücretsiz API anahtari ile çalışır; anahtar yoksa bos sonuç döner."""
 
     name = "coinalyze"
 
@@ -32,7 +32,7 @@ class CoinalyzeProvider:
 
     async def _get(self, path: str, params: dict[str, Any], ttl: int) -> Any:
         if not self.enabled:
-            raise ProviderError(self.name, "Coinalyze API anahtari tanimli degil")
+            raise ProviderError(self.name, "Coinalyze API anahtari tanımli değil")
         params = {**params, "api_key": self.settings.coinalyze_api_key}
         return await self.http.get_json(self.name, f"{BASE}{path}", params=params, ttl=ttl)
 

@@ -1,4 +1,4 @@
-"""BTC/ETH parite analizi: oran trendi, tarihsel zirve ve direnc mesafesi."""
+"""BTC/ETH parite analizi: oran trendi, tarihsel zirve ve direnç mesafesi."""
 
 from __future__ import annotations
 
@@ -41,9 +41,9 @@ async def analyze_parity(ctx: AnalysisContext) -> AnalysisResult:
     if not klines and dominance is None:
         return ctx.result(
             "parity",
-            "BTC/ETH Paritesi ve Direnc Mesafesi",
+            "BTC/ETH Paritesi ve Direnç Mesafesi",
             status="no_data",
-            summary=f"{symbol} icin BTC paritesi verisi alinamadi.",
+            summary=f"{symbol} için BTC paritesi verisi alınamadı.",
             sources=sources,
         )
 
@@ -89,33 +89,33 @@ async def analyze_parity(ctx: AnalysisContext) -> AnalysisResult:
         if symbol == "ETH":
             if change_30d is not None and change_30d > 3:
                 score += 0.5
-                reasons.append(f"ETH/BTC 30 gunde %{change_30d:.1f} yukarida: ETH goreli guclu")
+                reasons.append(f"ETH/BTC 30 günde %{change_30d:.1f} yukarıda: ETH göreli güçlü")
             elif change_30d is not None and change_30d < -3:
                 score -= 0.5
-                reasons.append(f"ETH/BTC 30 gunde %{change_30d:.1f} asagida: BTC goreli guclu")
+                reasons.append(f"ETH/BTC 30 günde %{change_30d:.1f} aşağıda: BTC göreli güçlü")
         elif symbol == "BTC":
             if change_30d is not None and change_30d < -3:
                 score += 0.4
-                reasons.append(f"ETH/BTC dusuyor (%{change_30d:.1f}): sermaye BTC'ye kayiyor")
+                reasons.append(f"ETH/BTC düşüyor (%{change_30d:.1f}): sermaye BTC'ye kayiyor")
             elif change_30d is not None and change_30d > 3:
                 score -= 0.4
-                reasons.append(f"ETH/BTC yukseliyor (%{change_30d:.1f}): BTC'den ETH'e rotasyon")
+                reasons.append(f"ETH/BTC yükseliyor (%{change_30d:.1f}): BTC'den ETH'e rotasyon")
         else:
             trend = trend_score(change_30d, 20.0)
             score += trend * 0.6
-            direction = "gucleniyor" if (change_30d or 0) > 0 else "zayifliyor"
+            direction = "güçleniyor" if (change_30d or 0) > 0 else "zayıflıyor"
             reasons.append(f"{pair_label} paritesinde coin {direction} (30g %{change_30d or 0:.1f})")
 
         if above_ema200 is not None:
             if above_ema200:
                 score += 0.15
-                reasons.append(f"{pair_label} 200 EMA uzerinde")
+                reasons.append(f"{pair_label} 200 EMA üzerinde")
             else:
                 score -= 0.15
-                reasons.append(f"{pair_label} 200 EMA altinda")
+                reasons.append(f"{pair_label} 200 EMA altında")
         if distance_ath is not None and distance_ath > -3:
             score -= 0.2
-            reasons.append(f"{pair_label} tarihsel zirvesine cok yakin: direnc riski")
+            reasons.append(f"{pair_label} tarihsel zirvesine çok yakın: direnç riski")
 
     if dominance is not None:
         confidence += 0.15
@@ -123,27 +123,27 @@ async def analyze_parity(ctx: AnalysisContext) -> AnalysisResult:
         if symbol == "BTC":
             if dominance > 55:
                 score += 0.2
-                reasons.append(f"BTC dominance %{dominance:.1f}: yuksek, BTC guclu")
+                reasons.append(f"BTC dominance %{dominance:.1f}: yüksek, BTC güçlü")
             elif dominance < 45:
                 score -= 0.2
-                reasons.append(f"BTC dominance %{dominance:.1f}: dusuk, altcoin sezonu egilimi")
+                reasons.append(f"BTC dominance %{dominance:.1f}: düşük, altcoin sezonu egilimi")
         else:
             if dominance > 58:
                 score -= 0.2
-                reasons.append(f"BTC dominance %{dominance:.1f}: altcoinler icin baski")
+                reasons.append(f"BTC dominance %{dominance:.1f}: altcoinler için baskı")
             elif dominance < 45:
                 score += 0.2
-                reasons.append(f"BTC dominance %{dominance:.1f}: altcoinlere sermaye akisi")
+                reasons.append(f"BTC dominance %{dominance:.1f}: altcoinlere sermaye akışı")
 
     summary = (
-        f"{pair_label} guncel {data.get('ratio_now', 'n/a')}; "
-        f"30g degisim %{data.get('ratio_change_30d_pct', 'n/a')}; "
-        f"BTC dominance %{dominance:.1f}." if dominance else f"{pair_label} analizi yapildi."
+        f"{pair_label} güncel {data.get('ratio_now', 'n/a')}; "
+        f"30g değişim %{data.get('ratio_change_30d_pct', 'n/a')}; "
+        f"BTC dominance %{dominance:.1f}." if dominance else f"{pair_label} analizi yapıldı."
     )
 
     return ctx.result(
         "parity",
-        "BTC/ETH Paritesi ve Direnc Mesafesi",
+        "BTC/ETH Paritesi ve Direnç Mesafesi",
         summary=summary,
         data={"reasons": reasons, **data},
         sources=sources,

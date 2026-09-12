@@ -1,4 +1,4 @@
-"""Makro saglayicilar: yfinance (DXY, SPX, altin, VIX), FRED serileri."""
+"""Makro sağlayıcılar: yfinance (DXY, SPX, altın, VIX), FRED serileri."""
 
 from __future__ import annotations
 
@@ -28,10 +28,10 @@ YF_TICKERS: dict[str, str] = {
 
 FRED_SERIES: dict[str, str] = {
     "FEDFUNDS": "Fed fon faizi",
-    "DFF": "Fed fon faizi (gunluk)",
+    "DFF": "Fed fon faizi (günlük)",
     "CPIAUCSL": "ABD TUFE",
     "T10Y2Y": "10Y-2Y getiri egrisi",
-    "M2SL": "ABD M2 para arzi",
+    "M2SL": "ABD M2 para arzı",
     "UNRATE": "ABD issizlik",
 }
 
@@ -46,7 +46,7 @@ class MacroProvider:
 
     # ------------------------------------------------------------------ yfinance
     async def market_data(self, period: str = "3mo") -> dict[str, dict[str, Any]]:
-        """yfinance ile makro varlik getirileri (onbellekli, thread'de)."""
+        """yfinance ile makro varlık getirileri (önbellekli, thread'de)."""
         cache_key = stable_key("yfinance", period, list(YF_TICKERS))
         cached = self.db.cache_get(cache_key)
         if cached and cached[1]:
@@ -66,7 +66,7 @@ class MacroProvider:
                     auto_adjust=True,
                 )
             except Exception as exc:
-                logger.info("yfinance indirme hatasi: %s", exc)
+                logger.info("yfinance indirme hatası: %s", exc)
                 return result
             if data is None or data.empty:
                 return result
@@ -119,7 +119,7 @@ class MacroProvider:
         return list((data or {}).get("observations") or [])
 
     async def fred_dashboard(self) -> dict[str, Any]:
-        """Secili FRED serilerinin son degerleri ve degisimleri."""
+        """Seçili FRED serilerinin son değerleri ve değişimleri."""
         out: dict[str, Any] = {}
         results = await asyncio.gather(
             *[self.fred_series(sid) for sid in FRED_SERIES], return_exceptions=True

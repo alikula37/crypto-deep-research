@@ -1,4 +1,4 @@
-"""Opsiyonel OpenRouter istemcisi (anahtar yoksa yalnizca prompt uretilir)."""
+"""Opsiyonel OpenRouter istemcisi (anahtar yoksa yalnızca prompt üretilir)."""
 
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ class OpenRouterClient:
         temperature: float = 0.3,
     ) -> str:
         if not self.enabled:
-            raise OpenRouterError("OpenRouter API anahtari tanimli degil (CDR_OPENROUTER_API_KEY).")
+            raise OpenRouterError("OpenRouter API anahtari tanımli değil (CDR_OPENROUTER_API_KEY).")
         messages = []
         if system:
             messages.append({"role": "system", "content": system})

@@ -1,4 +1,4 @@
-"""LanceDB tabanli yerel vektor deposu; kullanilamazsa SQLite FTS'e duser."""
+"""LanceDB tabanlı yerel vektör deposu; kullanılamazsa SQLite FTS'e düşer."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ TABLE_NAME = "documents"
 
 
 class VectorStore:
-    """LanceDB sarmalayicisi. Basarisizlikta available False olur ve FTS kullanilir."""
+    """LanceDB sarmalayicisi. Başarısızlıkta available False olur ve FTS kullanılır."""
 
     def __init__(self, directory: Path) -> None:
         self.directory = directory
@@ -26,7 +26,7 @@ class VectorStore:
             self._db = lancedb.connect(str(self.directory))
             self.available = True
         except Exception as exc:
-            logger.warning("LanceDB kullanilamiyor, FTS'e dusuluyor: %s", exc)
+            logger.warning("LanceDB kullanılamiyor, FTS'e düşülüyor: %s", exc)
 
     def _table(self) -> Any:
         if not self.available or self._db is None:
@@ -36,7 +36,7 @@ class VectorStore:
                 return self._db.open_table(TABLE_NAME)
             return None
         except Exception as exc:
-            logger.warning("LanceDB tablo hatasi: %s", exc)
+            logger.warning("LanceDB tablo hatası: %s", exc)
             return None
 
     def add(self, rows: list[dict[str, Any]]) -> bool:
@@ -50,7 +50,7 @@ class VectorStore:
                 table.add(rows)
             return True
         except Exception as exc:
-            logger.warning("LanceDB yazma hatasi: %s", exc)
+            logger.warning("LanceDB yazma hatası: %s", exc)
             self.available = False
             return False
 
@@ -70,7 +70,7 @@ class VectorStore:
                 row["score"] = 1.0 / (1.0 + distance)
             return rows
         except Exception as exc:
-            logger.warning("LanceDB arama hatasi: %s", exc)
+            logger.warning("LanceDB arama hatası: %s", exc)
             return []
 
     def count(self) -> int:

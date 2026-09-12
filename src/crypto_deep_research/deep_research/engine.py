@@ -1,4 +1,4 @@
-"""66 maddelik arastirma motoru: tum analizleri, madde degerlendirmelerini ve skorlamayi yonetir."""
+"""66 maddelik araştırma motoru: tüm analizleri, madde değerlendirmelerini ve skorlamayi yönetir."""
 
 from __future__ import annotations
 
@@ -80,7 +80,7 @@ class DeepResearchEngine:
             self.rag.ingest_articles(coin.id, articles)
             self.rag.ingest_analysis(coin.id, analysis_results)
         except Exception as exc:
-            logger.warning("RAG indeksleme hatasi: %s", exc)
+            logger.warning("RAG indeksleme hatası: %s", exc)
 
         specs = load_registry()
         item_results = await self._evaluate_items(ctx, specs, analyses_map)
@@ -178,10 +178,10 @@ class DeepResearchEngine:
         partial_items = sum(1 for item in item_results if item.status == "partial")
         no_data_items = sum(1 for item in item_results if item.status in ("no_data", "error"))
         notes = [
-            f"66 maddenin {ok_items} tanesi tam, {partial_items} tanesi kismi veriyle degerlendirildi; "
-            f"{no_data_items} madde icin dogrulanabilir ucretsiz veri bulunamadi ve ortalamaya dahil edilmedi.",
-            "Skorlar veri kaynaklarinin agirlikli ortalamasidir; kesin fiyat tahmini degildir.",
-            "Yatirim tavsiyesi degildir.",
+            f"66 maddenin {ok_items} tanesi tam, {partial_items} tanesi kısmi veriyle değerlendirildi; "
+            f"{no_data_items} madde için doğrulanabilir ücretsiz veri bulunamadı ve ortalamaya dahil edilmedi.",
+            "Skorlar veri kaynaklarının ağırlıklı ortalamasıdır; kesin fiyat tahmini değildir.",
+            "Yatırım tavsiyesi değildir.",
         ]
         return ResearchRun(
             run_id=uuid.uuid4().hex[:12],

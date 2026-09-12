@@ -1,4 +1,4 @@
-"""Teknik gostergeler ve formasyon tespitleri (pandas ile, harici TA kutuphanesi yok)."""
+"""Teknik göstergeler ve formasyon tespitleri (pandas ile, hariçi TA kutuphanesi yok)."""
 
 from __future__ import annotations
 
@@ -79,7 +79,7 @@ def obv(df: pd.DataFrame) -> pd.Series:
 def find_pivots(
     df: pd.DataFrame, left: int = 3, right: int = 3, max_levels: int = 8
 ) -> dict[str, list[float]]:
-    """Yerel tepe/dip noktalari (destek-direnc adaylari)."""
+    """Yerel tepe/dip noktaları (destek-direnç adaylari)."""
     highs: list[tuple[int, float]] = []
     lows: list[tuple[int, float]] = []
     high_values = df["high"].values
@@ -110,7 +110,7 @@ def _cluster_levels(levels: list[float], tolerance: float = 0.012) -> list[float
 
 
 def volume_profile(df: pd.DataFrame, bins: int = 30) -> list[dict[str, Any]]:
-    """Fiyat bazli hacim profili (destek/direnc yogunlugu)."""
+    """Fiyat bazlı hacim profili (destek/direnç yoğunluğu)."""
     if df.empty or df["volume"].sum() == 0:
         return []
     low, high = float(df["low"].min()), float(df["high"].max())
@@ -163,11 +163,11 @@ def candle_patterns(df: pd.DataFrame) -> list[str]:
     lower_wick = min(last["close"], last["open"]) - last["low"]
 
     if body / full_range < 0.1:
-        patterns.append("Doji (kararsizlik)")
+        patterns.append("Doji (kararsızlık)")
     if lower_wick > body * 2 and upper_wick < body:
-        patterns.append("Hammer (dip donus sinyali)")
+        patterns.append("Hammer (dip dönüş sinyali)")
     if upper_wick > body * 2 and lower_wick < body:
-        patterns.append("Shooting Star (tepe donus sinyali)")
+        patterns.append("Shooting Star (tepe dönüş sinyali)")
     prev_body = abs(prev["close"] - prev["open"])
     if last["close"] > last["open"] and prev["close"] < prev["open"] and body > prev_body:
         patterns.append("Bullish Engulfing")
@@ -176,14 +176,14 @@ def candle_patterns(df: pd.DataFrame) -> list[str]:
     if len(df) >= 3:
         three_closes = df["close"].tail(3).tolist()
         if three_closes[0] < three_closes[1] < three_closes[2]:
-            patterns.append("Uc beyaz asker (yukselis)")
+            patterns.append("Üç beyaz asker (yükseliş)")
         if three_closes[0] > three_closes[1] > three_closes[2]:
-            patterns.append("Uc siyah karga (dusus)")
+            patterns.append("Üç siyah karga (düşüş)")
     return patterns
 
 
 def detect_chart_patterns(df: pd.DataFrame) -> list[str]:
-    """Basit grafik formasyon tespiti (cift tepe/dip, kanal, ucgen yaklasimi)."""
+    """Basit grafik formasyon tespiti (çift tepe/dip, kanal, üçgen yaklaşımi)."""
     patterns: list[str] = []
     if len(df) < 60:
         return patterns
@@ -195,18 +195,18 @@ def detect_chart_patterns(df: pd.DataFrame) -> list[str]:
     for i in range(len(highs) - 1):
         for j in range(i + 1, len(highs)):
             if abs(highs[i] - highs[j]) / max(highs[j], 1e-9) < 0.02 and current < highs[j] * 0.98:
-                patterns.append("Cift tepe (Double Top)")
+                patterns.append("Çift tepe (Double Top)")
                 break
     for i in range(len(lows) - 1):
         for j in range(i + 1, len(lows)):
             if abs(lows[i] - lows[j]) / max(lows[j], 1e-9) < 0.02 and current > lows[j] * 1.02:
-                patterns.append("Cift dip (Double Bottom)")
+                patterns.append("Çift dip (Double Bottom)")
                 break
     closes = window["close"]
     if closes.iloc[-1] > closes.rolling(30).max().iloc[-2]:
-        patterns.append("30 periyot kirilimi (breakout)")
+        patterns.append("30 periyot kırılımı (breakout)")
     if closes.iloc[-1] < closes.rolling(30).min().iloc[-2]:
-        patterns.append("30 periyot asagi kirilimi (breakdown)")
+        patterns.append("30 periyot aşağı kırılımı (breakdown)")
     deduped: list[str] = []
     for pattern in patterns:
         if pattern not in deduped:
@@ -215,7 +215,7 @@ def detect_chart_patterns(df: pd.DataFrame) -> list[str]:
 
 
 def indicator_snapshot(df: pd.DataFrame) -> dict[str, Any]:
-    """Teknik gostergelerin son degerleri ve sinyalleri."""
+    """Teknik göstergelerin son değerleri ve sinyalleri."""
     close = df["close"]
     out: dict[str, Any] = {}
     out["price"] = float(close.iloc[-1])
@@ -256,7 +256,7 @@ def indicator_snapshot(df: pd.DataFrame) -> dict[str, Any]:
 
 
 def indicator_score(snapshot: dict[str, Any]) -> tuple[float, float, list[str]]:
-    """Gostergelerden -1..1 skor, guven ve gerekce uretir."""
+    """Göstergelerden -1..1 skor, güven ve gerekçe üretir."""
     signals: list[str] = []
     score = 0.0
     weight = 0.0
@@ -267,13 +267,13 @@ def indicator_score(snapshot: dict[str, Any]) -> tuple[float, float, list[str]]:
         weight += 1
         if rsi_value < 30:
             score += 0.8
-            signals.append(f"RSI {rsi_value:.1f} asiri satim (donus potansiyeli)")
+            signals.append(f"RSI {rsi_value:.1f} aşırı satım (dönüş potansiyeli)")
         elif rsi_value > 70:
             score -= 0.8
-            signals.append(f"RSI {rsi_value:.1f} asiri alim (duzeltme riski)")
+            signals.append(f"RSI {rsi_value:.1f} aşırı alım (düzeltme riski)")
         else:
             score += (50 - abs(rsi_value - 50)) / 100 * (0.4 if rsi_value > 50 else -0.4)
-            signals.append(f"RSI {rsi_value:.1f} notr")
+            signals.append(f"RSI {rsi_value:.1f} nötr")
 
     histogram = snapshot.get("macd_histogram")
     histogram_prev = snapshot.get("macd_histogram_prev")
@@ -281,13 +281,13 @@ def indicator_score(snapshot: dict[str, Any]) -> tuple[float, float, list[str]]:
         weight += 1
         if histogram > 0 and histogram > histogram_prev:
             score += 0.7
-            signals.append("MACD pozitif ve gucleniyor")
+            signals.append("MACD pozitif ve güçleniyor")
         elif histogram > 0:
             score += 0.3
-            signals.append("MACD pozitif ancak zayifliyor")
+            signals.append("MACD pozitif ancak zayıflıyor")
         elif histogram < 0 and histogram < histogram_prev:
             score -= 0.7
-            signals.append("MACD negatif ve zayifliyor")
+            signals.append("MACD negatif ve zayıflıyor")
         else:
             score -= 0.3
             signals.append("MACD negatif ancak toparlaniyor")
@@ -297,20 +297,20 @@ def indicator_score(snapshot: dict[str, Any]) -> tuple[float, float, list[str]]:
         weight += 1
         if price > ema200:
             score += 0.5
-            signals.append("Fiyat 200 EMA uzerinde (uzun trend pozitif)")
+            signals.append("Fiyat 200 EMA üzerinde (uzun trend pozitif)")
         else:
             score -= 0.5
-            signals.append("Fiyat 200 EMA altinda (uzun trend negatif)")
+            signals.append("Fiyat 200 EMA altında (uzun trend negatif)")
 
     ema50 = snapshot.get("ema_50") or snapshot.get("sma_50")
     if ema50 and price:
         weight += 1
         if price > ema50:
             score += 0.3
-            signals.append("Fiyat 50 EMA uzerinde (orta trend pozitif)")
+            signals.append("Fiyat 50 EMA üzerinde (orta trend pozitif)")
         else:
             score -= 0.3
-            signals.append("Fiyat 50 EMA altinda (orta trend negatif)")
+            signals.append("Fiyat 50 EMA altında (orta trend negatif)")
 
     position = snapshot.get("bb_position")
     if position is not None:
@@ -320,23 +320,23 @@ def indicator_score(snapshot: dict[str, Any]) -> tuple[float, float, list[str]]:
             signals.append("Bollinger alt bandinda")
         elif position > 0.95:
             score -= 0.5
-            signals.append("Bollinger ust bandinda")
+            signals.append("Bollinger üst bandinda")
 
     stoch_k = snapshot.get("stoch_k")
     if stoch_k is not None:
         weight += 0.5
         if stoch_k < 20:
             score += 0.3
-            signals.append("Stochastic asiri satim")
+            signals.append("Stochastic aşırı satım")
         elif stoch_k > 80:
             score -= 0.3
-            signals.append("Stochastic asiri alim")
+            signals.append("Stochastic aşırı alım")
 
     volume_ratio = snapshot.get("volume_vs_ma20")
     if volume_ratio is not None:
         weight += 0.5
         if volume_ratio > 1.5:
-            signals.append(f"Hacim 20 gun ortalamasinin {volume_ratio:.1f}x uzerinde")
+            signals.append(f"Hacim 20 gün ortalamasının {volume_ratio:.1f}x üzerinde")
 
     if weight == 0:
         return 0.0, 0.0, signals
@@ -344,7 +344,7 @@ def indicator_score(snapshot: dict[str, Any]) -> tuple[float, float, list[str]]:
 
 
 def compute_levels(df: pd.DataFrame, current_price: float) -> dict[str, Any]:
-    """Destek/direnc, fibonacci ve hacim profili seviyeleri."""
+    """Destek/direnç, fibonacci ve hacim profili seviyeleri."""
     window = df.tail(180) if len(df) > 180 else df
     pivots = find_pivots(window)
     high = float(window["high"].max())

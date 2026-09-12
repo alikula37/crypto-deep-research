@@ -1,4 +1,4 @@
-"""ATH/ATL analizi: dolar bazli tarihsel zirve/dip mesafeleri ve yerel aralik konumu."""
+"""ATH/ATL analizi: dolar bazlı tarihsel zirve/dip mesafeleri ve yerel aralık konumu."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ async def analyze_ath_atl(ctx: AnalysisContext) -> AnalysisResult:
     snapshot = await ctx.snapshot()
     sources = [
         source("CoinGecko", "https://www.coingecko.com", note="ATH/ATL ve tarihleri"),
-        source("Binance", "https://api.binance.com", note="yerel aralik"),
+        source("Binance", "https://api.binance.com", note="yerel aralık"),
     ]
     price = snapshot.price_usd
     data: dict[str, object] = {
@@ -56,47 +56,47 @@ async def analyze_ath_atl(ctx: AnalysisContext) -> AnalysisResult:
         confidence += 0.2
         if distance_ath < -80:
             score += 0.35
-            reasons.append(f"ATH'in %{abs(distance_ath):.0f} altinda: derin deger kaybi, toparlanma potansiyeli")
+            reasons.append(f"ATH'in %{abs(distance_ath):.0f} altında: derin değer kaybı, toparlanma potansiyeli")
         elif distance_ath < -50:
             score += 0.2
-            reasons.append(f"ATH'in %{abs(distance_ath):.0f} altinda: uzun vadeli iskonto")
+            reasons.append(f"ATH'in %{abs(distance_ath):.0f} altında: uzun vadeli iskonto")
         elif distance_ath > -8:
             score -= 0.2
-            reasons.append("ATH'e %8'den yakin: satis baskisi bolgesi")
+            reasons.append("ATH'e %8'den yakın: satış baskısı bölgesi")
 
     distance_atl = snapshot.distance_from_atl_pct
     if distance_atl is not None:
         confidence += 0.1
         if distance_atl < 50:
             score -= 0.3
-            reasons.append("ATL'e cok yakin: pazar guveni cok zayif")
+            reasons.append("ATL'e çok yakın: pazar güveni çok zayıf")
 
     if percentile is not None:
         confidence += 0.2
         if percentile < 0.15:
             score += 0.3
-            reasons.append(f"Yerel araligin alt %{percentile * 100:.0f}'inde (destek bolgesi)")
+            reasons.append(f"Yerel aralığın alt %{percentile * 100:.0f}'inde (destek bölgesi)")
         elif percentile > 0.9:
             score -= 0.1
-            reasons.append(f"Yerel araligin ust %{(1 - percentile) * 100:.0f}'inde (direnc bolgesi)")
+            reasons.append(f"Yerel aralığın üst %{(1 - percentile) * 100:.0f}'inde (direnç bölgesi)")
 
     if distance_ath is not None and percentile is not None:
         momentum = snapshot.change_30d_pct
         if momentum is not None and momentum > 10 and percentile > 0.6:
             score += 0.15
-            reasons.append("Yuksek konum + pozitif 30g momentum: trend devam edebilir")
+            reasons.append("Yüksek konum + pozitif 30g momentum: trend devam edebilir")
 
     summary = (
-        f"Fiyat ${price:,.4f}. ATH'e uzaklik %{distance_ath:.1f}, ATL'e uzaklik %{distance_atl:.1f}."
+        f"Fiyat ${price:,.4f}. ATH'e uzaklık %{distance_ath:.1f}, ATL'e uzaklık %{distance_atl:.1f}."
         if distance_ath is not None and distance_atl is not None
-        else f"Fiyat ${price:,.4f}; ATH/ATL verisi kismi."
+        else f"Fiyat ${price:,.4f}; ATH/ATL verisi kısmi."
     )
     if percentile is not None:
-        summary += f" Yerel 500 mum aralik konumu: %{percentile * 100:.0f}."
+        summary += f" Yerel 500 mum aralık konumu: %{percentile * 100:.0f}."
 
     return ctx.result(
         "ath_atl",
-        "USD Bazli ATH ve ATL Mesafesi",
+        "USD Bazlı ATH ve ATL Mesafesi",
         summary=summary,
         data={"reasons": reasons, **data},
         sources=sources,

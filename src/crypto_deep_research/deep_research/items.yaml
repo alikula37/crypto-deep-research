@@ -1,6 +1,6 @@
-# Kripto Yapay Zeka Analizi - 66 maddelik arastirma kayit defteri
+# Kripto Yapay Zeka Analizi - 66 maddelik araştırma kayıt defteri
 # source: analysis:<anahtar> | special:<fonksiyon> | news | unavailable
-# weight: agirlikli ortalamada kullanilan onem katsayisi (0.0 - 1.0)
+# weight: ağırlıklı ortalamada kullanılan önem katsayisi (0.0 - 1.0)
 items:
   - id: 1
     title_tr: "Teknik Analiz"
@@ -13,7 +13,7 @@ items:
     source: "special:fundamentals"
     weight: 1.0
   - id: 3
-    title_tr: "Piyasa Duyarliligi"
+    title_tr: "Piyasa Duyarlılığı"
     category: "Sentiment"
     source: "special:market_sensitivity"
     weight: 0.8
@@ -23,63 +23,63 @@ items:
     source: "analysis:news"
     weight: 0.9
   - id: 5
-    title_tr: "Turev Piyasalar"
-    category: "Turev"
+    title_tr: "Türev Piyasalar"
+    category: "Türev"
     source: "analysis:liquidations"
     weight: 0.9
   - id: 6
-    title_tr: "Yatirimci Davranislari"
-    category: "Zincir-ustu"
+    title_tr: "Yatırımcı Davranışları"
+    category: "Zincir-Üstü"
     source: "special:investor_behavior"
     weight: 0.8
   - id: 7
-    title_tr: "Indikatorler"
+    title_tr: "İndikatörler"
     category: "Teknik"
     source: "analysis:technical"
     weight: 0.9
   - id: 8
-    title_tr: "Sektorel Analiz"
+    title_tr: "Sektörel Analiz"
     category: "Temel"
     source: "special:sector"
     weight: 0.6
   - id: 9
-    title_tr: "Regulasyon ve Yasal Durum"
+    title_tr: "Regülasyon ve Yasal Durum"
     category: "Haber"
     source: "news"
     query: "regulation SEC lawsuit approval ban"
-    keywords: ["sec", "regulation", "lawsuit", "ban", "approval", "regulator", "yasal", "regulasyon"]
+    keywords: ["sec", "regulation", "lawsuit", "ban", "approval", "regulator", "yasal", "regülasyon"]
     weight: 0.7
   - id: 10
     title_tr: "Global Jeopolitik Olaylar"
     category: "Haber"
     source: "news"
     query: "geopolitics war sanctions"
-    keywords: ["war", "sanction", "geopolitic", "conflict", "tariff", "jeopolitik", "savas"]
+    keywords: ["war", "sanction", "geopolitic", "conflict", "tariff", "jeopolitik", "savaş"]
     weight: 0.6
   - id: 11
-    title_tr: "Teknolojik Ilerlemeler"
+    title_tr: "Teknolojik İlerlemeler"
     category: "Temel"
     source: "special:technology"
     weight: 0.7
   - id: 12
-    title_tr: "Sirket Haberleri"
+    title_tr: "Şirket Haberleri"
     category: "Haber"
     source: "news"
     query: "company business partnership earnings"
-    keywords: ["microstrategy", "tesla", "blackrock", "company", "partnership", "earnings", "sirket"]
+    keywords: ["microstrategy", "tesla", "blackrock", "company", "partnership", "earnings", "şirket"]
     weight: 0.6
   - id: 13
-    title_tr: "Makroekonomik Faktorler"
+    title_tr: "Makroekonomik Faktörler"
     category: "Makro"
     source: "special:macro"
     weight: 0.9
   - id: 14
-    title_tr: "Mum Formasyonlari"
+    title_tr: "Mum Formasyonları"
     category: "Teknik"
     source: "analysis:technical"
     weight: 0.6
   - id: 15
-    title_tr: "Grafik Formasyonlari"
+    title_tr: "Grafik Formasyonları"
     category: "Teknik"
     source: "analysis:technical"
     weight: 0.7
@@ -93,23 +93,23 @@ items:
     category: "Teknik"
     source: "special:tradingview_proxy"
     weight: 0.5
-    note: "TradingView'in ucretsiz API'si yok; yerel teknik derecelendirme vekili kullanilir."
+    note: "TradingView'in ücretsiz API'si yok; yerel teknik derecelendirme vekili kullanılır."
   - id: 18
     title_tr: "Hacim"
     category: "Piyasa"
     source: "analysis:volumes"
     weight: 0.9
   - id: 19
-    title_tr: "En Guclu Destek ve Direnc Noktalari"
+    title_tr: "En Güçlü Destek ve Direnç Noktaları"
     category: "Teknik"
     source: "analysis:technical"
     weight: 0.8
   - id: 20
-    title_tr: "Guncel Yapay Zeka Tahmini"
+    title_tr: "Güncel Yapay Zeka Tahmini"
     category: "AI"
     source: "unavailable"
     weight: 0.3
-    note: "Ucretsiz ve dogrulanabilir bir AI tahmin API'si yok. OpenRouter anahtari girilirse LLM tahmini eklenebilir."
+    note: "Ücretsiz ve doğrulanabilir bir AI tahmin API'si yok. OpenRouter anahtari girilirse LLM tahmini eklenebilir."
   - id: 21
     title_tr: "Fraktal Modeller"
     category: "Kantitatif"
@@ -132,30 +132,30 @@ items:
     source: "special:historical_similarity"
     weight: 0.7
   - id: 25
-    title_tr: "Astrolojiyle Finansal Piyasalar Arasinda Iliski Kuran Arastirmalar"
+    title_tr: "Astrolojiyle Finansal Piyasalar Arasında İlişki Kuran Araştırmalar"
     category: "Alternatif"
     source: "unavailable"
     weight: 0.05
-    note: "Bilimsel gecerliligi olan veri kaynagi yok; notr kabul edilir ve agirligi ihmal edilir."
+    note: "Bilimsel geçerliligi olan veri kaynağı yok; nötr kabul edilir ve ağırlığı ihmal edilir."
   - id: 26
-    title_tr: "Google Trends Aramalarindaki Yogunluk"
+    title_tr: "Google Trends Aramalarındaki Yoğunluk"
     category: "Sentiment"
     source: "special:google_trends"
     weight: 0.5
   - id: 27
-    title_tr: "Bitcoin ATM'lerinde Islem Hacmi"
-    category: "Zincir-ustu"
+    title_tr: "Bitcoin ATM'lerinde İşlem Hacmi"
+    category: "Zincir-Üstü"
     source: "news"
     query: "bitcoin ATM"
     keywords: ["atm", "bitcoin atm"]
     weight: 0.2
   - id: 28
-    title_tr: "Bitcoin Madenciligi Elektrik Tuketimi"
-    category: "Zincir-ustu"
+    title_tr: "Bitcoin Madenciliği Elektrik Tüketimi"
+    category: "Zincir-Üstü"
     source: "special:mining_energy"
     weight: 0.5
   - id: 29
-    title_tr: "Sektor Liderlerinin Tweet'leri"
+    title_tr: "Sektör Liderlerinin Tweet'leri"
     category: "Sentiment"
     source: "news"
     query: "Elon Musk Saylor Powell crypto tweet"
@@ -167,24 +167,24 @@ items:
     source: "special:crowd_psychology"
     weight: 0.8
   - id: 31
-    title_tr: "Balinalarin Kararlari"
-    category: "Zincir-ustu"
+    title_tr: "Balinaların Kararları"
+    category: "Zincir-Üstü"
     source: "analysis:whales"
     weight: 0.8
   - id: 32
-    title_tr: "Balina Izleme ve Cuzdan Hareketleri"
-    category: "Zincir-ustu"
+    title_tr: "Balina İzleme ve Cüzdan Hareketleri"
+    category: "Zincir-Üstü"
     source: "analysis:whales"
     weight: 0.8
   - id: 33
-    title_tr: "Kulturel Etkinlikler"
+    title_tr: "Kültürel Etkinlikler"
     category: "Haber"
     source: "news"
     query: "conference event adoption culture"
     keywords: ["conference", "event", "festival", "summit", "kulturel"]
     weight: 0.2
   - id: 34
-    title_tr: "Haberlerin Yazilma Hizi"
+    title_tr: "Haberlerin Yazılma Hızı"
     category: "Haber"
     source: "special:news_velocity"
     weight: 0.5
@@ -204,7 +204,7 @@ items:
     source: "special:regression_trend"
     weight: 0.6
   - id: 38
-    title_tr: "Zincir Disi (Off-chain) Veriler"
+    title_tr: "Zincir Dışı (Off-chain) Veriler"
     category: "Piyasa"
     source: "special:offchain"
     weight: 0.7
@@ -221,32 +221,32 @@ items:
     keywords: ["hedge fund", "institutional", "etf", "grayscale", "blackrock", "fidelity", "flow"]
     weight: 0.6
   - id: 41
-    title_tr: "Yerel Ekonomik Faktorler"
+    title_tr: "Yerel Ekonomik Faktörler"
     category: "Makro"
     source: "news"
     query: "Turkey lira local economy exchange"
     keywords: ["turkey", "turkish", "lira", "try", "local", "yerel", "enflasyon"]
     weight: 0.3
   - id: 42
-    title_tr: "Kara Para Aklama Karsiti (AML) Verileri"
+    title_tr: "Kara Para Aklama Karşıtı (AML) Verileri"
     category: "Haber"
     source: "news"
     query: "AML money laundering compliance fine"
     keywords: ["aml", "money laundering", "compliance", "fine", "sanction", "kara para"]
     weight: 0.3
   - id: 43
-    title_tr: "Alternatif Varliklarin Performansi"
+    title_tr: "Alternatif Varlıkların Performansı"
     category: "Makro"
     source: "special:alternatives"
     weight: 0.5
   - id: 44
-    title_tr: "Volatilite Indexleri"
-    category: "Turev"
+    title_tr: "Volatilite Endeksleri"
+    category: "Türev"
     source: "special:volatility_indices"
     weight: 0.7
   - id: 45
-    title_tr: "Capraz Zincir (Cross-chain) Verileri"
-    category: "Zincir-ustu"
+    title_tr: "Çapraz Zincir (Cross-chain) Verileri"
+    category: "Zincir-Üstü"
     source: "special:cross_chain"
     weight: 0.4
   - id: 46
@@ -255,12 +255,12 @@ items:
     source: "special:media_manipulation"
     weight: 0.4
   - id: 47
-    title_tr: "Sentetik Kiyaslama"
+    title_tr: "Sentetik Kıyaslama"
     category: "Kantitatif"
     source: "special:composite"
     weight: 0.7
   - id: 48
-    title_tr: "Psikolojik Destek ve Direnc Seviyeleri"
+    title_tr: "Psikolojik Destek ve Direnç Seviyeleri"
     category: "Teknik"
     source: "special:psych_levels"
     weight: 0.5
@@ -270,40 +270,40 @@ items:
     source: "special:energy_costs"
     weight: 0.4
   - id: 50
-    title_tr: "Makro Risk Faktorleri"
+    title_tr: "Makro Risk Faktörleri"
     category: "Makro"
     source: "special:macro_risk"
     weight: 0.8
   - id: 51
-    title_tr: "Topluluk Yonetim Kararlari"
+    title_tr: "Topluluk Yönetim Kararları"
     category: "Haber"
     source: "news"
     query: "governance proposal vote upgrade fork"
     keywords: ["governance", "proposal", "vote", "fork", "upgrade", "dao"]
     weight: 0.4
   - id: 52
-    title_tr: "Ulkelerin Bitcoin Hakkindaki Guncel Kararlari"
+    title_tr: "Ülkelerin Bitcoin Hakkındaki Güncel Kararları"
     category: "Haber"
     source: "news"
     query: "country bitcoin reserve legal tender government"
     keywords: ["reserve", "legal tender", "government", "country", "nation", "regulation"]
     weight: 0.5
   - id: 53
-    title_tr: "Halk Olaylari ve Guvenlik Riskleri"
+    title_tr: "Halk Olayları ve Güvenlik Riskleri"
     category: "Haber"
     source: "news"
     query: "security risk hack breach protest"
-    keywords: ["security", "hack", "breach", "attack", "risk", "guvenlik"]
+    keywords: ["security", "hack", "breach", "attack", "risk", "güvenlik"]
     weight: 0.4
   - id: 54
-    title_tr: "Vergi Mevzuati Degisiklikleri"
+    title_tr: "Vergi Mevzuatı Değişiklikleri"
     category: "Haber"
     source: "news"
     query: "crypto tax legislation IRS"
     keywords: ["tax", "taxation", "irs", "vergi", "legislation"]
     weight: 0.4
   - id: 55
-    title_tr: "Fiziksel Dunya ile Bitcoin Etkilesimi"
+    title_tr: "Fiziksel Dünya ile Bitcoin Etkileşimi"
     category: "Haber"
     source: "news"
     query: "bitcoin ETF physical adoption payment hardware"
@@ -311,55 +311,55 @@ items:
     weight: 0.3
   - id: 56
     title_tr: "Blockchain Verilerinde Anomaliler"
-    category: "Zincir-ustu"
+    category: "Zincir-Üstü"
     source: "special:anomalies"
     weight: 0.6
   - id: 57
-    title_tr: "Duygu Analizi ile Satis Baskisi Tespiti"
-    category: "Turev"
+    title_tr: "Duygu Analizi ile Satış Baskısı Tespiti"
+    category: "Türev"
     source: "special:sell_pressure"
     weight: 0.8
   - id: 58
-    title_tr: "Uluslararasi Sermaye Akislarinin Kriptoya Etkisi"
+    title_tr: "Uluslararası Sermaye Akışlarının Kriptoya Etkisi"
     category: "Makro"
     source: "special:capital_flows"
     weight: 0.7
   - id: 59
-    title_tr: "Kripto Cuzdanlarinin Buyume Orani"
-    category: "Zincir-ustu"
+    title_tr: "Kripto Cüzdanlarının Büyüme Oranı"
+    category: "Zincir-Üstü"
     source: "special:wallet_growth"
     weight: 0.5
   - id: 60
-    title_tr: "Ozel Sirketlerin Blockchain Projeleri"
+    title_tr: "Özel Şirketlerin Blockchain Projeleri"
     category: "Haber"
     source: "news"
     query: "company blockchain project enterprise adoption"
     keywords: ["enterprise", "company", "blockchain project", "corporate", "partnership"]
     weight: 0.4
   - id: 61
-    title_tr: "Akilli Kontrat Analizleri"
-    category: "Zincir-ustu"
+    title_tr: "Akıllı Kontrat Analizleri"
+    category: "Zincir-Üstü"
     source: "special:smart_contracts"
     weight: 0.5
   - id: 62
     title_tr: "Stablecoin Rezerv Hareketleri"
-    category: "Zincir-ustu"
+    category: "Zincir-Üstü"
     source: "special:stablecoin_flows"
     weight: 0.7
   - id: 63
-    title_tr: "Merkez Bankalarinin Kriptoya Bakisi"
+    title_tr: "Merkez Bankalarının Kriptoya Bakışı"
     category: "Makro"
     source: "news"
     query: "central bank CBDC crypto policy"
     keywords: ["central bank", "cbdc", "fed", "ecb", "policy", "merkez bankasi"]
     weight: 0.5
   - id: 64
-    title_tr: "Buyuk Capli Madencilik Tasinmalari"
-    category: "Zincir-ustu"
+    title_tr: "Büyük Çaplı Madencilik Taşınmaları"
+    category: "Zincir-Üstü"
     source: "special:mining_shift"
     weight: 0.4
   - id: 65
-    title_tr: "Acik Blockchain Patentleri"
+    title_tr: "Açık Blockchain Patentleri"
     category: "Haber"
     source: "news"
     query: "blockchain patent filing"

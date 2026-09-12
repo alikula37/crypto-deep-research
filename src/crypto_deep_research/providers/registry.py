@@ -1,4 +1,4 @@
-"""Saglayici kayit defteri: tum saglayicilari tek nesnede toplar."""
+"""Sağlayıcı kayıt defteri: tüm sağlayıcıları tek nesnede toplar."""
 
 from __future__ import annotations
 

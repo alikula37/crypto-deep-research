@@ -1,4 +1,4 @@
-"""Markdown rapor uretimi (Turkce)."""
+"""Markdown rapor üretimi (Turkce)."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from crypto_deep_research.models import AnalysisResult, ItemResult, ResearchRun
 
 STATUS_LABELS = {
     "ok": "Tam",
-    "partial": "Kismi",
+    "partial": "Kısmi",
     "no_data": "Veri yok",
     "error": "Hata",
 }
@@ -28,17 +28,17 @@ def render_report(
         "",
         f"- **Tarih:** {now.strftime('%d.%m.%Y %H:%M UTC')}",
         f"- **Fiyat:** ${price:,.6f}".rstrip("0").rstrip("."),
-        f"- **Timeframe:** {run.timeframe} | **Gecmis penceresi:** {run.lookback_days} gun",
-        f"- **Agirlikli skor:** {run.weighted_score}",
-        f"- **Yukselis / Dusus olasiligi:** %{run.up_probability} / %{run.down_probability}",
-        f"- **Beklenen aralik:** {run.expected_low} - {run.expected_high} USD",
+        f"- **Timeframe:** {run.timeframe} | **Geçmiş penceresi:** {run.lookback_days} gün",
+        f"- **Ağırlıklı skor:** {run.weighted_score}",
+        f"- **Yükseliş / Düşüş olasılığı:** %{run.up_probability} / %{run.down_probability}",
+        f"- **Beklenen aralık:** {run.expected_low} - {run.expected_high} USD",
         "",
-        "> Bu rapor otomatik uretilmistir ve yatirim tavsiyesi degildir. Skorlar veri agirlikli",
-        "> tahminlerdir; kesinlik iddiası tasimaz.",
+        "> Bu rapor otomatik üretilmiştir ve yatırım tavsiyesi değildir. Skorlar veri ağırlıklı",
+        "> tahminlerdir; kesinlik iddiası taşımaz.",
         "",
         "## 10 Ana Analiz",
         "",
-        "| Analiz | Durum | Skor | Guven | Ozet |",
+        "| Analiz | Durum | Skor | Güven | Özet |",
         "| --- | --- | --- | --- | --- |",
     ]
     for analysis in analyses:
@@ -69,9 +69,9 @@ def render_report(
 
     lines.extend(
         [
-            "## 66 Maddelik Arastirma Tablosu",
+            "## 66 Maddelik Araştırma Tablosu",
             "",
-            "| # | Madde | Durum | Skor | Guven | Ozet |",
+            "| # | Madde | Durum | Skor | Güven | Özet |",
             "| --- | --- | --- | --- | --- | --- |",
         ]
     )
@@ -84,16 +84,16 @@ def render_report(
         )
     lines.append("")
 
-    lines.append("## Madde Detaylari")
+    lines.append("## Madde Detayları")
     lines.append("")
     for item in items:
         lines.append(f"### {item.item_id}. {item.title_tr}")
         lines.append("")
         lines.append(f"- **Durum:** {STATUS_LABELS.get(item.status, item.status)}")
         lines.append(
-            f"- **Skor / Guven:** {item.score if item.score is not None else '-'} / {item.confidence:.2f}"
+            f"- **Skor / Güven:** {item.score if item.score is not None else '-'} / {item.confidence:.2f}"
         )
-        lines.append(f"- **Ozet:** {item.summary or '-'}")
+        lines.append(f"- **Özet:** {item.summary or '-'}")
         reasons = (item.data or {}).get("reasons")
         if reasons:
             lines.append("- **Nedenler:** " + "; ".join(str(reason) for reason in reasons[:6]))
@@ -102,29 +102,29 @@ def render_report(
                 "- **Kaynaklar:** " + ", ".join(sorted({s.name for s in item.sources}))
             )
         if item.warnings:
-            lines.append("- **Uyarilar:** " + "; ".join(item.warnings))
+            lines.append("- **Uyarılar:** " + "; ".join(item.warnings))
         lines.append("")
 
-    lines.extend(["## Kullanilan Kaynaklar", ""])
+    lines.extend(["## Kullanılan Kaynaklar", ""])
     for source in sorted({s.name for s in run.sources}):
         lines.append(f"- {source}")
     lines.append("")
 
     if prompt:
-        lines.extend(["## Prompt Dosyasi", "", "Harici AI'a verilecek prompt ayni isimli `_prompt.txt` dosyasindadir.", ""])
+        lines.extend(["## Prompt Dosyasi", "", "Harici AI'a verilecek prompt aynı isimli `_prompt.txt` dosyasindadir.", ""])
 
     lines.extend(
         [
-            "## Metodoloji ve Sinirlamalar",
+            "## Metodoloji ve Sınırlamalar",
             "",
-            "- Veriler ucretsiz API katmanlarindan toplanir (CoinGecko, Binance, Coinalyze, DefiLlama,",
+            "- Veriler ücretsiz API katmanlarindan toplanır (CoinGecko, Binance, Coinalyze, DefiLlama,",
             "  CryptoPanic, RSS, GDELT, alternative.me, Reddit, Google Trends, Blockchain.com,",
             "  mempool.space, Blockchair, Blockscout, Etherscan, yfinance, FRED, Deribit).",
-            "- Her madde veri + kaynak + guven ile raporlanir; verisi olmayan maddeler ortalamaya",
-            "  dahil edilmez ve raporda acikca isaretlenir.",
-            "- Skorlar -1 (guclu negatif) ile +1 (guclu pozitif) arasindadir; agirlikli ortalama",
-            "  guven katsayisi ile hesaplanir.",
-            f"- Politika ozeti (Context Control Plane): {json.dumps(run.notes, ensure_ascii=False)}",
+            "- Her madde veri + kaynak + güven ile raporlanir; verisi olmayan maddeler ortalamaya",
+            "  dahil edilmez ve raporda açıkça işaretlenir.",
+            "- Skorlar -1 (güçlü negatif) ile +1 (güçlü pozitif) arasındadir; ağırlıklı ortalama",
+            "  güven katsayisi ile hesaplanir.",
+            f"- Politika özeti (Context Control Plane): {json.dumps(run.notes, ensure_ascii=False)}",
             "",
         ]
     )

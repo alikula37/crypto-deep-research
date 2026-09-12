@@ -1,4 +1,4 @@
-"""Piyasa degeri siralamasi: guncel rank, gecmis max/min rank mesafesi."""
+"""Piyasa değeri sıralaması: güncel rank, geçmiş max/min rank mesafesi."""
 
 from __future__ import annotations
 
@@ -11,15 +11,15 @@ from crypto_deep_research.providers.base import ProviderError, source
 
 async def analyze_rankings(ctx: AnalysisContext) -> AnalysisResult:
     snapshot = await ctx.snapshot()
-    sources = [source("CoinGecko", "https://www.coingecko.com", note="mcap siralamasi (top 300)")]
+    sources = [source("CoinGecko", "https://www.coingecko.com", note="mcap sıralaması (top 300)")]
     current_rank = snapshot.rank
     current_mcap = snapshot.market_cap_usd
     if current_rank is None or not current_mcap:
         return ctx.result(
             "rankings",
-            "Mcap Siralamasi ve Gecmis Uzaklik",
+            "Mcap Sıralaması ve Geçmiş Uzaklık",
             status="no_data",
-            summary="Siralama verisi alinamadi.",
+            summary="Sıralama verisi alınamadı.",
             sources=sources,
         )
 
@@ -56,10 +56,10 @@ async def analyze_rankings(ctx: AnalysisContext) -> AnalysisResult:
 
     if current_rank <= 10:
         score += 0.3
-        reasons.append(f"#{current_rank}: en buyuk 10 varlik arasinda")
+        reasons.append(f"#{current_rank}: en büyük 10 varlık arasında")
     elif current_rank <= 50:
         score += 0.15
-        reasons.append(f"#{current_rank}: ilk 50 icinde")
+        reasons.append(f"#{current_rank}: ilk 50 içinde")
     elif current_rank > 200:
         score -= 0.2
         reasons.append(f"#{current_rank}: 200+. sirada, likidite riski")
@@ -68,12 +68,12 @@ async def analyze_rankings(ctx: AnalysisContext) -> AnalysisResult:
         confidence += 0.25
         if rank_change > 0:
             score += 0.35
-            reasons.append(f"Rank gecmise gore {rank_change:.0f} sira iyilesti")
+            reasons.append(f"Rank geçmişe göre {rank_change:.0f} sira iyilesti")
         elif rank_change < 0:
             score -= 0.35
-            reasons.append(f"Rank gecmise gore {abs(rank_change):.0f} sira kotulesti")
+            reasons.append(f"Rank geçmişe göre {abs(rank_change):.0f} sira kötülesti")
     else:
-        reasons.append("Gecmis rank verisi birikiyor; sonraki kosularda karsilastirma yapilacak")
+        reasons.append("Geçmiş rank verisi birikiyor; sonraki kosularda karşılaştırma yapılacak")
 
     if distance_from_best is not None:
         data_best = {
@@ -88,13 +88,13 @@ async def analyze_rankings(ctx: AnalysisContext) -> AnalysisResult:
 
     if mcap_percentile is not None:
         confidence += 0.2
-        reasons.append(f"Top {universe} icinde mcap yuzdeligi %{mcap_percentile * 100:.0f}")
+        reasons.append(f"Top {universe} içinde mcap yüzdeliği %{mcap_percentile * 100:.0f}")
 
-    summary = f"Guncel siralama #{current_rank}."
+    summary = f"Güncel sıralama #{current_rank}."
     if best_rank:
-        summary += f" Gozlenen en iyi #{int(best_rank)}, en kotu #{int(worst_rank)}."
+        summary += f" Gözlenen en iyi #{int(best_rank)}, en kötü #{int(worst_rank)}."
     if mcap_percentile is not None:
-        summary += f" Top {universe} mcap yuzdeligi %{mcap_percentile * 100:.0f}."
+        summary += f" Top {universe} mcap yüzdeliği %{mcap_percentile * 100:.0f}."
 
     data: dict[str, Any] = {
         "rank": current_rank,
@@ -108,7 +108,7 @@ async def analyze_rankings(ctx: AnalysisContext) -> AnalysisResult:
 
     return ctx.result(
         "rankings",
-        "Coinler Arasi Mcap Siralamasi",
+        "Coinler Arasi Mcap Sıralaması",
         summary=summary,
         data=data,
         sources=sources,

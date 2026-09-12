@@ -1,4 +1,4 @@
-"""SQLite tabanli depolama: onbellek, makale, context, kosu ve rapor kayitlari."""
+"""SQLite tabanlı depolama: önbellek, makale, context, kosu ve rapor kayıtları."""
 
 from __future__ import annotations
 
@@ -127,13 +127,13 @@ def _loads(value: str | None) -> Any:
 
 
 def stable_key(*parts: Any) -> str:
-    """Verilen parcalardan deterministik bir anahtar uretir."""
+    """Verilen parcalardan deterministik bir anahtar üretir."""
     raw = "|".join(_dumps(p) if not isinstance(p, str) else p for p in parts)
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:40]
 
 
 class Database:
-    """Kucuk, thread-safe SQLite sarmalayicisi."""
+    """Küçük, thread-safe SQLite sarmalayicisi."""
 
     def __init__(self, path: Path | str) -> None:
         self.path = Path(path)
@@ -162,7 +162,7 @@ class Database:
 
     # ------------------------------------------------------------------ cache
     def cache_get(self, key: str, ttl: int | None = None) -> tuple[Any, bool] | None:
-        """(payload, is_fresh) dondurur; yoksa None."""
+        """(payload, is_fresh) döndürür; yoksa None."""
         rows = self.query("SELECT payload, created_at, ttl FROM http_cache WHERE key = ?", (key,))
         if not rows:
             return None
@@ -393,7 +393,7 @@ class Database:
             "SELECT run_id, coin, created_at FROM runs ORDER BY created_at DESC LIMIT ?", (limit,)
         )
 
-    # ------------------------------------------------------------------ metric gecmisi
+    # ------------------------------------------------------------------ metric geçmişi
     def record_metric(self, coin: str, metric: str, value: float, ts: float | None = None) -> None:
         self.execute(
             "INSERT INTO metric_history (coin, metric, value, ts) VALUES (?, ?, ?, ?)",

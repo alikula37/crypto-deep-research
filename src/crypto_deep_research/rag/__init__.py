@@ -1,4 +1,4 @@
-"""Yerel RAG katmani: embedding, vektor deposu ve arama motoru."""
+"""Yerel RAG katmani: embedding, vektör deposu ve arama motoru."""
 
 from crypto_deep_research.rag.engine import RAGEngine
 

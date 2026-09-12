@@ -1,4 +1,4 @@
-"""Madde kayit defteri: YAML'dan 66 maddeyi yukler ve dogrular."""
+"""Madde kayıt defteri: YAML'dan 66 maddeyi yükler ve doğrular."""
 
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ def load_registry(path: str | None = None) -> list[ItemSpec]:
     ids = [item.id for item in items]
     if len(items) != 66 or len(set(ids)) != 66 or set(ids) != set(range(1, 67)):
         raise ValueError(
-            f"Kayit defteri 1..66 arasinda benzersiz 66 madde icermeli; bulunan: {len(items)}"
+            f"Kayıt defteri 1..66 arasında benzersiz 66 madde icermeli; bulunan: {len(items)}"
         )
     return items
 

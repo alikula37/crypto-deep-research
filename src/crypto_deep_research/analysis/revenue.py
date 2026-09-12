@@ -1,4 +1,4 @@
-"""Gelir/fee analizi: DefiLlama ucret ve protokol gelirleri, fee/mcap orani."""
+"""Gelir/fee analizi: DefiLlama ücret ve protokol gelirleri, fee/mcap oranı."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from crypto_deep_research.providers.base import source
 async def analyze_revenue(ctx: AnalysisContext) -> AnalysisResult:
     snapshot = await ctx.snapshot()
     sources = [
-        source("DefiLlama", "https://defillama.com/fees", note="protokol/zincir ucret ve gelirleri")
+        source("DefiLlama", "https://defillama.com/fees", note="protokol/zincir ücret ve gelirleri")
     ]
     fees_task = ctx.providers.defillama.fees_summary(ctx.coin.id, "dailyFees")
     revenue_task = ctx.providers.defillama.fees_summary(ctx.coin.id, "dailyRevenue")
@@ -39,9 +39,9 @@ async def analyze_revenue(ctx: AnalysisContext) -> AnalysisResult:
     if not summary_data and not revenue_summary:
         return ctx.result(
             "revenue",
-            "Gelirler, Fee'ler ve Mcap Orani",
+            "Gelirler, Fee'ler ve Mcap Oranı",
             status="no_data",
-            summary=f"{ctx.coin.name} icin DefiLlama ucret/gelir verisi bulunamadi.",
+            summary=f"{ctx.coin.name} için DefiLlama ücret/gelir verisi bulunamadı.",
             sources=sources,
         )
 
@@ -61,42 +61,42 @@ async def analyze_revenue(ctx: AnalysisContext) -> AnalysisResult:
         confidence += 0.4
         if fee_yield >= 5:
             score += 0.5
-            reasons.append(f"Yillik fee getirisi %{fee_yield:.2f}: guclu nakit uretimi")
+            reasons.append(f"Yıllık fee getirisi %{fee_yield:.2f}: güçlü nakit üretimi")
         elif fee_yield >= 1:
             score += 0.2
-            reasons.append(f"Yillik fee getirisi %{fee_yield:.2f}: makul")
+            reasons.append(f"Yıllık fee getirisi %{fee_yield:.2f}: makul")
         elif fee_yield < 0.2:
             score -= 0.3
-            reasons.append(f"Yillik fee getirisi %{fee_yield:.3f}: zayif")
+            reasons.append(f"Yıllık fee getirisi %{fee_yield:.3f}: zayıf")
 
     change_7d = summary_data.get("change_7d_pct")
     if change_7d is not None:
         confidence += 0.25
         if change_7d > 10:
             score += 0.25
-            reasons.append(f"Fee'ler 7 gunde %{change_7d:.1f} artti: kullanim artisi")
+            reasons.append(f"Fee'ler 7 günde %{change_7d:.1f} arttı: kullanım artışı")
         elif change_7d < -10:
             score -= 0.25
-            reasons.append(f"Fee'ler 7 gunde %{change_7d:.1f} azaldi: kullanim dususu")
+            reasons.append(f"Fee'ler 7 günde %{change_7d:.1f} azaldı: kullanım düşüşü")
 
     if revenue_yield is not None:
         confidence += 0.15
-        data_note = f"Yillik gelir getirisi %{revenue_yield:.2f}"
+        data_note = f"Yıllık gelir getirisi %{revenue_yield:.2f}"
         reasons.append(data_note)
 
     summary = (
-        f"Gunluk fee ${daily_fees:,.0f}" if daily_fees else "Gunluk fee verisi yok"
+        f"Günlük fee ${daily_fees:,.0f}" if daily_fees else "Günlük fee verisi yok"
     )
     if annualized_fees:
-        summary += f" (yillik ~${annualized_fees:,.0f})"
+        summary += f" (yıllık ~${annualized_fees:,.0f})"
     if fee_yield is not None:
         summary += f"; fee/mcap getirisi %{fee_yield:.2f}"
     if revenue_daily:
-        summary += f"; gunluk gelir ${revenue_daily:,.0f}"
+        summary += f"; günlük gelir ${revenue_daily:,.0f}"
 
     return ctx.result(
         "revenue",
-        "Gelirler, Fee'ler ve Mcap Orani",
+        "Gelirler, Fee'ler ve Mcap Oranı",
         summary=summary,
         data={
             "fees": summary_data,

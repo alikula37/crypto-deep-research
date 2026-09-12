@@ -1,4 +1,4 @@
-"""Sentiment saglayicilari: Fear & Greed, Reddit, Google Trends."""
+"""Sentiment sağlayıcıları: Fear & Greed, Reddit, Google Trends."""
 
 from __future__ import annotations
 
@@ -110,7 +110,7 @@ class SentimentProvider:
                     "source": "Google Trends (pytrends)",
                 }
             except Exception as exc:  # pytrends servis hatalarina karsi savunmaci
-                logger.info("Google Trends alinamadi: %s", exc)
+                logger.info("Google Trends alınamadı: %s", exc)
                 return None
 
         result = await asyncio.to_thread(_fetch)

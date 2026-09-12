@@ -1,4 +1,4 @@
-"""Yerel embedding: fastembed (ONNX) ile cok dilli vektor uretimi."""
+"""Yerel embedding: fastembed (ONNX) ile çok dilli vektör üretimi."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ FALLBACK_MODELS = [
 
 
 class Embedder:
-    """Gec yuklenen (lazy), hata durumunda devre disi kalan embedding sarmalayicisi."""
+    """Gec yüklenen (lazy), hata durumunda devre disi kalan embedding sarmalayicisi."""
 
     def __init__(self, model_name: str, enabled: bool = True) -> None:
         self.model_name = model_name
@@ -45,14 +45,14 @@ class Embedder:
                     try:
                         self._model = TextEmbedding(model_name=candidate)
                         self.model_name = candidate
-                        logger.info("Embedding modeli yuklendi: %s", candidate)
+                        logger.info("Embedding modeli yüklendi: %s", candidate)
                         break
                     except Exception as exc:
-                        logger.warning("Embedding modeli yuklenemedi (%s): %s", candidate, exc)
+                        logger.warning("Embedding modeli yüklenemedi (%s): %s", candidate, exc)
                 if self._model is None:
                     self._load_failed = True
             except Exception as exc:
-                logger.warning("fastembed kullanilamiyor: %s", exc)
+                logger.warning("fastembed kullanılamiyor: %s", exc)
                 self._load_failed = True
         return self._model
 
@@ -65,7 +65,7 @@ class Embedder:
         try:
             return [list(vector) for vector in model.embed(texts)]
         except Exception as exc:
-            logger.warning("Embedding hatasi: %s", exc)
+            logger.warning("Embedding hatası: %s", exc)
             return None
 
     def embed_one(self, text: str) -> list[float] | None:

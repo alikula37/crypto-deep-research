@@ -1,4 +1,4 @@
-"""CoinGecko saglayicisi (ucretsiz Demo API)."""
+"""CoinGecko sağlayıcısi (ücretsiz Demo API)."""
 
 from __future__ import annotations
 
@@ -130,7 +130,7 @@ class CoinGeckoProvider:
         if name_matches:
             chosen = name_matches[0]
             return CoinRef(id=chosen["id"], symbol=chosen["symbol"], name=chosen["name"])
-        raise ProviderError(self.name, f"Coin bulunamadi: {query}")
+        raise ProviderError(self.name, f"Coin bulunamadı: {query}")
 
     # ------------------------------------------------------------- market verisi
     async def markets(self, ids: list[str] | None = None, per_page: int = 100, page: int = 1) -> list[dict]:
