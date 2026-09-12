@@ -153,15 +153,18 @@ Detaylı gerekçe ve kriter denetim notları: [`docs/kriter-denetimi.md`](docs/k
 
 ## Geliştirme
 
+Tüm testler yerelde çalıştırılır:
+
 ```bash
-uv run pytest -q                # Python testleri
-uv run ruff check src tests     # lint
-cd web && npm test              # web birim testleri
-cd web && npm run build         # web derleme
+make check        # ruff + pytest + web testleri + derleme (hepsi)
+make test         # yalnız Python testleri (pytest)
+make web-test     # yalnız web birim testleri (Vitest)
+make build        # web derleme
 ```
 
-CI (GitHub Actions): ruff + pytest + web test/build. Dependabot güncellemeleri haftalık açılır,
-CI yeşilse otomatik squash merge edilir.
+GitHub Actions, private repo faturalandırma limiti nedeniyle devre dışıdır; bu yüzden
+değişiklikleri push etmeden önce `make check` çalıştırın. Dependabot güncellemeleri haftalık
+açılmaya devam eder, birleştirme öncesi testleri yerelde doğrulayın.
 
 ## Lisans
 
