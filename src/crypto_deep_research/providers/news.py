@@ -34,6 +34,24 @@ RSS_FEEDS: list[tuple[str, str]] = [
 ]
 
 GDELT_DOC = "https://api.gdeltproject.org/api/v2/doc/doc"
+GOOGLE_NEWS = "https://news.google.com/rss/search"
+
+
+def build_topic_query(keywords: list[str], max_terms: int = 4) -> str:
+    """GDELT icin OR'lu sorgu uretir: '("kw1" OR "kw2" OR ...)'."""
+    terms = []
+    seen: set[str] = set()
+    for keyword in keywords:
+        term = (keyword or "").strip().replace('"', "")
+        if len(term) < 3 or term.lower() in seen:
+            continue
+        seen.add(term.lower())
+        terms.append(term)
+        if len(terms) >= max_terms:
+            break
+    if not terms:
+        return ""
+    return "(" + " OR ".join(f'"{term}"' for term in terms) + ")"
 
 _CRYPTO_LEXICON: dict[str, float] = {
     "bullish": 2.8,
@@ -179,6 +197,44 @@ class NewsProvider:
             )
         return articles
 
+    # ------------------------------------------------------------------ Google News
+    async def google_news(self, keywords: list[str], limit: int = 40) -> list[NewsArticle]:
+        """Google News RSS ile konu bazli arama (anahtarsiz, hizli ve güvenilir)."""
+        query = build_topic_query(keywords)
+        if not query:
+            return []
+        try:
+            text = await self.http.get_text(
+                "google_news",
+                GOOGLE_NEWS,
+                params={"q": query, "hl": "en", "gl": "US", "ceid": "US:en"},
+                ttl=self.settings.ttl_news,
+            )
+        except ProviderError:
+            return []
+        parsed = await asyncio.to_thread(feedparser.parse, text)
+        articles: list[NewsArticle] = []
+        for entry in parsed.entries[:limit]:
+            published = None
+            if getattr(entry, "published_parsed", None):
+                published = datetime.fromtimestamp(
+                    datetime(*entry.published_parsed[:6], tzinfo=timezone.utc).timestamp(),
+                    tz=timezone.utc,
+                )
+            source_name = "Google News"
+            entry_source = getattr(entry, "source", None)
+            if entry_source is not None and getattr(entry_source, "title", None):
+                source_name = entry_source.title
+            article = NewsArticle(
+                title=getattr(entry, "title", "") or "",
+                url=getattr(entry, "link", "") or "",
+                source=source_name,
+                published_at=published,
+                summary=re.sub(r"<[^>]+>", " ", getattr(entry, "summary", "") or "")[:600].strip(),
+            )
+            articles.append(self.score_article(article))
+        return articles
+
     # ------------------------------------------------------------------ GDELT
     async def gdelt(self, coin: CoinRef, hours: int = 24, limit: int = 75) -> list[NewsArticle]:
         query = f'"{coin.name}" OR {coin.symbol.upper()} crypto'
@@ -219,6 +275,51 @@ class NewsProvider:
                 continue
         return articles
 
+    async def gdelt_topic(
+        self, keywords: list[str], hours: int = 168, limit: int = 40
+    ) -> list[NewsArticle]:
+        """Bir konu/kriter icin GDELT'te hedefli arama (coin havuzu disinda)."""
+        query = build_topic_query(keywords)
+        if not query:
+            return []
+        try:
+            data = await self.http.get_json(
+                "gdelt",
+                GDELT_DOC,
+                params={
+                    "query": query,
+                    "mode": "artlist",
+                    "maxrecords": limit,
+                    "format": "json",
+                    "timespan": f"{hours}h",
+                    "sort": "datedesc",
+                },
+                ttl=self.settings.ttl_news,
+            )
+        except ProviderError:
+            return []
+        articles: list[NewsArticle] = []
+        for item in (data or {}).get("articles") or []:
+            try:
+                seen = item.get("seendate") or ""
+                published = (
+                    datetime.strptime(seen, "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+                    if seen
+                    else None
+                )
+                article = NewsArticle(
+                    title=item.get("title") or "",
+                    url=item.get("url") or "",
+                    source=item.get("domain") or "GDELT",
+                    published_at=published,
+                    language=(item.get("language") or "en").lower()[:2],
+                    sentiment_raw=None,
+                )
+                articles.append(self.score_article(article))
+            except Exception:
+                continue
+        return articles
+
     async def gdelt_volume(self, coin: CoinRef, hours: int = 24) -> list[dict[str, Any]]:
         """Haber yazilma hızını zaman serisi olarak döndürür (GDELT timeline)."""
         try:
@@ -252,10 +353,11 @@ class NewsProvider:
 
     async def fetch_news(self, coin: CoinRef, hours: int = 72, limit: int = 200) -> list[NewsArticle]:
         """Tüm kaynaklardan haberleri toplar, tekilleştirir, sentiment hesaplar ve kaydeder."""
+        # Not: GDELT havuz sorgusu yogun 429 verdigi icin kaldirildi; konu bazli
+        # aramalar Google News RSS ile yapilir (specials._topic_search), GDELT yalnizca yedek.
         batches = await asyncio.gather(
             self.cryptopanic(coin),
             self.rss(),
-            self.gdelt(coin, hours=min(hours, 48)),
             return_exceptions=True,
         )
         collected: list[NewsArticle] = []

@@ -211,3 +211,12 @@ korunur.
 ## Lisans
 
 MIT
+
+## Haber Arka Uçları
+
+- Coin haber havuzu: RSS (CoinDesk, Cointelegraph TR, Decrypt, The Block...) + opsiyonel CryptoPanic.
+- **Konu bazlı kriterler** (jeopolitik, vergi, yerel ekonomi, listeleme, kurumsal...) için
+  hedefli **Google News RSS** araması yapılır; sonuç yoksa GDELT yedeği denenir.
+- GDELT yoğun 429 verdiği için havuz sorgusundan çıkarılmıştır; yalnızca yedek olarak kullanılır.
+- İlk (soğuk) koşu ücretsiz API limitleri nedeniyle daha uzun sürebilir; aynı coin için sonraki
+  koşular önbellekle ~2 dakikada tamamlanır.

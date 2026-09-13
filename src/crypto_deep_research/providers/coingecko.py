@@ -203,7 +203,13 @@ class CoinGeckoProvider:
     async def market_chart(
         self, coin_id: str, days: int = 365, vs_currency: str = "usd"
     ) -> dict[str, Any]:
-        ttl = self.settings.ttl_market if days <= 1 else self.settings.ttl_ohlcv * 2
+        # Uzun gecmis seriler yavas degisir; TTL yuksek tutulur (429 firtinasini onler).
+        if days > 30:
+            ttl = 3600
+        elif days <= 1:
+            ttl = self.settings.ttl_market
+        else:
+            ttl = 900
         return await self._get(
             f"/coins/{coin_id}/market_chart",
             {"vs_currency": vs_currency, "days": days},
@@ -227,7 +233,7 @@ class CoinGeckoProvider:
         return list((data or {}).get("tickers") or [])
 
     async def global_market(self) -> GlobalMarket:
-        data = await self._get("/global", ttl=self.settings.ttl_market)
+        data = await self._get("/global", ttl=600)
         d = (data or {}).get("data") or {}
         return GlobalMarket(
             total_market_cap_usd=(d.get("total_market_cap") or {}).get("usd"),
@@ -306,7 +312,7 @@ class CoinGeckoProvider:
 
     async def coins_categories(self) -> list[dict[str, Any]]:
         data = await self._get(
-            "/coins/categories", {"order": "market_cap_desc"}, ttl=1800
+            "/coins/categories", {"order": "market_cap_desc"}, ttl=7200
         )
         return data if isinstance(data, list) else []
 

@@ -89,25 +89,46 @@ def _sentiment_of(articles: list) -> tuple[float, int]:
     return float(sum(scores) / len(scores)), len(scores)
 
 
+TOPIC_SEARCH_LIMIT = 10
+
+
+async def _topic_search(ctx: AnalysisContext, keywords: list[str]) -> tuple[list, str | None]:
+    """Havuzda eslesme yoksa hedefli arama: once Google News RSS, sonra GDELT."""
+    news = ctx.providers.news
+    attempts = (
+        ("google_news", getattr(news, "google_news", None)),
+        ("gdelt_topic", getattr(news, "gdelt_topic", None)),
+    )
+    used = int(ctx.extra.get("topic_search_calls", 0))
+    for name, fetcher in attempts:
+        if fetcher is None or used >= TOPIC_SEARCH_LIMIT:
+            continue
+        ctx.extra["topic_search_calls"] = used + 1
+        used += 1
+        try:
+            candidates = await fetcher(keywords)
+        except Exception:
+            candidates = []
+        if candidates:
+            filtered = _match_articles(candidates, keywords)
+            return (filtered or candidates[:20]), name
+    return [], None
+
+
 async def _news_item(ctx: AnalysisContext, spec: ItemSpec) -> ItemResult:
     articles = await ctx.articles(hours=72)
     keywords = spec.keywords or [spec.query or spec.title_tr]
     matched = _match_articles(articles, keywords)
-    if not articles:
-        return result_from(
-            spec,
-            status="no_data",
-            summary="Haber kaynaklarına ulaşilamadi.",
-            score=None,
-            confidence=0.0,
-        )
+    targeted_backend: str | None = None
+    if not matched and spec.query:
+        matched, targeted_backend = await _topic_search(ctx, keywords)
     if not matched:
         return result_from(
             spec,
             status="no_data",
             summary=(
-                f"Son 7 günde '{', '.join(keywords[:3])}' ile ilgili haber bulunamadı; "
-                "bu kriter skora dahil edilmedi."
+                f"Son 7 günde '{', '.join(keywords[:3])}' ile ilgili haber bulunamadı"
+                " (havuz ve hedefli arama); bu kriter skora dahil edilmedi."
             ),
             data={"query": spec.query, "matched": 0, "total_articles": len(articles)},
             sources=[
@@ -122,16 +143,22 @@ async def _news_item(ctx: AnalysisContext, spec: ItemSpec) -> ItemResult:
     score = clamp(avg_sentiment * 2.0) * sample_factor
     confidence = min(0.7, 0.25 + count / 40)
     latest = sorted(matched, key=lambda a: a.published_at or datetime.now(timezone.utc), reverse=True)[:5]
+    backend_label = {
+        "google_news": "Hedefli Google News taraması: ",
+        "gdelt_topic": "Hedefli GDELT taraması: ",
+    }.get(targeted_backend or "", "")
     return result_from(
         spec,
         summary=(
-            f"Son 7 günde {count} ilgili haber bulundu; ortalama sentiment {avg_sentiment:.2f}"
+            backend_label
+            + f"Son 7 günde {count} ilgili haber bulundu; ortalama sentiment {avg_sentiment:.2f}"
             + (" (örneklem küçük olduğu için skor sönümlendi)." if sample_factor < 1.0 else ".")
         ),
         data={
             "query": spec.query,
             "keywords": keywords,
             "matched": count,
+            "search": targeted_backend or "pool",
             "avg_sentiment": round(avg_sentiment, 4),
             "headlines": [
                 {

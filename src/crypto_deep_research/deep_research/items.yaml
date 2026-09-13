@@ -257,11 +257,10 @@ items:
   source: news
   query: conference event adoption culture
   keywords:
-  - conference
-  - summit
-  - festival
-  - hackathon
-  - meetup
+  - crypto conference
+  - blockchain summit
+  - web3 event
+  - bitcoin conference
   weight: 0.15
 - id: 34
   title_tr: Haberlerin Yazılma Hızı
@@ -309,11 +308,9 @@ items:
   source: news
   query: hedge fund institutional ETF inflow Grayscale
   keywords:
+  - etf inflow
   - hedge fund
   - institutional
-  - etf inflow
-  - etf outflow
-  - etf flow
   - grayscale
   - fidelity
   weight: 0.4
@@ -325,11 +322,9 @@ items:
   query: Turkey lira local economy exchange
   keywords:
   - türkiye
-  - turkiye
   - lira
-  - turkish
-  - btc try
-  - local exchange
+  - turkish lira
+  - türkiye ekonomi
   weight: 0.15
 - id: 42
   title_tr: Kara Para Aklama Karşıtı (AML) Verileri
@@ -338,10 +333,10 @@ items:
   source: news
   query: AML money laundering compliance fine
   keywords:
-  - aml
   - money laundering
+  - aml
   - financial crime
-  - compliance
+  - crypto sanctions
   weight: 0.15
 - id: 43
   title_tr: Alternatif Varlıkların Performansı
@@ -444,11 +439,10 @@ items:
   source: news
   query: crypto tax legislation IRS
   keywords:
-  - tax
-  - taxation
+  - crypto tax
+  - tax evasion
   - irs
-  - vergi
-  - tax legislation
+  - taxation
   weight: 0.2
 - id: 55
   title_tr: Fiziksel Dünya ile Bitcoin Etkileşimi
@@ -543,12 +537,11 @@ items:
   source: news
   query: exchange listing delisting futures launch
   keywords:
-  - listing
+  - exchange listing
+  - token listing
   - delisting
-  - perpetual futures
-  - futures launch
-  - new trading pair
-  - spot listing
+  - binance listing
+  - coinbase listing
   weight: 0.2
   note: Patent akışı ücretsiz kaynaklarda bulunamadığı için listeleme/vadeli işlem duyuruları izlenir.
 - id: 66

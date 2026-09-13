@@ -24,11 +24,19 @@ async def analyze_whales(ctx: AnalysisContext) -> AnalysisResult:
     warnings: list[str] = []
     if chain == "bitcoin":
         flows = await ctx.providers.onchain.btc_large_transactions(min_btc=50.0)
+        if not flows:
+            flows = await ctx.providers.onchain.btc_large_transactions(min_btc=10.0)
+            if flows:
+                warnings.append("50 BTC eşiğinde transfer yok; eşik 10 BTC'ye düşürüldü.")
         sources.append(
             source("blockchain.com", "https://api.blockchain.info", note="mempool büyük BTC transferleri")
         )
     elif chain == "ethereum":
         flows = await ctx.providers.onchain.eth_large_transactions(min_eth=1000.0)
+        if not flows:
+            flows = await ctx.providers.onchain.eth_large_transactions(min_eth=200.0)
+            if flows:
+                warnings.append("1000 ETH eşiğinde transfer yok; eşik 200 ETH'ye düşürüldü.")
         sources.append(
             source("Blockscout", "https://eth.blockscout.com", note="son bloklar büyük ETH transferleri")
         )
