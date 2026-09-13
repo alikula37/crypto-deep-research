@@ -27,6 +27,7 @@ from crypto_deep_research.deep_research.registry import registry_summary
 from crypto_deep_research.llm import OpenRouterClient, OpenRouterError
 from crypto_deep_research.models import Kline
 from crypto_deep_research.portfolio import value_portfolio
+from crypto_deep_research.prompt_store import latest_prompt, prompt_for_report
 from crypto_deep_research.providers.registry import build_providers
 from crypto_deep_research.rag.engine import RAGEngine
 from crypto_deep_research.storage.db import Database
@@ -163,6 +164,12 @@ class PortfolioUpdateRequest(BaseModel):
 
 class TelegramStartRequest(BaseModel):
     token: str | None = None
+
+
+class PromptRunRequest(BaseModel):
+    prompt: str | None = None
+    report_name: str | None = None
+    max_tokens: int = Field(default=1500, ge=64, le=8000)
 
 
 class RagSearchRequest(BaseModel):
@@ -654,6 +661,55 @@ async def translate_report(name: str, request: TranslateRequest) -> dict[str, An
     except OpenRouterError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     return {"name": name, "language": request.language, "markdown": translated}
+
+
+@app.get("/api/prompts/{coin}")
+async def prompt_latest(coin: str) -> dict[str, Any]:
+    """Coin icin en son uretilen promptu dondurur (MCP/harness entegrasyonlari icin)."""
+    settings, db, providers = _services()
+    try:
+        try:
+            ref = await providers.coingecko.resolve(coin)
+            symbol = ref.symbol
+        except Exception:
+            symbol = None
+        data = latest_prompt(db, settings, coin, symbol=symbol)
+        if not data:
+            raise HTTPException(status_code=404, detail="Bu coin için kayıtlı prompt bulunamadı.")
+        return data
+    finally:
+        await providers.aclose()
+
+
+@app.post("/api/prompt/run")
+async def prompt_run(request: PromptRunRequest) -> dict[str, Any]:
+    """Promptu OpenRouter uzerinden calistirir; yanit metnini dondurur."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    prompt = (request.prompt or "").strip()
+    if not prompt and request.report_name:
+        found = prompt_for_report(db, settings, request.report_name)
+        prompt = (found or {}).get("prompt", "")
+    if not prompt:
+        raise HTTPException(
+            status_code=400,
+            detail="Çalıştırmak için prompt metni veya kayıtlı bir rapor adı gerekli.",
+        )
+    client = OpenRouterClient(settings)
+    if not client.enabled:
+        raise HTTPException(
+            status_code=400,
+            detail="Prompt çalıştırmak için CDR_OPENROUTER_API_KEY tanımlı olmalıdır.",
+        )
+    try:
+        answer = await client.complete(prompt, max_tokens=request.max_tokens)
+    except OpenRouterError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return {
+        "model": settings.openrouter_model,
+        "characters": len(answer),
+        "answer": answer,
+    }
 
 
 @app.get("/api/runs")

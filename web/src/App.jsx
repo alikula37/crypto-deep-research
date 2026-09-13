@@ -133,11 +133,13 @@ const TAB_INTROS = {
   },
   prompt: {
     title: "Prompt Çıktısı",
-    summary: "Raporun ChatGPT, Claude, Codex veya OpenRouter gibi araçlara yapıştırılmaya hazır istem metni.",
+    summary: "Harici AI araçları için hazır istem metni; MCP entegrasyonu ve doğrudan çalıştırma.",
     points: [
       "Prompt; varlık özeti, modül bulguları, 66 kriter bağlamı ve beklenen çıktı şemasını içerir.",
-      "OpenRouter anahtarı tanımlıysa sistem doğrudan yanıt üretebilir; değilse yalnızca prompt oluşturulur.",
-      "Metnin uzunluğu karakter sayısı olarak araç çubuğunda gösterilir.",
+      "Bu sekme, kayıtlı en son promptu otomatik yükler; yeni koşu tamamlanınca güncellenir.",
+      "OpenRouter anahtarı tanımlıysa 'OpenRouter ile Çalıştır' düğmesi yanıtı doğrudan üretir.",
+      "MCP panosundaki komutlarla Claude Code, Codex veya Cursor promptu araç içinden çekebilir (get_prompt).",
+      "Pipe örnekleriyle prompt tek komutla bir harness'a gönderilebilir: cdr prompt BTC --raw | claude -p",
     ],
   },
   rag: {
@@ -609,6 +611,67 @@ function ResearchLoader({ message, progress, elapsed, mode }) {
   );
 }
 
+function IntegrationCard({ copied, onCopy }) {
+  const projectPath = "/TAM/YOL/crypto-deep-research";
+  const snippets = [
+    {
+      key: "claude",
+      title: "Claude Code (CLI)",
+      text: `claude mcp add crypto-deep-research -- uv --directory ${projectPath} run cdr mcp`,
+    },
+    {
+      key: "desktop",
+      title: "Claude Desktop / JSON",
+      text: JSON.stringify(
+        {
+          mcpServers: {
+            "crypto-deep-research": {
+              command: "uv",
+              args: ["--directory", projectPath, "run", "cdr", "mcp"],
+            },
+          },
+        },
+        null,
+        2
+      ),
+    },
+    {
+      key: "codex",
+      title: "Codex (~/.codex/config.toml)",
+      text: `[mcp_servers.crypto-deep-research]\ncommand = "uv"\nargs = ["--directory", "${projectPath}", "run", "cdr", "mcp"]`,
+    },
+    {
+      key: "pipe",
+      title: "Pipe: prompt'u doğrudan gönder",
+      text: `uv run cdr prompt btc --raw | claude -p\nuv run cdr prompt btc --raw | codex exec -`,
+    },
+  ];
+  return (
+    <div className="card integration-card">
+      <div className="card-head">
+        <h3>Harness Entegrasyonu (MCP)</h3>
+        <span className="muted">Claude Code, Codex, Cursor ve MCP destekli araçlar</span>
+      </div>
+      <p className="muted small">
+        MCP sunucusu 12 araç sunar. Harness'lar <code>get_prompt</code> ile bu promptu doğrudan çeker,
+        <code> deep_research</code> ile yeni araştırma başlatır, <code>get_report</code> ile raporu
+        okur. Aşağıdaki örneklerdeki yolu kendi proje dizininizle değiştirin.
+      </p>
+      {snippets.map((snippet) => (
+        <div className="snippet" key={snippet.key}>
+          <div className="snippet-head">
+            <b>{snippet.title}</b>
+            <button className="mini-btn" onClick={() => onCopy(snippet.text, snippet.key)}>
+              {copied === snippet.key ? "Kopyalandı" : "Kopyala"}
+            </button>
+          </div>
+          <pre>{snippet.text}</pre>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function ShortcutHelp({ open, onClose }) {
   if (!open) return null;
   const shortcuts = [
@@ -688,6 +751,9 @@ export default function App() {
   const [language, setLanguage] = useState("tr");
   const [translatedReport, setTranslatedReport] = useState("");
   const [translating, setTranslating] = useState(false);
+  const [latestPrompt, setLatestPrompt] = useState(null);
+  const [promptAnswer, setPromptAnswer] = useState("");
+  const [promptRunning, setPromptRunning] = useState(false);
   const [profilesList, setProfilesList] = useState([]);
   const [tab, setTab] = useState("overview");
   const [snapshotData, setSnapshotData] = useState(null);
@@ -750,6 +816,26 @@ export default function App() {
     return () => {
       cancelled = true;
     };
+  }, [coin, deep]);
+
+  useEffect(() => {
+    if (tab !== "prompt" || deep?.prompt) return undefined;
+    let cancelled = false;
+    api
+      .latestPrompt(coin)
+      .then((data) => {
+        if (!cancelled) setLatestPrompt(data);
+      })
+      .catch(() => {
+        if (!cancelled) setLatestPrompt(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [tab, coin, deep]);
+
+  useEffect(() => {
+    setPromptAnswer("");
   }, [coin, deep]);
 
   useEffect(() => {
@@ -921,12 +1007,21 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  const copyText = async (text, key) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(key);
+      setTimeout(() => setCopied(""), 2000);
+      return true;
+    } catch {
+      showToast("Panoya kopyalanamadı; metni elle seçebilirsiniz.", "error");
+      return false;
+    }
+  };
+
   const copyReport = async () => {
     const markdown = translatedReport || deep?.markdown;
-    if (!markdown) return;
-    await navigator.clipboard.writeText(markdown);
-    setCopied("report");
-    setTimeout(() => setCopied(""), 2000);
+    if (markdown) await copyText(markdown, "report");
   };
 
   const translateReport = async () => {
@@ -946,26 +1041,53 @@ export default function App() {
   };
 
   const downloadPrompt = () => {
-    if (!deep?.prompt) return;
-    const blob = new Blob([deep.prompt], { type: "text/plain;charset=utf-8" });
+    if (!promptText) return;
+    const blob = new Blob([promptText], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${deep.run.coin.symbol.toUpperCase()}_prompt.txt`;
+    link.download = `${(deep?.run?.coin?.symbol || coin).toUpperCase()}_prompt.txt`;
     link.click();
     URL.revokeObjectURL(url);
   };
 
   const copyPrompt = async () => {
-    if (!deep?.prompt) return;
-    await navigator.clipboard.writeText(deep.prompt);
-    setCopied("prompt");
-    setTimeout(() => setCopied(""), 2000);
+    if (promptText) await copyText(promptText, "prompt");
+  };
+
+  const copyAnswer = async () => {
+    if (promptAnswer) await copyText(promptAnswer, "answer");
+  };
+
+  const copySnippet = async (text, key) => {
+    await copyText(text, key);
+  };
+
+  const runPrompt = async () => {
+    if (!promptText) return;
+    setPromptRunning(true);
+    setError("");
+    try {
+      const result = await api.promptRun({ prompt: promptText, max_tokens: 1500 });
+      setPromptAnswer(result.answer || "");
+      showToast("AI yanıtı üretildi");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setPromptRunning(false);
+    }
   };
 
   const run = deep?.run;
   const deepBusy = busy === "deep";
   deepResearchRef.current = runDeepResearch;
+
+  const promptText = deep?.prompt || latestPrompt?.prompt || "";
+  const promptSourceLabel = deep?.prompt
+    ? "Bu koşunun promptu"
+    : latestPrompt
+      ? `Son kayıtlı prompt: ${latestPrompt.name}`
+      : "";
 
   const filteredReports = useMemo(() => {
     const needle = reportQuery.trim().toLowerCase();
@@ -1350,12 +1472,7 @@ export default function App() {
           {tab === "prompt" && (
             <>
               <PageIntro id="prompt" />
-              {!deep && (
-                <EmptyState title="Prompt bekleniyor">
-                  Derin araştırma tamamlandığında harici AI araçları için prompt üretilir.
-                </EmptyState>
-              )}
-              {deep && (
+              {promptText ? (
                 <>
                   <div className="toolbar">
                     <button onClick={copyPrompt}>
@@ -1365,14 +1482,47 @@ export default function App() {
                     <button onClick={downloadPrompt}>
                       <IconDownload width={14} height={14} /> İndir
                     </button>
+                    {health?.openrouter ? (
+                      <button className="accent" onClick={runPrompt} disabled={promptRunning}>
+                        {promptRunning ? (
+                          <>
+                            <span className="spinner" /> Yanıt üretiliyor…
+                          </>
+                        ) : (
+                          <>
+                            <IconSparkles width={14} height={14} /> OpenRouter ile Çalıştır
+                          </>
+                        )}
+                      </button>
+                    ) : (
+                      <span className="muted small" title="CDR_OPENROUTER_API_KEY tanımlanmalı">
+                        Çalıştırmak için OpenRouter anahtarı gerekir
+                      </span>
+                    )}
                     <span className="muted">
-                      Bu metni Claude, ChatGPT, Codex veya OpenRouter gibi araçlara yapıştırabilirsiniz
-                      · {deep.prompt?.length ?? 0} karakter
+                      {promptSourceLabel} · {promptText.length} karakter
                     </span>
                   </div>
-                  <textarea className="prompt-box" readOnly value={deep.prompt || ""} />
+                  <textarea className="prompt-box" readOnly value={promptText} />
+                  {promptAnswer && (
+                    <div className="card prompt-answer">
+                      <div className="card-head">
+                        <h3>AI Yanıtı</h3>
+                        <button className="mini-btn" onClick={copyAnswer}>
+                          {copied === "answer" ? "Kopyalandı" : "Kopyala"}
+                        </button>
+                      </div>
+                      <Markdown>{promptAnswer}</Markdown>
+                    </div>
+                  )}
                 </>
+              ) : (
+                <EmptyState title="Prompt bekleniyor">
+                  Derin araştırma tamamlandığında prompt üretilir; bu coin için kayıtlı son prompt
+                  varsa otomatik yüklenir.
+                </EmptyState>
               )}
+              <IntegrationCard copied={copied} onCopy={copySnippet} />
             </>
           )}
 

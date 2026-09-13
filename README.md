@@ -34,7 +34,7 @@ Kripto varlıklar için **tamamen yerel** derin araştırma sistemi. Ücretsiz v
 - **İngilizce destek:** prompt dilini seçin; OpenRouter anahtarı varsa raporu tek tıkla İngilizce'ye çevirin.
 - **Telegram botu:** `/fiyat`, `/skor`, `/rapor`, `/arastir` komutlarıyla uzaktan kullanım.
 - **API anahtarı gerekmez:** tüm temel kaynaklar anahtarsız çalışır; anahtar girilirse oto devreye girer.
-- **MCP desteği:** Claude Desktop/Code, Codex ve Cursor için 11 hazır araç.
+- **MCP desteği:** Claude Code, Codex ve Cursor için 12 hazır araç; prompt'u araç içinden çekme (`get_prompt`) ve pipe örnekleri arayüzde.
 
 ## Hızlı başlangıç (Docker)
 
@@ -72,7 +72,7 @@ Gereksinimler: Python 3.10+ ve [uv](https://docs.astral.sh/uv/). Web geliştirme
 | Takip | Takip listesi (günlük otomatik araştırma) + fiyat/skor/olasılık alarmları |
 | Portföy | Manuel pozisyonlar: canlı değer, kâr/zarar, portföy payı |
 | Rapor | Kaynaklı Markdown raporu (kopyala / indir / PDF; OpenRouter ile EN çeviri) |
-| Prompt Çıktısı | Harici AI araçlarına hazır prompt |
+| Prompt Çıktısı | Hazır prompt + MCP entegrasyon panosu + OpenRouter ile çalıştırma |
 | Kaynak Arama | Yerel RAG araması ve (anahtar varsa) AI yanıtı |
 | Rapor Arşivi | Geçmiş koşular, rapor arama filtresi ve Markdown görüntüleme |
 
@@ -88,6 +88,7 @@ uv run cdr deep-research bitcoin --profile conservative --lang en  # profil ve p
 uv run cdr search "ETF akışları" --coin bitcoin                  # yerel RAG araması
 uv run cdr ask "BTC likidasyon riski nedir?" --coin bitcoin      # RAG + isteğe bağlı LLM
 uv run cdr items                                                 # 66 kriter ve açıklamaları
+uv run cdr prompt bitcoin --raw                                  # son promptu yazdır (pipe için)
 uv run cdr telegram                                              # Telegram botu (token gerekir)
 uv run cdr mcp                                                   # MCP server (stdio)
 ```

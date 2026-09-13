@@ -257,6 +257,23 @@ def get_run(run_id: str) -> dict[str, Any]:
     return json.loads(run.model_dump_json())
 
 
+@server.tool()
+def get_prompt(coin: str) -> dict[str, Any]:
+    """Coin icin en son uretilen derin arastirma promptunu dondurur.
+
+    Harness'lar (Claude Code, Codex, Cursor...) bu metni alip dogrudan
+    yanitlayabilir; deep_research araci include_prompt=true ile de prompt uretir.
+    """
+    from crypto_deep_research.prompt_store import latest_prompt
+
+    settings = get_settings()
+    db = Database(settings.db_path)
+    data = latest_prompt(db, settings, coin)
+    if not data:
+        return {"error": f"{coin} icin kayitli prompt bulunamadi"}
+    return data
+
+
 def run_stdio() -> None:
     server.run("stdio")
 

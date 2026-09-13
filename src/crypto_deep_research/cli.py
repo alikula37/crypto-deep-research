@@ -341,5 +341,26 @@ def telegram_command(
         console.print("Bot durduruldu.")
 
 
+@app.command("prompt")
+def prompt_command(
+    coin: str = typer.Argument(..., help="Coin kimligi veya sembolu (orn. bitcoin)"),
+    raw: bool = typer.Option(False, "--raw", help="Yalnizca prompt metnini yazdir (pipe icin)"),
+) -> None:
+    """Coin icin en son uretilen promptu yazdirir (Claude Code/Codex pipe entegrasyonu)."""
+    from crypto_deep_research.prompt_store import latest_prompt
+
+    settings = get_settings()
+    db = Database(settings.db_path)
+    data = latest_prompt(db, settings, coin)
+    if not data:
+        console.print(f"[red]{coin} için kayıtlı prompt bulunamadı.[/red]")
+        raise typer.Exit(code=1)
+    if raw:
+        print(data["prompt"])
+        return
+    console.print(f"[bold]{data['name']}[/bold] ({data['path']})")
+    console.print(data["prompt"])
+
+
 if __name__ == "__main__":
     app()

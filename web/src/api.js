@@ -59,6 +59,10 @@ export const api = {
     request("/api/rag/search", { method: "POST", body: JSON.stringify(payload) }),
   ragAsk: (payload) =>
     request("/api/rag/ask", { method: "POST", body: JSON.stringify(payload), timeoutMs: 180000 }),
+  promptRun: (payload) =>
+    request("/api/prompt/run", { method: "POST", body: JSON.stringify(payload), timeoutMs: 300000 }),
+  latestPrompt: (coin) =>
+    request(`/api/prompts/${encodeURIComponent(coin)}`, { timeoutMs: 60000 }),
   reports: () => request("/api/reports"),
   report: (name) => request(`/api/reports/${encodeURIComponent(name)}`),
   translateReport: (name, language = "en") =>

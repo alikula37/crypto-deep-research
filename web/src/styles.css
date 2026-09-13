@@ -561,3 +561,14 @@ button { display: inline-flex; align-items: center; gap: 6px; justify-content: c
 .telegram-card .status-badge { text-transform: none; }
 .telegram-card input[type="password"] { flex: 1; min-width: 220px; }
 .telegram-card code { background: var(--bg-soft); padding: 1px 5px; border-radius: 5px; font-size: 11px; }
+
+/* Prompt entegrasyon panosu */
+.integration-card { margin-top: 14px; }
+.integration-card code { background: var(--bg-soft); padding: 1px 5px; border-radius: 5px; font-size: 11px; }
+.snippet { border-top: 1px solid var(--border); padding: 10px 0; }
+.snippet:first-of-type { border-top: 0; padding-top: 0; }
+.snippet-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12.5px; }
+.snippet pre { margin: 0; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 8px; padding: 9px 11px; font-size: 11.5px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+.prompt-answer { margin-top: 14px; }
+.prompt-answer .card-head { align-items: center; }
+.prompt-answer h3 { margin: 0; }
