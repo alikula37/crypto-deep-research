@@ -60,6 +60,9 @@ class Settings(BaseSettings):
     watchlist_interval_minutes: int = 60
     watchlist_auto_run_hours: int = 24
 
+    # Telegram botu (opsiyonel)
+    telegram_token: str | None = None
+
     @property
     def effective_state_dir(self) -> Path:
         return self.state_dir or self.data_dir

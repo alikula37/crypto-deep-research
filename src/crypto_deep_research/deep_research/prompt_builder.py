@@ -125,6 +125,7 @@ def build_prompt(
     analyses: list[AnalysisResult],
     items: list[ItemResult],
     control_plane: ContextControlPlane | None = None,
+    language: str = "tr",
 ) -> str:
     now: datetime = run.created_at
     sections: list[str] = [
@@ -190,4 +191,9 @@ def build_prompt(
         "aralığını, yükselme ve düşme ihtimallerini yüzde olarak yaz. En sonunda tek cümlede en net "
         "tahminini söyle."
     )
+    if (language or "tr").lower().startswith("en"):
+        sections.append(
+            "IMPORTANT: Write your entire response in English. Keep the numbers, tickers and "
+            "probability figures exactly as given; translate the Turkish data labels as needed."
+        )
     return "\n\n".join(sections)

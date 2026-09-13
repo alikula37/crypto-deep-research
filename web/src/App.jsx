@@ -8,6 +8,7 @@ import ScoreHistoryChart from "./ScoreHistoryChart.jsx";
 import AccuracyPanel from "./AccuracyPanel.jsx";
 import ComparePanel from "./ComparePanel.jsx";
 import WatchlistPanel from "./WatchlistPanel.jsx";
+import PortfolioPanel from "./PortfolioPanel.jsx";
 import {
   IconAlert,
   IconBell,
@@ -25,6 +26,7 @@ import {
   IconSearch,
   IconSparkles,
   IconTarget,
+  IconWallet,
   IconWand,
   IconX,
 } from "./icons.jsx";
@@ -37,6 +39,7 @@ const TABS = [
   { id: "accuracy", label: "İsabet", icon: IconTarget },
   { id: "compare", label: "Karşılaştır", icon: IconCoins },
   { id: "watchlist", label: "Takip", icon: IconBell },
+  { id: "portfolio", label: "Portföy", icon: IconWallet },
   { id: "report", label: "Rapor", icon: IconDoc },
   { id: "prompt", label: "Prompt Çıktısı", icon: IconWand },
   { id: "rag", label: "Kaynak Arama", icon: IconSearch },
@@ -107,6 +110,16 @@ const TAB_INTROS = {
       "Otomatik koşuyu kapatmak için satırdaki 'Otomatik' kutusunu işaretini kaldırın.",
       "Alarmlar tarayıcıda saklanır; sayfa açıkken dakikada bir fiyat, skor ve yükseliş olasılığı kontrol edilir.",
       "Bildirim izni vermezseniz alarmlar yine uygulama içi uyarı (toast) olarak gösterilir.",
+    ],
+  },
+  portfolio: {
+    title: "Portföy",
+    summary: "Manuel pozisyonları canlı fiyatlarla değerler; kâr/zarar ve dağılım gösterir.",
+    points: [
+      "Miktar coin cinsindendir; giriş fiyatı USD olarak girilir.",
+      "Değer ve kâr/zarar her açılışta güncel fiyatlarla hesaplanır; fiyat alınamazsa '—' görünür.",
+      "Pay sütunu, pozisyonun toplam portföy değerine oranıdır; konsantrasyon riskini gösterir.",
+      "Yatırım tavsiyesi değildir; veriler yalnızca takip amaçlıdır.",
     ],
   },
   report: {
@@ -672,6 +685,9 @@ export default function App() {
   const [selected, setSelected] = useState([]);
   const [platform, setPlatform] = useState("generic");
   const [profile, setProfile] = useState("balanced");
+  const [language, setLanguage] = useState("tr");
+  const [translatedReport, setTranslatedReport] = useState("");
+  const [translating, setTranslating] = useState(false);
   const [profilesList, setProfilesList] = useState([]);
   const [tab, setTab] = useState("overview");
   const [snapshotData, setSnapshotData] = useState(null);
@@ -818,6 +834,7 @@ export default function App() {
     setBusy("deep");
     setError("");
     setDeep(null);
+    setTranslatedReport("");
     setAnalysisResults([]);
     setElapsed(0);
     setJobStartedAt(Date.now());
@@ -829,6 +846,7 @@ export default function App() {
         lookback_days: Number(lookback),
         platform,
         profile,
+        language,
         analyses: selected.length ? selected : null,
         include_prompt: true,
       };
@@ -892,21 +910,39 @@ export default function App() {
   };
 
   const downloadReport = () => {
-    if (!deep?.markdown) return;
-    const blob = new Blob([deep.markdown], { type: "text/markdown;charset=utf-8" });
+    const markdown = translatedReport || deep?.markdown;
+    if (!markdown) return;
+    const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${deep.run.coin.symbol.toUpperCase()}_rapor.md`;
+    link.download = `${deep.run.coin.symbol.toUpperCase()}_rapor${translatedReport ? "_en" : ""}.md`;
     link.click();
     URL.revokeObjectURL(url);
   };
 
   const copyReport = async () => {
-    if (!deep?.markdown) return;
-    await navigator.clipboard.writeText(deep.markdown);
+    const markdown = translatedReport || deep?.markdown;
+    if (!markdown) return;
+    await navigator.clipboard.writeText(markdown);
     setCopied("report");
     setTimeout(() => setCopied(""), 2000);
+  };
+
+  const translateReport = async () => {
+    if (!deep?.report_path) return;
+    const name = deep.report_path.split("/").pop().replace(/\.md$/, "");
+    setTranslating(true);
+    setError("");
+    try {
+      const result = await api.translateReport(name, "en");
+      setTranslatedReport(result.markdown || "");
+      showToast("Rapor İngilizce'ye çevrildi");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setTranslating(false);
+    }
   };
 
   const downloadPrompt = () => {
@@ -1044,6 +1080,17 @@ export default function App() {
                   {item.label}
                 </option>
               ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>Prompt Dili</span>
+            <select
+              value={language}
+              onChange={(event) => setLanguage(event.target.value)}
+              title="Harici AI'dan yanıtın hangi dilde isteneceği. Rapor çevirisi için Rapor sekmesindeki 'İngilizce'ye Çevir' düğmesini kullanın."
+            >
+              <option value="tr">Türkçe</option>
+              <option value="en">İngilizce</option>
             </select>
           </label>
         </div>
@@ -1241,6 +1288,13 @@ export default function App() {
             </>
           )}
 
+          {tab === "portfolio" && (
+            <>
+              <PageIntro id="portfolio" />
+              <PortfolioPanel initialCoin={coin} />
+            </>
+          )}
+
           {tab === "report" && (
             <>
               <PageIntro id="report" />
@@ -1262,11 +1316,32 @@ export default function App() {
                     <button onClick={() => window.print()}>
                       <IconPrinter width={14} height={14} /> Yazdır / PDF
                     </button>
+                    {health?.openrouter ? (
+                      translatedReport ? (
+                        <button onClick={() => setTranslatedReport("")}>
+                          Türkçe özgün metne dön
+                        </button>
+                      ) : (
+                        <button onClick={translateReport} disabled={translating}>
+                          {translating ? (
+                            <>
+                              <span className="spinner" /> Çevriliyor…
+                            </>
+                          ) : (
+                            "İngilizce'ye Çevir"
+                          )}
+                        </button>
+                      )
+                    ) : (
+                      <span className="muted small" title="CDR_OPENROUTER_API_KEY tanımlanmalı">
+                        Çeviri için OpenRouter anahtarı gerekir
+                      </span>
+                    )}
                     <span className="muted">
                       {deep.report_path} · Bağlam: {JSON.stringify(deep.context_stats?.groups || {})}
                     </span>
                   </div>
-                  <Markdown>{deep.markdown}</Markdown>
+                  <Markdown>{translatedReport || deep.markdown}</Markdown>
                 </>
               )}
             </>

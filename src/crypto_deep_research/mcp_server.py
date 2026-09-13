@@ -158,11 +158,13 @@ async def deep_research(
     lookback_days: int = 365,
     platform: str = "generic",
     profile: str = "balanced",
+    language: str = "tr",
     include_prompt: bool = False,
 ) -> dict[str, Any]:
     """66 maddelik araştırmayı çalıştırir; skor, olasılık, rapor ve prompt üretir.
 
     profile: balanced | conservative (dogrulanmis veri agirlikli) | aggressive (momentum agirlikli)
+    language: tr | en (prompt yanit dili)
     """
     settings, db, providers = _context()
     engine = DeepResearchEngine(providers, settings, db)
@@ -173,6 +175,7 @@ async def deep_research(
             lookback_days=lookback_days,
             platform=platform,
             profile=profile,
+            language=language,
         )
         run = output.run
         response: dict[str, Any] = {

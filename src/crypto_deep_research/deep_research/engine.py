@@ -72,6 +72,7 @@ class DeepResearchEngine:
         lookback_days: int = 365,
         platform: str = "generic",
         profile: str = DEFAULT_PROFILE,
+        language: str = "tr",
         include_all_items: bool = True,
         progress: ProgressCallback | None = None,
     ) -> DeepResearchOutput:
@@ -134,7 +135,7 @@ class DeepResearchEngine:
         self.db.save_run(run)
 
         notify(92, "Rapor ve prompt üretiliyor…")
-        prompt = build_prompt(run, analysis_results, item_results, self.control_plane)
+        prompt = build_prompt(run, analysis_results, item_results, self.control_plane, language=language)
         markdown = render_report(run, analysis_results, item_results, prompt=prompt)
 
         run_id = run.run_id

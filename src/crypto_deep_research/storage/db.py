@@ -110,6 +110,18 @@ CREATE TABLE IF NOT EXISTS watchlist (
   last_run_at REAL
 );
 
+CREATE TABLE IF NOT EXISTS portfolio (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  coin TEXT NOT NULL,
+  symbol TEXT,
+  name TEXT,
+  amount REAL NOT NULL,
+  entry_price REAL NOT NULL,
+  entry_date REAL,
+  note TEXT,
+  created_at REAL NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS documents (
   id TEXT PRIMARY KEY,
   coin TEXT,
@@ -486,6 +498,58 @@ class Database:
         self.execute(
             "UPDATE watchlist SET last_run_at = ? WHERE coin = ?", (ts or time.time(), coin)
         )
+
+    # ------------------------------------------------------------------ portfoy
+    def portfolio_add(
+        self,
+        coin: str,
+        *,
+        amount: float,
+        entry_price: float,
+        symbol: str | None = None,
+        name: str | None = None,
+        entry_date: float | None = None,
+        note: str | None = None,
+    ) -> int:
+        cursor = self.execute(
+            """
+            INSERT INTO portfolio (coin, symbol, name, amount, entry_price, entry_date, note, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (coin, symbol, name, float(amount), float(entry_price), entry_date, note, time.time()),
+        )
+        return int(cursor.lastrowid or 0)
+
+    def portfolio_list(self) -> list[dict[str, Any]]:
+        return self.query("SELECT * FROM portfolio ORDER BY created_at")
+
+    def portfolio_get(self, position_id: int) -> dict[str, Any] | None:
+        rows = self.query("SELECT * FROM portfolio WHERE id = ?", (position_id,))
+        return rows[0] if rows else None
+
+    def portfolio_update(
+        self,
+        position_id: int,
+        *,
+        amount: float | None = None,
+        entry_price: float | None = None,
+        note: str | None = None,
+    ) -> None:
+        entry = self.portfolio_get(position_id)
+        if not entry:
+            return
+        self.execute(
+            "UPDATE portfolio SET amount = ?, entry_price = ?, note = ? WHERE id = ?",
+            (
+                amount if amount is not None else entry["amount"],
+                entry_price if entry_price is not None else entry["entry_price"],
+                note if note is not None else entry["note"],
+                position_id,
+            ),
+        )
+
+    def portfolio_remove(self, position_id: int) -> None:
+        self.execute("DELETE FROM portfolio WHERE id = ?", (position_id,))
 
     # ------------------------------------------------------------------ metric geçmişi
     def record_metric(self, coin: str, metric: str, value: float, ts: float | None = None) -> None:

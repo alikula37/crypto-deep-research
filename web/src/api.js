@@ -61,6 +61,12 @@ export const api = {
     request("/api/rag/ask", { method: "POST", body: JSON.stringify(payload), timeoutMs: 180000 }),
   reports: () => request("/api/reports"),
   report: (name) => request(`/api/reports/${encodeURIComponent(name)}`),
+  translateReport: (name, language = "en") =>
+    request(`/api/reports/${encodeURIComponent(name)}/translate`, {
+      method: "POST",
+      body: JSON.stringify({ language }),
+      timeoutMs: 300000,
+    }),
   accuracy: (coin) =>
     request(`/api/accuracy${coin ? `?coin=${encodeURIComponent(coin)}` : ""}`, { timeoutMs: 120000 }),
   watchlist: () => request("/api/watchlist"),
@@ -75,6 +81,12 @@ export const api = {
     request(`/api/watchlist/${encodeURIComponent(coin)}`, { method: "DELETE" }),
   watchlistRun: (coin) =>
     request(`/api/watchlist/${encodeURIComponent(coin)}/run`, { method: "POST", timeoutMs: 60000 }),
+  portfolio: () => request("/api/portfolio", { timeoutMs: 120000 }),
+  portfolioAdd: (payload) =>
+    request("/api/portfolio", { method: "POST", body: JSON.stringify(payload), timeoutMs: 60000 }),
+  portfolioUpdate: (id, payload) =>
+    request(`/api/portfolio/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
+  portfolioRemove: (id) => request(`/api/portfolio/${id}`, { method: "DELETE" }),
   runs: (coin) => request(`/api/runs${coin ? `?coin=${encodeURIComponent(coin)}` : ""}`),
   run: (runId) => request(`/api/runs/${runId}`),
   ragStats: () => request("/api/rag/stats"),

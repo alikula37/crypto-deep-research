@@ -81,3 +81,10 @@ def test_prompt_has_no_scientific_notation_or_none():
     assert "e-08" not in prompt
     assert "None" not in prompt
     assert "77044.1" in prompt
+
+
+def test_prompt_language_instruction():
+    base = build_prompt(_run(), [_analysis()], [_item(1)])
+    assert "English" not in base
+    english = build_prompt(_run(), [_analysis()], [_item(1)], language="en")
+    assert "Write your entire response in English" in english

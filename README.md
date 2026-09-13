@@ -30,6 +30,9 @@ Kripto varlıklar için **tamamen yerel** derin araştırma sistemi. Ücretsiz v
 - **Karşılaştırma modu:** 2–4 varlık fiyat, momentum ve son skorla yan yana.
 - **Takip listesi ve alarmlar:** coinleri takibe alın (günlük otomatik araştırma), fiyat/skor/olasılık
   eşikleri için tarayıcı bildirimi kurun.
+- **Portföy:** manuel pozisyonlar canlı fiyatlarla değerlenir; kâr/zarar ve dağılım görünür.
+- **İngilizce destek:** prompt dilini seçin; OpenRouter anahtarı varsa raporu tek tıkla İngilizce'ye çevirin.
+- **Telegram botu:** `/fiyat`, `/skor`, `/rapor`, `/arastir` komutlarıyla uzaktan kullanım.
 - **API anahtarı gerekmez:** tüm temel kaynaklar anahtarsız çalışır; anahtar girilirse oto devreye girer.
 - **MCP desteği:** Claude Desktop/Code, Codex ve Cursor için 11 hazır araç.
 
@@ -67,7 +70,8 @@ Gereksinimler: Python 3.10+ ve [uv](https://docs.astral.sh/uv/). Web geliştirme
 | İsabet | Geçmiş koşuların 1/7/30 günlük getirilerle isabet oranı ve ort. getiri tablosu |
 | Karşılaştır | 2–4 varlık: fiyat, 24s/7g/30g, son skor, olasılık ve beklenen aralık |
 | Takip | Takip listesi (günlük otomatik araştırma) + fiyat/skor/olasılık alarmları |
-| Rapor | Kaynaklı Markdown raporu (kopyala / indir / PDF) |
+| Portföy | Manuel pozisyonlar: canlı değer, kâr/zarar, portföy payı |
+| Rapor | Kaynaklı Markdown raporu (kopyala / indir / PDF; OpenRouter ile EN çeviri) |
 | Prompt Çıktısı | Harici AI araçlarına hazır prompt |
 | Kaynak Arama | Yerel RAG araması ve (anahtar varsa) AI yanıtı |
 | Rapor Arşivi | Geçmiş koşular, rapor arama filtresi ve Markdown görüntüleme |
@@ -80,9 +84,11 @@ Klavye kısayolları: `/` arama alanına git · `?` yardım · `⌘/Ctrl + Enter
 uv run cdr snapshot bitcoin                                      # anlık piyasa özeti
 uv run cdr analyze bitcoin --types technical,news,liquidations   # seçili modüller
 uv run cdr deep-research bitcoin --platform claude --json        # 66 kriter + rapor + prompt
+uv run cdr deep-research bitcoin --profile conservative --lang en  # profil ve prompt dili
 uv run cdr search "ETF akışları" --coin bitcoin                  # yerel RAG araması
 uv run cdr ask "BTC likidasyon riski nedir?" --coin bitcoin      # RAG + isteğe bağlı LLM
 uv run cdr items                                                 # 66 kriter ve açıklamaları
+uv run cdr telegram                                              # Telegram botu (token gerekir)
 uv run cdr mcp                                                   # MCP server (stdio)
 ```
 
@@ -106,10 +112,26 @@ Docker içinde çalıştırmak için: `docker compose run --rm app cdr snapshot 
 Araçlar: `list_analyses, list_research_items, resolve_coin, get_market_snapshot, run_analysis,
 get_price_chart, deep_research, search_context, list_reports, get_report, get_run`
 
+## Telegram Botu
+
+Opsiyoneldir; BotFather'dan alınan token ile çalışır:
+
+```bash
+export CDR_TELEGRAM_TOKEN="123:ABC..."
+uv run cdr telegram
+```
+
+| Komut | Açıklama |
+| --- | --- |
+| `/fiyat <coin>` | Anlık fiyat, piyasa değeri, 24s/7g değişim |
+| `/skor <coin>` | Son derin araştırma skoru ve olasılıklar |
+| `/rapor <coin>` | Son raporun metni |
+| `/arastir <coin> [dengeli\|muhafazakar\|agresif]` | Yeni derin araştırma başlatır |
+| `/yardim` | Komut listesi |
+
 ## REST API
 
 `uv run cdr serve` ile birlikte gelir; Swagger: `http://127.0.0.1:8000/docs`
-
 | Metot | Yol | Açıklama |
 | --- | --- | --- |
 | GET | `/api/health` | Durum ve tanımlı API anahtarları |
@@ -140,6 +162,7 @@ Tüm ayarlar `.env` üzerinden yönetilir; hiçbiri zorunlu değildir:
 | `CDR_WATCHLIST_ENABLED` | Takip listesi otomatik koşuları (varsayılan: açık) |
 | `CDR_WATCHLIST_INTERVAL_MINUTES` | Zamanlayıcı kontrol aralığı (varsayılan: 60) |
 | `CDR_WATCHLIST_AUTO_RUN_HOURS` | Aynı coin için otomatik koşu sıklığı (varsayılan: 24 saat) |
+| `CDR_TELEGRAM_TOKEN` | Telegram botu tokeni (`cdr telegram` komutu için) |
 
 Anahtarsız çalışan kaynaklar: CoinGecko, Binance/OKX/Bybit, DefiLlama, RSS, GDELT,
 alternative.me, Reddit, Google Trends, Blockchain.com, mempool.space, Blockscout, yfinance,

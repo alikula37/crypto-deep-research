@@ -26,6 +26,7 @@ from crypto_deep_research.deep_research.profiles import profile_summary
 from crypto_deep_research.deep_research.registry import registry_summary
 from crypto_deep_research.llm import OpenRouterClient, OpenRouterError
 from crypto_deep_research.models import Kline
+from crypto_deep_research.portfolio import value_portfolio
 from crypto_deep_research.providers.registry import build_providers
 from crypto_deep_research.rag.engine import RAGEngine
 from crypto_deep_research.storage.db import Database
@@ -113,6 +114,7 @@ class AnalyzeRequest(BaseModel):
 class DeepResearchRequest(AnalyzeRequest):
     platform: str = "generic"
     profile: str = "balanced"
+    language: str = "tr"
     include_prompt: bool = True
 
 
@@ -129,6 +131,23 @@ class WatchlistUpdateRequest(BaseModel):
     profile: str | None = None
     timeframe: str | None = None
     auto_run: bool | None = None
+
+
+class TranslateRequest(BaseModel):
+    language: str = "en"
+
+
+class PortfolioRequest(BaseModel):
+    coin: str
+    amount: float = Field(gt=0)
+    entry_price: float = Field(gt=0)
+    note: str | None = None
+
+
+class PortfolioUpdateRequest(BaseModel):
+    amount: float | None = Field(default=None, gt=0)
+    entry_price: float | None = Field(default=None, gt=0)
+    note: str | None = None
 
 
 class RagSearchRequest(BaseModel):
@@ -286,6 +305,7 @@ def _make_deep_runner(request: DeepResearchRequest):
                 lookback_days=request.lookback_days,
                 platform=request.platform,
                 profile=request.profile,
+                language=request.language,
                 progress=job.update,
             )
             return _serialize_output(output, request.include_prompt)
@@ -360,6 +380,54 @@ async def watchlist_remove(coin: str) -> dict[str, Any]:
     db = Database(settings.db_path)
     db.watchlist_remove(coin)
     return {"removed": coin}
+
+
+@app.get("/api/portfolio")
+async def portfolio() -> dict[str, Any]:
+    """Portfoy pozisyonlarini guncel fiyatlarla degerler."""
+    settings, db, providers = _services()
+    try:
+        return await value_portfolio(providers, db)
+    finally:
+        await providers.aclose()
+
+
+@app.post("/api/portfolio")
+async def portfolio_add(request: PortfolioRequest) -> dict[str, Any]:
+    settings, db, providers = _services()
+    try:
+        ref = await providers.coingecko.resolve(request.coin)
+        position_id = db.portfolio_add(
+            ref.id,
+            symbol=ref.symbol.upper(),
+            name=ref.name,
+            amount=request.amount,
+            entry_price=request.entry_price,
+            note=request.note,
+        )
+        return db.portfolio_get(position_id) or {}
+    finally:
+        await providers.aclose()
+
+
+@app.patch("/api/portfolio/{position_id}")
+async def portfolio_update(position_id: int, request: PortfolioUpdateRequest) -> dict[str, Any]:
+    settings = get_settings()
+    db = Database(settings.db_path)
+    if not db.portfolio_get(position_id):
+        raise HTTPException(status_code=404, detail="Pozisyon bulunamadı")
+    db.portfolio_update(
+        position_id, amount=request.amount, entry_price=request.entry_price, note=request.note
+    )
+    return db.portfolio_get(position_id) or {}
+
+
+@app.delete("/api/portfolio/{position_id}")
+async def portfolio_remove(position_id: int) -> dict[str, Any]:
+    settings = get_settings()
+    db = Database(settings.db_path)
+    db.portfolio_remove(position_id)
+    return {"removed": position_id}
 
 
 @app.post("/api/watchlist/{coin}/run")
@@ -501,6 +569,45 @@ async def report(name: str) -> dict[str, Any]:
         "markdown": path.read_text(encoding="utf-8"),
         "meta": None,
     }
+
+
+@app.post("/api/reports/{name}/translate")
+async def translate_report(name: str, request: TranslateRequest) -> dict[str, Any]:
+    """Raporu OpenRouter ile hedef dile cevirir (CDR_OPENROUTER_API_KEY gerekir)."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    data = db.get_report(name)
+    if not data:
+        path = settings.reports_dir / f"{name}.md"
+        if not path.exists():
+            raise HTTPException(status_code=404, detail="Rapor bulunamadı")
+        data = {"markdown": path.read_text(encoding="utf-8")}
+    client = OpenRouterClient(settings)
+    if not client.enabled:
+        raise HTTPException(
+            status_code=400,
+            detail="Çeviri için CDR_OPENROUTER_API_KEY tanımlı olmalıdır.",
+        )
+    target = "İngilizce" if request.language.lower().startswith("en") else request.language
+    prompt = (
+        f"Aşağıdaki Markdown raporunu {target} diline çevir. Markdown yapısını, başlıkları, "
+        "tabloları, sayı biçimlerini ve tüm rakamları aynen koru; hiçbir bölümü özetleme, "
+        "çıkarma veya yorum ekleme; yalnızca çevrilmiş Markdown metnini döndür.\n\n"
+        + (data.get("markdown") or "")
+    )
+    try:
+        translated = await client.complete(
+            prompt,
+            system=(
+                "Sen profesyonel bir finansal çevirmensin. Kaynak metnin yapısını bozmadan, "
+                "terimleri doğru karşılıklarıyla çevirirsin."
+            ),
+            max_tokens=8000,
+            temperature=0.2,
+        )
+    except OpenRouterError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return {"name": name, "language": request.language, "markdown": translated}
 
 
 @app.get("/api/runs")

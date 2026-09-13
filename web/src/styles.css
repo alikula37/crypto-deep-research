@@ -544,3 +544,10 @@ button { display: inline-flex; align-items: center; gap: 6px; justify-content: c
 .alarm-row.triggered { color: var(--yellow); }
 .alarm-triggered { color: var(--yellow); font-size: 11px; }
 .alarm-price { margin-left: auto; }
+
+/* Portfoy */
+.portfolio-totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.portfolio-total { display: flex; flex-direction: column; gap: 4px; }
+.portfolio-total b { font-size: 18px; }
+.portfolio-form-card { margin-bottom: 14px; }
+.portfolio-form-card .alarm-form input[type="text"] { flex: 1; min-width: 140px; }

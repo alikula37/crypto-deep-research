@@ -132,7 +132,13 @@ def analyze(
 
 
 async def _deep_research(
-    coin: str, types: list[str], timeframe: str, days: int, platform: str, profile: str = "balanced"
+    coin: str,
+    types: list[str],
+    timeframe: str,
+    days: int,
+    platform: str,
+    profile: str = "balanced",
+    language: str = "tr",
 ) -> dict:
     settings, db, providers = _providers()
     engine = DeepResearchEngine(providers, settings, db)
@@ -144,6 +150,7 @@ async def _deep_research(
             lookback_days=days,
             platform=platform,
             profile=profile,
+            language=language,
         )
         return {
             "run": output.run.model_dump(mode="json"),
@@ -165,11 +172,12 @@ def deep_research(
     profile: str = typer.Option(
         "balanced", "--profile", help="balanced|conservative|aggressive skorlama profili"
     ),
+    language: str = typer.Option("tr", "--lang", help="Prompt dili: tr|en"),
     json_output: bool = typer.Option(False, "--json"),
 ):
     """66 maddelik deep research çalıştırir; rapor ve prompt üretir."""
     selected = [item.strip() for item in types.split(",")] if types else None
-    result = asyncio.run(_deep_research(coin, selected, timeframe, days, platform, profile))
+    result = asyncio.run(_deep_research(coin, selected, timeframe, days, platform, profile, language))
     if json_output:
         console.print_json(json.dumps(result, default=str))
         return
@@ -313,6 +321,24 @@ def analyses_command():
     """Kullanılabilir analiz anahtarlarini listeler."""
     for item in available_analyses():
         console.print(f"- [bold]{item['key']}[/bold]: {item['title']}")
+
+
+@app.command("telegram")
+def telegram_command(
+    token: str | None = typer.Option(
+        None, "--token", help="Telegram bot tokeni (yoksa CDR_TELEGRAM_TOKEN kullanilir)"
+    ),
+) -> None:
+    """Telegram botunu baslatir: /fiyat, /skor, /rapor, /arastir komutlari."""
+    from crypto_deep_research.telegram_bot import run_bot
+
+    try:
+        asyncio.run(run_bot(token))
+    except RuntimeError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(code=1) from exc
+    except KeyboardInterrupt:
+        console.print("Bot durduruldu.")
 
 
 if __name__ == "__main__":
