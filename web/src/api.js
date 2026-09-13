@@ -40,6 +40,7 @@ async function request(path, { timeoutMs = 60000, ...options } = {}) {
 export const api = {
   health: () => request("/api/health", { timeoutMs: 15000 }),
   analyses: () => request("/api/analyses"),
+  profiles: () => request("/api/profiles"),
   items: () => request("/api/items"),
   snapshot: (coin) => request(`/api/snapshot/${encodeURIComponent(coin)}`),
   analyze: (payload) =>
@@ -62,6 +63,18 @@ export const api = {
   report: (name) => request(`/api/reports/${encodeURIComponent(name)}`),
   accuracy: (coin) =>
     request(`/api/accuracy${coin ? `?coin=${encodeURIComponent(coin)}` : ""}`, { timeoutMs: 120000 }),
+  watchlist: () => request("/api/watchlist"),
+  watchlistAdd: (payload) =>
+    request("/api/watchlist", { method: "POST", body: JSON.stringify(payload), timeoutMs: 60000 }),
+  watchlistUpdate: (coin, payload) =>
+    request(`/api/watchlist/${encodeURIComponent(coin)}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    }),
+  watchlistRemove: (coin) =>
+    request(`/api/watchlist/${encodeURIComponent(coin)}`, { method: "DELETE" }),
+  watchlistRun: (coin) =>
+    request(`/api/watchlist/${encodeURIComponent(coin)}/run`, { method: "POST", timeoutMs: 60000 }),
   runs: (coin) => request(`/api/runs${coin ? `?coin=${encodeURIComponent(coin)}` : ""}`),
   run: (runId) => request(`/api/runs/${runId}`),
   ragStats: () => request("/api/rag/stats"),

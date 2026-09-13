@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
+import time
+from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 from typing import Any
 
@@ -19,6 +22,7 @@ from crypto_deep_research.api.jobs import Job, JobManager
 from crypto_deep_research.config import get_settings
 from crypto_deep_research.deep_research.accuracy import compute_accuracy
 from crypto_deep_research.deep_research.engine import DeepResearchEngine, DeepResearchOutput
+from crypto_deep_research.deep_research.profiles import profile_summary
 from crypto_deep_research.deep_research.registry import registry_summary
 from crypto_deep_research.llm import OpenRouterClient, OpenRouterError
 from crypto_deep_research.models import Kline
@@ -28,10 +32,67 @@ from crypto_deep_research.storage.db import Database
 
 logger = logging.getLogger(__name__)
 
+
+def _due_watchlist(entries: list[dict[str, Any]], now: float, interval_hours: float) -> list[dict[str, Any]]:
+    """Otomatik kosusu zamani gelmis takip kayitlarini secer."""
+    return [
+        entry
+        for entry in entries
+        if entry.get("auto_run") and now - (entry.get("last_run_at") or 0) >= interval_hours * 3600
+    ]
+
+
+async def _watchlist_scheduler() -> None:
+    """Takip listesindeki coinler icin periyodik derin arastirma baslatir."""
+    settings = get_settings()
+    interval = max(60, settings.watchlist_interval_minutes * 60)
+    while True:
+        await asyncio.sleep(interval)
+        if not settings.watchlist_enabled or jobs.has_running():
+            continue
+        try:
+            db = Database(settings.db_path)
+            due = _due_watchlist(
+                db.watchlist_list(), time.time(), settings.watchlist_auto_run_hours
+            )
+        except Exception:
+            logger.exception("Takip listesi okunamadi")
+            continue
+        for entry in due:
+            try:
+                db.watchlist_touch(entry["coin"])
+                job = jobs.create(
+                    _make_deep_runner(
+                        DeepResearchRequest(
+                            coin=entry["coin"],
+                            timeframe=entry.get("timeframe") or "1d",
+                            profile=entry.get("profile") or "balanced",
+                            include_prompt=True,
+                        )
+                    )
+                )
+                logger.info("Otomatik takip koşusu başlatıldı: %s (%s)", entry["coin"], job.id)
+            except Exception:
+                logger.exception("Otomatik koşu başlatılamadı: %s", entry["coin"])
+            break  # ayni anda tek kosu
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    task = asyncio.create_task(_watchlist_scheduler())
+    try:
+        yield
+    finally:
+        task.cancel()
+        with suppress(asyncio.CancelledError):
+            await task
+
+
 app = FastAPI(
     title="Crypto Deep Research",
     description="Kripto paralar için yerel RAG + 66 maddelik deep research sistemi",
     version="0.2.0",
+    lifespan=lifespan,
 )
 app.add_middleware(
     CORSMiddleware,
@@ -51,7 +112,23 @@ class AnalyzeRequest(BaseModel):
 
 class DeepResearchRequest(AnalyzeRequest):
     platform: str = "generic"
+    profile: str = "balanced"
     include_prompt: bool = True
+
+
+class WatchlistRequest(BaseModel):
+    coin: str
+    symbol: str | None = None
+    name: str | None = None
+    profile: str = "balanced"
+    timeframe: str = "1d"
+    auto_run: bool = True
+
+
+class WatchlistUpdateRequest(BaseModel):
+    profile: str | None = None
+    timeframe: str | None = None
+    auto_run: bool | None = None
 
 
 class RagSearchRequest(BaseModel):
@@ -111,6 +188,11 @@ async def health() -> dict[str, Any]:
 @app.get("/api/analyses")
 async def analyses() -> list[dict[str, str]]:
     return available_analyses()
+
+
+@app.get("/api/profiles")
+async def profiles() -> list[dict[str, str]]:
+    return profile_summary()
 
 
 @app.get("/api/items")
@@ -181,6 +263,7 @@ async def deep_research(request: DeepResearchRequest) -> dict[str, Any]:
             timeframe=request.timeframe,
             lookback_days=request.lookback_days,
             platform=request.platform,
+            profile=request.profile,
         )
         return _serialize_output(output, request.include_prompt)
     except Exception as exc:
@@ -190,10 +273,7 @@ async def deep_research(request: DeepResearchRequest) -> dict[str, Any]:
         await providers.aclose()
 
 
-@app.post("/api/deep-research/jobs")
-async def start_deep_research_job(request: DeepResearchRequest) -> dict[str, Any]:
-    """Uzun süren derin araştırmayı arka planda başlatır; ilerleme sorgulanabilir."""
-
+def _make_deep_runner(request: DeepResearchRequest):
     async def runner(job: Job) -> dict[str, Any]:
         settings, db, providers = _services()
         engine = DeepResearchEngine(providers, settings, db)
@@ -205,14 +285,21 @@ async def start_deep_research_job(request: DeepResearchRequest) -> dict[str, Any
                 timeframe=request.timeframe,
                 lookback_days=request.lookback_days,
                 platform=request.platform,
+                profile=request.profile,
                 progress=job.update,
             )
             return _serialize_output(output, request.include_prompt)
         finally:
             await providers.aclose()
 
+    return runner
+
+
+@app.post("/api/deep-research/jobs")
+async def start_deep_research_job(request: DeepResearchRequest) -> dict[str, Any]:
+    """Uzun süren derin araştırmayı arka planda başlatır; ilerleme sorgulanabilir."""
     jobs.prune()
-    job = jobs.create(runner)
+    job = jobs.create(_make_deep_runner(request))
     return {"job_id": job.id, "status": job.status, "message": job.message}
 
 
@@ -222,6 +309,81 @@ async def deep_research_job_status(job_id: str) -> dict[str, Any]:
     if job is None:
         raise HTTPException(status_code=404, detail="Görev bulunamadı")
     return job.to_dict()
+
+
+@app.get("/api/watchlist")
+async def watchlist() -> list[dict[str, Any]]:
+    settings = get_settings()
+    db = Database(settings.db_path)
+    return db.watchlist_list()
+
+
+@app.post("/api/watchlist")
+async def watchlist_add(request: WatchlistRequest) -> dict[str, Any]:
+    settings, db, providers = _services()
+    try:
+        ref = await providers.coingecko.resolve(request.coin)
+        db.watchlist_add(
+            ref.id,
+            symbol=request.symbol or ref.symbol.upper(),
+            name=request.name or ref.name,
+            profile=request.profile,
+            timeframe=request.timeframe,
+            auto_run=request.auto_run,
+        )
+        return db.watchlist_get(ref.id) or {}
+    finally:
+        await providers.aclose()
+
+
+@app.patch("/api/watchlist/{coin}")
+async def watchlist_update(coin: str, request: WatchlistUpdateRequest) -> dict[str, Any]:
+    settings = get_settings()
+    db = Database(settings.db_path)
+    entry = db.watchlist_get(coin)
+    if not entry:
+        raise HTTPException(status_code=404, detail="Takip listesinde bulunamadı")
+    db.watchlist_add(
+        coin,
+        symbol=entry.get("symbol"),
+        name=entry.get("name"),
+        profile=request.profile or entry["profile"],
+        timeframe=request.timeframe or entry["timeframe"],
+        auto_run=entry["auto_run"] if request.auto_run is None else request.auto_run,
+    )
+    return db.watchlist_get(coin) or {}
+
+
+@app.delete("/api/watchlist/{coin}")
+async def watchlist_remove(coin: str) -> dict[str, Any]:
+    settings = get_settings()
+    db = Database(settings.db_path)
+    db.watchlist_remove(coin)
+    return {"removed": coin}
+
+
+@app.post("/api/watchlist/{coin}/run")
+async def watchlist_run(coin: str) -> dict[str, Any]:
+    """Takip listesindeki coin icin hemen derin arastirma baslatir."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    entry = db.watchlist_get(coin)
+    if not entry:
+        raise HTTPException(status_code=404, detail="Takip listesinde bulunamadı")
+    if jobs.has_running():
+        raise HTTPException(status_code=409, detail="Zaten çalışan bir araştırma var; bitince deneyin.")
+    jobs.prune()
+    job = jobs.create(
+        _make_deep_runner(
+            DeepResearchRequest(
+                coin=coin,
+                timeframe=entry.get("timeframe") or "1d",
+                profile=entry.get("profile") or "balanced",
+                include_prompt=True,
+            )
+        )
+    )
+    return {"job_id": job.id, "status": job.status, "message": job.message}
 
 
 @app.get("/api/ohlcv/{coin}")

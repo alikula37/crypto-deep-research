@@ -25,6 +25,11 @@ Kripto varlıklar için **tamamen yerel** derin araştırma sistemi. Ücretsiz v
 - **Modern arayüz:** otomatik tamamlamalı varlık arama, interaktif mum grafiği, olasılık
   çubuğu, modül durum paneli, arama/sıralama, Markdown indirme ve yazdırma/PDF.
 - **tr-TR sayı biçimi:** 1.234,56; mikro fiyatlar (ör. $0,00000338) kaybolmaz.
+- **Skorlama profilleri:** Dengeli / Muhafazakâr / Agresif; kategori ağırlıkları profile göre ölçeklenir.
+- **İsabet panosu:** geçmiş koşuların skorları sonraki 1/7/30 günlük gerçek getirilerle karşılaştırılır.
+- **Karşılaştırma modu:** 2–4 varlık fiyat, momentum ve son skorla yan yana.
+- **Takip listesi ve alarmlar:** coinleri takibe alın (günlük otomatik araştırma), fiyat/skor/olasılık
+  eşikleri için tarayıcı bildirimi kurun.
 - **API anahtarı gerekmez:** tüm temel kaynaklar anahtarsız çalışır; anahtar girilirse oto devreye girer.
 - **MCP desteği:** Claude Desktop/Code, Codex ve Cursor için 11 hazır araç.
 
@@ -59,6 +64,9 @@ Gereksinimler: Python 3.10+ ve [uv](https://docs.astral.sh/uv/). Web geliştirme
 | --- | --- |
 | Genel Bakış | Anlık fiyat/mcap, mum grafiği, skor geçmişi, olasılık dağılımı, modül durumları |
 | Araştırma Bulguları | 66 kriter: açıklama, bulgu, skor, güven (koşu öncesi tüm kriterler listelenir) |
+| İsabet | Geçmiş koşuların 1/7/30 günlük getirilerle isabet oranı ve ort. getiri tablosu |
+| Karşılaştır | 2–4 varlık: fiyat, 24s/7g/30g, son skor, olasılık ve beklenen aralık |
+| Takip | Takip listesi (günlük otomatik araştırma) + fiyat/skor/olasılık alarmları |
 | Rapor | Kaynaklı Markdown raporu (kopyala / indir / PDF) |
 | Prompt Çıktısı | Harici AI araçlarına hazır prompt |
 | Kaynak Arama | Yerel RAG araması ve (anahtar varsa) AI yanıtı |
@@ -129,6 +137,9 @@ Tüm ayarlar `.env` üzerinden yönetilir; hiçbiri zorunlu değildir:
 | `CDR_FRED_API_KEY` | Faiz, enflasyon, getiri eğrisi |
 | `CDR_OPENROUTER_API_KEY` | RAG yanıtı ve rapor üretimini LLM'e devreder |
 | `CDR_EMBEDDING_MODEL` | Daha küçük embedding modeli (hız/disk kazancı) |
+| `CDR_WATCHLIST_ENABLED` | Takip listesi otomatik koşuları (varsayılan: açık) |
+| `CDR_WATCHLIST_INTERVAL_MINUTES` | Zamanlayıcı kontrol aralığı (varsayılan: 60) |
+| `CDR_WATCHLIST_AUTO_RUN_HOURS` | Aynı coin için otomatik koşu sıklığı (varsayılan: 24 saat) |
 
 Anahtarsız çalışan kaynaklar: CoinGecko, Binance/OKX/Bybit, DefiLlama, RSS, GDELT,
 alternative.me, Reddit, Google Trends, Blockchain.com, mempool.space, Blockscout, yfinance,

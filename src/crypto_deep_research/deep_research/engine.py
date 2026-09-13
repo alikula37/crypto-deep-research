@@ -14,6 +14,11 @@ from crypto_deep_research.analysis.base import AnalysisContext, clamp
 from crypto_deep_research.analysis.engine import DEFAULT_ANALYSES, run_analyses
 from crypto_deep_research.config import Settings
 from crypto_deep_research.context.control_plane import ContextControlPlane
+from crypto_deep_research.deep_research.profiles import (
+    DEFAULT_PROFILE,
+    normalize_profile,
+    weight_multipliers,
+)
 from crypto_deep_research.deep_research.prompt_builder import build_prompt
 from crypto_deep_research.deep_research.registry import ItemSpec, load_registry
 from crypto_deep_research.deep_research.report import render_report
@@ -66,6 +71,7 @@ class DeepResearchEngine:
         timeframe: str = "1d",
         lookback_days: int = 365,
         platform: str = "generic",
+        profile: str = DEFAULT_PROFILE,
         include_all_items: bool = True,
         progress: ProgressCallback | None = None,
     ) -> DeepResearchOutput:
@@ -105,6 +111,7 @@ class DeepResearchEngine:
             item_results = [item for item in item_results if item.status in ("ok", "partial")]
 
         group_factors = compute_group_factors(specs)
+        multipliers = weight_multipliers(profile, specs)
 
         run = self._build_run(
             coin=coin,
@@ -115,6 +122,8 @@ class DeepResearchEngine:
             lookback_days=lookback_days,
             platform=platform,
             group_factors=group_factors,
+            profile=normalize_profile(profile),
+            weight_multipliers=multipliers,
         )
 
         for analysis in analysis_results:
@@ -197,8 +206,12 @@ class DeepResearchEngine:
         lookback_days: int,
         platform: str,
         group_factors: dict[int, float] | None = None,
+        profile: str = DEFAULT_PROFILE,
+        weight_multipliers: dict[int, float] | None = None,
     ) -> ResearchRun:
-        weighted_score = compute_weighted_score(item_results, group_factors=group_factors)
+        weighted_score = compute_weighted_score(
+            item_results, group_factors=group_factors, multipliers=weight_multipliers
+        )
         up_probability, down_probability = probabilities(weighted_score)
         atr_pct = _atr_pct(analysis_results)
         expected_low, expected_high = expected_range(
@@ -213,9 +226,20 @@ class DeepResearchEngine:
             f"{no_data_items} madde için doğrulanabilir ücretsiz veri bulunamadı ve ortalamaya dahil edilmedi.",
             "Aynı analiz modülünü paylaşan kriterler skorlamada tek sinyal olarak (en yüksek ağırlıkla) sayılır.",
             "Kısmi veriyle değerlendirilen kriterler yarım ağırlıkla katkı verir.",
-            "Skorlar veri kaynaklarının ağırlıklı ortalamasıdır; kesin fiyat tahmini değildir.",
-            "Yatırım tavsiyesi değildir.",
         ]
+        if profile != DEFAULT_PROFILE:
+            from crypto_deep_research.deep_research.profiles import PROFILES
+
+            config = PROFILES.get(profile, {})
+            notes.append(
+                f"Skorlama profili: {config.get('label', profile)} — {config.get('description', '')}"
+            )
+        notes.extend(
+            [
+                "Skorlar veri kaynaklarının ağırlıklı ortalamasıdır; kesin fiyat tahmini değildir.",
+                "Yatırım tavsiyesi değildir.",
+            ]
+        )
         return ResearchRun(
             run_id=uuid.uuid4().hex[:12],
             coin=coin,
@@ -223,6 +247,7 @@ class DeepResearchEngine:
             timeframe=timeframe,
             lookback_days=lookback_days,
             platform=platform,
+            profile=profile,
             analyses=[result.key for result in analysis_results],
             items=item_results,
             weighted_score=weighted_score,
@@ -264,9 +289,11 @@ def compute_weighted_score(
     items: list[ItemResult],
     *,
     group_factors: dict[int, float] | None = None,
+    multipliers: dict[int, float] | None = None,
     partial_penalty: float = 0.5,
 ) -> float | None:
     factors = group_factors or {}
+    weights_by_item = multipliers or {}
     numerator = 0.0
     denominator = 0.0
     for item in items:
@@ -274,7 +301,12 @@ def compute_weighted_score(
             continue
         if item.status not in ("ok", "partial"):
             continue
-        weight = item.weight * item.confidence * factors.get(item.item_id, 1.0)
+        weight = (
+            item.weight
+            * item.confidence
+            * factors.get(item.item_id, 1.0)
+            * weights_by_item.get(item.item_id, 1.0)
+        )
         if item.status == "partial":
             weight *= partial_penalty
         numerator += item.score * weight

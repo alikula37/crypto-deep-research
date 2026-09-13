@@ -75,6 +75,9 @@ class JobManager:
     def get(self, job_id: str) -> Job | None:
         return self._jobs.get(job_id)
 
+    def has_running(self) -> bool:
+        return any(job.status in ("queued", "running") for job in self._jobs.values())
+
     def prune(self, max_age_seconds: float = 3600.0) -> int:
         cutoff = time.time() - max_age_seconds
         stale = [

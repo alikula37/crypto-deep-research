@@ -55,6 +55,11 @@ class Settings(BaseSettings):
     ttl_macro: int = 3600
     ttl_static: int = 86400
 
+    # Takip listesi (watchlist) otomatik kosulari
+    watchlist_enabled: bool = True
+    watchlist_interval_minutes: int = 60
+    watchlist_auto_run_hours: int = 24
+
     @property
     def effective_state_dir(self) -> Path:
         return self.state_dir or self.data_dir

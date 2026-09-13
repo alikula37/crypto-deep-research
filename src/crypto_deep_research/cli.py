@@ -131,7 +131,9 @@ def analyze(
         )
 
 
-async def _deep_research(coin: str, types: list[str], timeframe: str, days: int, platform: str) -> dict:
+async def _deep_research(
+    coin: str, types: list[str], timeframe: str, days: int, platform: str, profile: str = "balanced"
+) -> dict:
     settings, db, providers = _providers()
     engine = DeepResearchEngine(providers, settings, db)
     try:
@@ -141,6 +143,7 @@ async def _deep_research(coin: str, types: list[str], timeframe: str, days: int,
             timeframe=timeframe,
             lookback_days=days,
             platform=platform,
+            profile=profile,
         )
         return {
             "run": output.run.model_dump(mode="json"),
@@ -159,11 +162,14 @@ def deep_research(
     timeframe: str = typer.Option("1d", "--timeframe", "-f"),
     days: int = typer.Option(365, "--days", "-d"),
     platform: str = typer.Option("generic", "--platform", help="generic|claude|codex|chatgpt"),
+    profile: str = typer.Option(
+        "balanced", "--profile", help="balanced|conservative|aggressive skorlama profili"
+    ),
     json_output: bool = typer.Option(False, "--json"),
 ):
     """66 maddelik deep research çalıştırir; rapor ve prompt üretir."""
     selected = [item.strip() for item in types.split(",")] if types else None
-    result = asyncio.run(_deep_research(coin, selected, timeframe, days, platform))
+    result = asyncio.run(_deep_research(coin, selected, timeframe, days, platform, profile))
     if json_output:
         console.print_json(json.dumps(result, default=str))
         return

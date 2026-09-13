@@ -527,3 +527,20 @@ button { display: inline-flex; align-items: center; gap: 6px; justify-content: c
 .score-bar .bar-up { background: var(--green); }
 .score-bar .bar-down { background: var(--red); }
 .score-bar b { position: relative; margin-left: 14px; font-size: 12px; }
+
+/* Takip listesi ve alarmlar */
+.watchlist-card, .alarms-card { margin-bottom: 14px; }
+.watchlist-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 9px 0; border-top: 1px solid var(--border); font-size: 12.5px; }
+.watchlist-row:first-of-type { border-top: 0; }
+.watchlist-symbol { font-weight: 700; color: var(--accent); min-width: 52px; }
+.watchlist-name { min-width: 120px; }
+.watchlist-field { display: inline-flex; align-items: center; gap: 6px; }
+.watchlist-field select { padding: 4px 8px; font-size: 12px; }
+.watchlist-last { margin-left: auto; }
+.alarm-form { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.alarm-form .coin-select { min-width: 180px; }
+.alarm-form input[type="number"] { width: 120px; }
+.alarm-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid var(--border); font-size: 12.5px; }
+.alarm-row.triggered { color: var(--yellow); }
+.alarm-triggered { color: var(--yellow); font-size: 11px; }
+.alarm-price { margin-left: auto; }

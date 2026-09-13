@@ -173,6 +173,7 @@ class ResearchRun(BaseModel):
     timeframe: str = "1d"
     lookback_days: int = 365
     platform: str | None = None
+    profile: str = "balanced"
     analyses: list[str] = Field(default_factory=list)
     items: list[ItemResult] = Field(default_factory=list)
     weighted_score: float | None = None

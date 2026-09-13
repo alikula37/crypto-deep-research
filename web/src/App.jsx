@@ -7,8 +7,10 @@ import PriceChart from "./PriceChart.jsx";
 import ScoreHistoryChart from "./ScoreHistoryChart.jsx";
 import AccuracyPanel from "./AccuracyPanel.jsx";
 import ComparePanel from "./ComparePanel.jsx";
+import WatchlistPanel from "./WatchlistPanel.jsx";
 import {
   IconAlert,
+  IconBell,
   IconCheck,
   IconChart,
   IconCoins,
@@ -34,6 +36,7 @@ const TABS = [
   { id: "findings", label: "Araştırma Bulguları", icon: IconSparkles },
   { id: "accuracy", label: "İsabet", icon: IconTarget },
   { id: "compare", label: "Karşılaştır", icon: IconCoins },
+  { id: "watchlist", label: "Takip", icon: IconBell },
   { id: "report", label: "Rapor", icon: IconDoc },
   { id: "prompt", label: "Prompt Çıktısı", icon: IconWand },
   { id: "rag", label: "Kaynak Arama", icon: IconSearch },
@@ -93,6 +96,17 @@ const TAB_INTROS = {
       "Farklı tarihlerde yapılmış koşuları kıyaslarken 'Son Koşu' sütunundaki tarihlere dikkat edin.",
       "Skor çubuğu merkez çizgisinden sağa (pozitif) veya sola (negatif) uzanır.",
       "Coin eklemek için arama kutusuna yazıp listeden seçin; kaldırmak için satır sonundaki × düğmesini kullanın.",
+    ],
+  },
+  watchlist: {
+    title: "Takip",
+    summary: "Takip listesi (günlük otomatik araştırma) ve tarayıcı bildirimli alarmlar.",
+    points: [
+      "Takip listesine eklenen coinler için sistem günde bir kez otomatik derin araştırma çalıştırır (aralık: CDR_WATCHLIST_AUTO_RUN_HOURS).",
+      "'Şimdi çalıştır' ile beklemeden araştırma başlatabilirsiniz; aynı anda tek araştırma çalışır.",
+      "Otomatik koşuyu kapatmak için satırdaki 'Otomatik' kutusunu işaretini kaldırın.",
+      "Alarmlar tarayıcıda saklanır; sayfa açıkken dakikada bir fiyat, skor ve yükseliş olasılığı kontrol edilir.",
+      "Bildirim izni vermezseniz alarmlar yine uygulama içi uyarı (toast) olarak gösterilir.",
     ],
   },
   report: {
@@ -657,6 +671,8 @@ export default function App() {
   const [lookback, setLookback] = useState(365);
   const [selected, setSelected] = useState([]);
   const [platform, setPlatform] = useState("generic");
+  const [profile, setProfile] = useState("balanced");
+  const [profilesList, setProfilesList] = useState([]);
   const [tab, setTab] = useState("overview");
   const [snapshotData, setSnapshotData] = useState(null);
   const [analysisResults, setAnalysisResults] = useState([]);
@@ -684,6 +700,7 @@ export default function App() {
   useEffect(() => {
     api.health().then(setHealth).catch(() => {});
     api.analyses().then(setAnalysesList).catch(() => {});
+    api.profiles().then(setProfilesList).catch(() => {});
     api.items().then(setItems).catch(() => {});
     api.reports().then(setReports).catch(() => {});
     api.ragStats().then(setRagStats).catch(() => {});
@@ -811,6 +828,7 @@ export default function App() {
         timeframe,
         lookback_days: Number(lookback),
         platform,
+        profile,
         analyses: selected.length ? selected : null,
         include_prompt: true,
       };
@@ -1007,6 +1025,27 @@ export default function App() {
               <option value="chatgpt">ChatGPT</option>
             </select>
           </label>
+          <label className="field">
+            <span>Skorlama Profili</span>
+            <select
+              value={profile}
+              onChange={(event) => setProfile(event.target.value)}
+              title={profilesList.find((item) => item.key === profile)?.description || ""}
+            >
+              {(profilesList.length
+                ? profilesList
+                : [
+                    { key: "balanced", label: "Dengeli" },
+                    { key: "conservative", label: "Muhafazakâr" },
+                    { key: "aggressive", label: "Agresif" },
+                  ]
+              ).map((item) => (
+                <option key={item.key} value={item.key}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
 
         <button className="primary" onClick={runAnalyze} disabled={!!busy}>
@@ -1114,6 +1153,12 @@ export default function App() {
                   <div className="range-line">
                     Beklenen fiyat aralığı: <b>{priceRange(run.expected_low, run.expected_high)}</b>
                   </div>
+                  {run.profile && run.profile !== "balanced" && (
+                    <div className="muted small">
+                      Skorlama profili:{" "}
+                      {profilesList.find((item) => item.key === run.profile)?.label || run.profile}
+                    </div>
+                  )}
                   <ScoreDistribution items={run.items} />
                 </div>
               )}
@@ -1183,6 +1228,16 @@ export default function App() {
             <>
               <PageIntro id="compare" />
               <ComparePanel initialCoin={coin} />
+            </>
+          )}
+
+          {tab === "watchlist" && (
+            <>
+              <PageIntro id="watchlist" />
+              <WatchlistPanel
+                initialCoin={coin}
+                onNotify={(message) => showToast(message, "success")}
+              />
             </>
           )}
 

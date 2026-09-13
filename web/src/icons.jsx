@@ -166,3 +166,12 @@ export function IconTarget(props) {
     </svg>
   );
 }
+
+export function IconBell(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M6 9a6 6 0 1 1 12 0c0 5 2 6 2 6H4s2-1 2-6" />
+      <path d="M10.3 20a2 2 0 0 0 3.4 0" />
+    </svg>
+  );
+}

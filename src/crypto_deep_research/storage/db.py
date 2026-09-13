@@ -99,6 +99,17 @@ CREATE TABLE IF NOT EXISTS reports (
   meta TEXT
 );
 
+CREATE TABLE IF NOT EXISTS watchlist (
+  coin TEXT PRIMARY KEY,
+  symbol TEXT,
+  name TEXT,
+  profile TEXT NOT NULL DEFAULT 'balanced',
+  timeframe TEXT NOT NULL DEFAULT '1d',
+  auto_run INTEGER NOT NULL DEFAULT 1,
+  added_at REAL NOT NULL,
+  last_run_at REAL
+);
+
 CREATE TABLE IF NOT EXISTS documents (
   id TEXT PRIMARY KEY,
   coin TEXT,
@@ -429,6 +440,52 @@ class Database:
             )
         summaries.reverse()
         return summaries
+
+    # ------------------------------------------------------------------ takip listesi
+    def watchlist_add(
+        self,
+        coin: str,
+        *,
+        symbol: str | None = None,
+        name: str | None = None,
+        profile: str = "balanced",
+        timeframe: str = "1d",
+        auto_run: bool = True,
+    ) -> None:
+        self.execute(
+            """
+            INSERT INTO watchlist (coin, symbol, name, profile, timeframe, auto_run, added_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(coin) DO UPDATE SET
+              symbol = COALESCE(excluded.symbol, watchlist.symbol),
+              name = COALESCE(excluded.name, watchlist.name),
+              profile = excluded.profile,
+              timeframe = excluded.timeframe,
+              auto_run = excluded.auto_run
+            """,
+            (coin, symbol, name, profile, timeframe, 1 if auto_run else 0, time.time()),
+        )
+
+    def watchlist_remove(self, coin: str) -> None:
+        self.execute("DELETE FROM watchlist WHERE coin = ?", (coin,))
+
+    def watchlist_get(self, coin: str) -> dict[str, Any] | None:
+        rows = self.query("SELECT * FROM watchlist WHERE coin = ?", (coin,))
+        return rows[0] if rows else None
+
+    def watchlist_list(self) -> list[dict[str, Any]]:
+        rows = self.query("SELECT * FROM watchlist ORDER BY added_at")
+        for row in rows:
+            row["auto_run"] = bool(row["auto_run"])
+            last = self.query("SELECT MAX(created_at) AS ts FROM runs WHERE coin = ?", (row["coin"],))
+            if last and last[0]["ts"]:
+                row["last_run_at"] = last[0]["ts"]
+        return rows
+
+    def watchlist_touch(self, coin: str, ts: float | None = None) -> None:
+        self.execute(
+            "UPDATE watchlist SET last_run_at = ? WHERE coin = ?", (ts or time.time(), coin)
+        )
 
     # ------------------------------------------------------------------ metric geçmişi
     def record_metric(self, coin: str, metric: str, value: float, ts: float | None = None) -> None:
