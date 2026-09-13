@@ -185,3 +185,21 @@ export function IconWallet(props) {
     </svg>
   );
 }
+
+export function IconEdit(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 20h4l10-10-4-4L4 16v4z" />
+      <path d="M13.5 6.5l4 4" />
+    </svg>
+  );
+}
+
+export function IconSend(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M21 3L10 14" />
+      <path d="M21 3l-7 18-4-7-7-4 18-7z" />
+    </svg>
+  );
+}

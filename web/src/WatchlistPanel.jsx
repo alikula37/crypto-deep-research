@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import CoinSelect from "./CoinSelect.jsx";
 import { api } from "./api.js";
 import { formatDateTime, price } from "./format.js";
-import { IconBell, IconPlay, IconRefresh, IconX } from "./icons.jsx";
+import { IconBell, IconPlay, IconRefresh, IconSend, IconX } from "./icons.jsx";
 
 const ALARM_KEY = "cdr-alarms";
 
@@ -40,6 +40,9 @@ export default function WatchlistPanel({ initialCoin, onNotify }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [alarms, setAlarms] = useState(loadAlarms);
+  const [telegram, setTelegram] = useState(null);
+  const [telegramToken, setTelegramToken] = useState("");
+  const [telegramBusy, setTelegramBusy] = useState(false);
   const [alarmForm, setAlarmForm] = useState({
     coin: initialCoin || "bitcoin",
     type: "price_above",
@@ -60,6 +63,13 @@ export default function WatchlistPanel({ initialCoin, onNotify }) {
   };
 
   useEffect(load, []);
+
+  useEffect(() => {
+    const loadTelegram = () => api.telegramStatus().then(setTelegram).catch(() => {});
+    loadTelegram();
+    const timer = setInterval(loadTelegram, 10000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(ALARM_KEY, JSON.stringify(alarms));
@@ -191,6 +201,33 @@ export default function WatchlistPanel({ initialCoin, onNotify }) {
 
   const removeAlarm = (id) => setAlarms((previous) => previous.filter((alarm) => alarm.id !== id));
 
+  const startTelegram = async () => {
+    setTelegramBusy(true);
+    setError("");
+    try {
+      setTelegram(await api.telegramStart(telegramToken.trim()));
+      setTelegramToken("");
+      notifyRef.current?.("Telegram botu başlatıldı");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setTelegramBusy(false);
+    }
+  };
+
+  const stopTelegram = async () => {
+    setTelegramBusy(true);
+    setError("");
+    try {
+      setTelegram(await api.telegramStop());
+      notifyRef.current?.("Telegram botu durduruldu");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setTelegramBusy(false);
+    }
+  };
+
   return (
     <div>
       {error && <div className="error">{error}</div>}
@@ -315,6 +352,47 @@ export default function WatchlistPanel({ initialCoin, onNotify }) {
             </button>
           </div>
         ))}
+      </div>
+
+      <div className="card telegram-card">
+        <div className="card-head">
+          <h3>
+            <IconSend width={15} height={15} /> Telegram Botu
+          </h3>
+          <span className={`status-badge tone-${telegram?.running ? "ok" : telegram?.error ? "error" : "idle"}`}>
+            {telegram?.running
+              ? `Çalışıyor${telegram.username ? ` · @${telegram.username}` : ""}`
+              : telegram?.error
+                ? "Hata"
+                : "Durdu"}
+          </span>
+        </div>
+        {telegram?.error && <p className="muted small">{telegram.error}</p>}
+        <div className="alarm-form">
+          <input
+            type="password"
+            autoComplete="off"
+            placeholder={
+              telegram?.token_configured
+                ? "CDR_TELEGRAM_TOKEN tanımlı (değiştirmek için yeni token girin)"
+                : "Bot tokeni (BotFather)"
+            }
+            value={telegramToken}
+            onChange={(event) => setTelegramToken(event.target.value)}
+            onKeyDown={(event) => event.key === "Enter" && startTelegram()}
+          />
+          <button onClick={startTelegram} disabled={telegramBusy || telegram?.running}>
+            {telegramBusy && !telegram?.running ? <span className="spinner" /> : null} Başlat
+          </button>
+          <button onClick={stopTelegram} disabled={telegramBusy || !telegram?.running}>
+            Durdur
+          </button>
+        </div>
+        <p className="muted small">
+          Komutlar: /fiyat &lt;coin&gt; · /skor &lt;coin&gt; · /rapor &lt;coin&gt; · /arastir &lt;coin&gt; [profil] · /yardim.
+          Bot, sunucu çalıştığı sürece yanıt verir; kalıcı çalıştırma için <code>cdr telegram</code> veya{" "}
+          <code>CDR_TELEGRAM_AUTOSTART=true</code> kullanın.
+        </p>
       </div>
     </div>
   );

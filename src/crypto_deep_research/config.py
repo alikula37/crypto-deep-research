@@ -62,6 +62,7 @@ class Settings(BaseSettings):
 
     # Telegram botu (opsiyonel)
     telegram_token: str | None = None
+    telegram_autostart: bool = False
 
     @property
     def effective_state_dir(self) -> Path:

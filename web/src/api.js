@@ -87,6 +87,14 @@ export const api = {
   portfolioUpdate: (id, payload) =>
     request(`/api/portfolio/${id}`, { method: "PATCH", body: JSON.stringify(payload) }),
   portfolioRemove: (id) => request(`/api/portfolio/${id}`, { method: "DELETE" }),
+  telegramStatus: () => request("/api/telegram/status", { timeoutMs: 15000 }),
+  telegramStart: (token) =>
+    request("/api/telegram/start", {
+      method: "POST",
+      body: JSON.stringify({ token: token || null }),
+      timeoutMs: 30000,
+    }),
+  telegramStop: () => request("/api/telegram/stop", { method: "POST", timeoutMs: 30000 }),
   runs: (coin) => request(`/api/runs${coin ? `?coin=${encodeURIComponent(coin)}` : ""}`),
   run: (runId) => request(`/api/runs/${runId}`),
   ragStats: () => request("/api/rag/stats"),

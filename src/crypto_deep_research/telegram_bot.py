@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
+from contextlib import suppress
 from typing import Any
 
 import httpx
@@ -181,3 +183,64 @@ async def run_bot(token: str | None = None, poll_timeout: int = 30) -> None:
                     logger.exception("Telegram komut hatasi")
                     reply = f"Beklenmeyen hata: {exc}"
                 await _send(client, token, chat_id, reply)
+
+
+async def fetch_bot_info(token: str) -> dict[str, Any]:
+    """getMe ile tokeni dogrular ve bot bilgisini dondurur."""
+    async with httpx.AsyncClient(timeout=15) as client:
+        data = await _call(client, token, "getMe")
+    if not data.get("ok"):
+        raise RuntimeError(data.get("description") or "Telegram tokeni geçersiz.")
+    return data.get("result") or {}
+
+
+class TelegramBotManager:
+    """Web arayuzunden botu baslatip durdurmak icin surec ici yonetici."""
+
+    def __init__(self) -> None:
+        self._task: asyncio.Task | None = None
+        self.username: str | None = None
+        self.error: str | None = None
+        self.started_at: float | None = None
+
+    @property
+    def running(self) -> bool:
+        return bool(self._task and not self._task.done())
+
+    def status(self) -> dict[str, Any]:
+        return {
+            "running": self.running,
+            "username": self.username,
+            "error": self.error,
+            "started_at": self.started_at,
+        }
+
+    async def start(self, token: str) -> dict[str, Any]:
+        if self.running:
+            return self.status()
+        info = await fetch_bot_info(token)
+        self.username = info.get("username")
+        self.error = None
+        self.started_at = time.time()
+
+        async def runner() -> None:
+            try:
+                await run_bot(token)
+            except asyncio.CancelledError:
+                raise
+            except Exception as exc:  # bot dongusu cokmesin; durumu raporla
+                self.error = str(exc)
+                logger.exception("Telegram botu durdu")
+
+        self._task = asyncio.create_task(runner())
+        return self.status()
+
+    async def stop(self) -> dict[str, Any]:
+        task = self._task
+        if task and not task.done():
+            task.cancel()
+            with suppress(asyncio.CancelledError):
+                await task
+        self._task = None
+        self.started_at = None
+        return self.status()

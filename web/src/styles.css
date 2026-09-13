@@ -551,3 +551,13 @@ button { display: inline-flex; align-items: center; gap: 6px; justify-content: c
 .portfolio-total b { font-size: 18px; }
 .portfolio-form-card { margin-bottom: 14px; }
 .portfolio-form-card .alarm-form input[type="text"] { flex: 1; min-width: 140px; }
+
+/* Portfoy satir duzenleme */
+.inline-input { width: 100%; min-width: 90px; padding: 5px 8px; font-size: 12px; }
+.inline-actions { display: flex; gap: 4px; }
+
+/* Telegram karti */
+.telegram-card { margin-bottom: 14px; }
+.telegram-card .status-badge { text-transform: none; }
+.telegram-card input[type="password"] { flex: 1; min-width: 220px; }
+.telegram-card code { background: var(--bg-soft); padding: 1px 5px; border-radius: 5px; font-size: 11px; }

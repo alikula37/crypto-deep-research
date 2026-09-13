@@ -30,8 +30,11 @@ from crypto_deep_research.portfolio import value_portfolio
 from crypto_deep_research.providers.registry import build_providers
 from crypto_deep_research.rag.engine import RAGEngine
 from crypto_deep_research.storage.db import Database
+from crypto_deep_research.telegram_bot import TelegramBotManager
 
 logger = logging.getLogger(__name__)
+
+telegram_bot = TelegramBotManager()
 
 
 def _due_watchlist(entries: list[dict[str, Any]], now: float, interval_hours: float) -> list[dict[str, Any]]:
@@ -80,13 +83,21 @@ async def _watchlist_scheduler() -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    settings = get_settings()
     task = asyncio.create_task(_watchlist_scheduler())
+    if settings.telegram_autostart and settings.telegram_token:
+        try:
+            await telegram_bot.start(settings.telegram_token)
+            logger.info("Telegram botu otomatik başlatıldı")
+        except Exception:
+            logger.exception("Telegram botu otomatik başlatılamadı")
     try:
         yield
     finally:
         task.cancel()
         with suppress(asyncio.CancelledError):
             await task
+        await telegram_bot.stop()
 
 
 app = FastAPI(
@@ -150,6 +161,10 @@ class PortfolioUpdateRequest(BaseModel):
     note: str | None = None
 
 
+class TelegramStartRequest(BaseModel):
+    token: str | None = None
+
+
 class RagSearchRequest(BaseModel):
     query: str
     coin: str | None = None
@@ -199,6 +214,7 @@ async def health() -> dict[str, Any]:
             "cryptopanic": bool(settings.cryptopanic_api_key),
             "etherscan": bool(settings.etherscan_api_key),
             "fred": bool(settings.fred_api_key),
+            "telegram": bool(settings.telegram_token),
         },
         "reports": len(db.list_reports(limit=1000)),
     }
@@ -428,6 +444,36 @@ async def portfolio_remove(position_id: int) -> dict[str, Any]:
     db = Database(settings.db_path)
     db.portfolio_remove(position_id)
     return {"removed": position_id}
+
+
+@app.get("/api/telegram/status")
+async def telegram_status() -> dict[str, Any]:
+    settings = get_settings()
+    payload = telegram_bot.status()
+    payload["token_configured"] = bool(settings.telegram_token)
+    return payload
+
+
+@app.post("/api/telegram/start")
+async def telegram_start(request: TelegramStartRequest) -> dict[str, Any]:
+    settings = get_settings()
+    token = (request.token or settings.telegram_token or "").strip()
+    if not token:
+        raise HTTPException(
+            status_code=400,
+            detail="Telegram tokeni gerekli: arayüze girin veya CDR_TELEGRAM_TOKEN tanımlayın.",
+        )
+    try:
+        return await telegram_bot.start(token)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"Bot başlatılamadı: {exc}") from exc
+
+
+@app.post("/api/telegram/stop")
+async def telegram_stop() -> dict[str, Any]:
+    return await telegram_bot.stop()
 
 
 @app.post("/api/watchlist/{coin}/run")

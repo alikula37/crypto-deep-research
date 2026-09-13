@@ -114,11 +114,12 @@ get_price_chart, deep_research, search_context, list_reports, get_report, get_ru
 
 ## Telegram Botu
 
-Opsiyoneldir; BotFather'dan alınan token ile çalışır:
+Opsiyoneldir; BotFather'dan alınan token ile çalışır. Web arayüzündeki **Takip** sekmesinden
+tek tıkla başlatılıp durdurulabilir; kalıcı kullanım için:
 
 ```bash
 export CDR_TELEGRAM_TOKEN="123:ABC..."
-uv run cdr telegram
+uv run cdr telegram              # veya CDR_TELEGRAM_AUTOSTART=true ile sunucuyla birlikte
 ```
 
 | Komut | Açıklama |
