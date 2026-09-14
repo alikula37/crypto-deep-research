@@ -22,6 +22,8 @@ Kripto varlıklar için **tamamen yerel** derin araştırma sistemi. Ücretsiz v
   yarım ağırlıkla katkı verir. Böylece aynı teknik skor 7 kez tartılmaz.
 - **Dürüst veri:** veri bulunamayan kriter "veri yok" işaretlenir ve ortalamaya katılmaz.
 - **Uzun işler arka planda:** canlı ilerleme çubuğu, aşama mesajları ve süre göstergesi.
+- **Dayanıklı iş yönetimi:** araştırma işleri SQLite'ta saklanır; sunucu yeniden başlarsa yarım
+  kalan iş "hata" olarak raporlanır (404 yerine), aynı anda tek araştırma çalışır.
 - **Modern arayüz:** otomatik tamamlamalı varlık arama, interaktif mum grafiği, olasılık
   çubuğu, modül durum paneli, arama/sıralama, Markdown indirme ve yazdırma/PDF.
 - **tr-TR sayı biçimi:** 1.234,56; mikro fiyatlar (ör. $0,00000338) kaybolmaz.

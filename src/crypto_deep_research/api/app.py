@@ -85,6 +85,9 @@ async def _watchlist_scheduler() -> None:
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     settings = get_settings()
+    stale = _job_database().job_mark_stale()
+    if stale:
+        logger.warning("%s yarım kalan araştırma işi hata olarak işaretlendi", stale)
     task = asyncio.create_task(_watchlist_scheduler())
     if settings.telegram_autostart and settings.telegram_token:
         try:
@@ -205,7 +208,21 @@ def _serialize_output(output: DeepResearchOutput, include_prompt: bool) -> dict[
     }
 
 
-jobs = JobManager()
+_job_db: Database | None = None
+
+
+def _job_database() -> Database:
+    global _job_db
+    if _job_db is None:
+        _job_db = Database(get_settings().db_path)
+    return _job_db
+
+
+def _persist_job(payload: dict[str, Any]) -> None:
+    _job_database().job_save(payload)
+
+
+jobs = JobManager(persist=_persist_job)
 
 
 @app.get("/api/health")
@@ -341,6 +358,11 @@ def _make_deep_runner(request: DeepResearchRequest):
 @app.post("/api/deep-research/jobs")
 async def start_deep_research_job(request: DeepResearchRequest) -> dict[str, Any]:
     """Uzun süren derin araştırmayı arka planda başlatır; ilerleme sorgulanabilir."""
+    if jobs.has_running():
+        raise HTTPException(
+            status_code=409,
+            detail="Zaten çalışan bir araştırma var; tamamlanınca tekrar deneyin.",
+        )
     jobs.prune()
     job = jobs.create(_make_deep_runner(request))
     return {"job_id": job.id, "status": job.status, "message": job.message}
@@ -349,9 +371,13 @@ async def start_deep_research_job(request: DeepResearchRequest) -> dict[str, Any
 @app.get("/api/deep-research/jobs/{job_id}")
 async def deep_research_job_status(job_id: str) -> dict[str, Any]:
     job = jobs.get(job_id)
-    if job is None:
+    if job is not None:
+        return job.to_dict()
+    # Sunucu yeniden basladiysa bellek ici kayit kaybolur; SQLite'tan oku.
+    persisted = _job_database().job_get(job_id)
+    if persisted is None:
         raise HTTPException(status_code=404, detail="Görev bulunamadı")
-    return job.to_dict()
+    return persisted
 
 
 @app.get("/api/watchlist")

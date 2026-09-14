@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 import time
 import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from typing import Any
 
+logger = logging.getLogger(__name__)
+
 JobRunner = Callable[["Job"], Awaitable[dict[str, Any]]]
+JobPersist = Callable[[dict[str, Any]], None]
 
 
 @dataclass
@@ -22,10 +26,20 @@ class Job:
     finished_at: float | None = None
     result: dict[str, Any] | None = None
     error: str | None = None
+    _persist: JobPersist | None = field(default=None, repr=False)
 
     def update(self, progress: int, message: str) -> None:
         self.progress = max(0, min(100, int(progress)))
         self.message = message
+        self._notify(include_result=False)
+
+    def _notify(self, *, include_result: bool) -> None:
+        if self._persist is None:
+            return
+        try:
+            self._persist(self.to_dict(include_result=include_result))
+        except Exception:  # kalicilik hatasi isi durdurmasin
+            logger.warning("Is durumu kaydedilemedi: %s", self.id)
 
     def to_dict(self, include_result: bool = True) -> dict[str, Any]:
         payload: dict[str, Any] = {
@@ -44,20 +58,23 @@ class Job:
 
 
 class JobManager:
-    """Bellek ici, tek kullanicilik is kuyrugu."""
+    """Bellek ici is kuyrugu; opsiyonel olarak SQLite'a yaz-through yapar."""
 
-    def __init__(self) -> None:
+    def __init__(self, persist: JobPersist | None = None) -> None:
         self._jobs: dict[str, Job] = {}
+        self._persist = persist
 
     def create(self, runner: JobRunner) -> Job:
-        job = Job(id=uuid.uuid4().hex[:12])
+        job = Job(id=uuid.uuid4().hex[:12], _persist=self._persist)
         self._jobs[job.id] = job
+        job._notify(include_result=False)
         asyncio.create_task(self._execute(job, runner))
         return job
 
     async def _execute(self, job: Job, runner: JobRunner) -> None:
         job.status = "running"
         job.message = "Başlatılıyor…"
+        job._notify(include_result=False)
         try:
             job.result = await runner(job)
             job.status = "done"
@@ -71,6 +88,7 @@ class JobManager:
             job.error = str(exc)
         finally:
             job.finished_at = time.time()
+            job._notify(include_result=True)
 
     def get(self, job_id: str) -> Job | None:
         return self._jobs.get(job_id)

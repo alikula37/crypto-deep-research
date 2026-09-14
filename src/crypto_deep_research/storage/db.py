@@ -122,6 +122,17 @@ CREATE TABLE IF NOT EXISTS portfolio (
   created_at REAL NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS jobs (
+  id TEXT PRIMARY KEY,
+  status TEXT NOT NULL,
+  progress INTEGER NOT NULL DEFAULT 0,
+  message TEXT,
+  created_at REAL NOT NULL,
+  finished_at REAL,
+  error TEXT,
+  result TEXT
+);
+
 CREATE TABLE IF NOT EXISTS documents (
   id TEXT PRIMARY KEY,
   coin TEXT,
@@ -483,7 +494,11 @@ class Database:
 
     def watchlist_get(self, coin: str) -> dict[str, Any] | None:
         rows = self.query("SELECT * FROM watchlist WHERE coin = ?", (coin,))
-        return rows[0] if rows else None
+        if not rows:
+            return None
+        row = rows[0]
+        row["auto_run"] = bool(row["auto_run"])
+        return row
 
     def watchlist_list(self) -> list[dict[str, Any]]:
         rows = self.query("SELECT * FROM watchlist ORDER BY added_at")
@@ -550,6 +565,59 @@ class Database:
 
     def portfolio_remove(self, position_id: int) -> None:
         self.execute("DELETE FROM portfolio WHERE id = ?", (position_id,))
+
+    # ------------------------------------------------------------------ isler (jobs)
+    def job_save(self, payload: dict[str, Any]) -> None:
+        result = payload.get("result")
+        self.execute(
+            """
+            INSERT OR REPLACE INTO jobs
+              (id, status, progress, message, created_at, finished_at, error, result)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                payload["job_id"],
+                payload.get("status") or "queued",
+                int(payload.get("progress") or 0),
+                payload.get("message"),
+                payload.get("created_at") or time.time(),
+                payload.get("finished_at"),
+                payload.get("error"),
+                _dumps(result) if result is not None else None,
+            ),
+        )
+
+    def job_get(self, job_id: str) -> dict[str, Any] | None:
+        rows = self.query("SELECT * FROM jobs WHERE id = ?", (job_id,))
+        if not rows:
+            return None
+        row = rows[0]
+        payload: dict[str, Any] = {
+            "job_id": row["id"],
+            "status": row["status"],
+            "progress": row["progress"],
+            "message": row["message"],
+            "created_at": row["created_at"],
+            "finished_at": row["finished_at"],
+        }
+        if row.get("error"):
+            payload["error"] = row["error"]
+        if row.get("result"):
+            try:
+                payload["result"] = json.loads(row["result"])
+            except (ValueError, TypeError):
+                pass
+        return payload
+
+    def job_mark_stale(self) -> int:
+        """Sunucu yeniden baslarken yarim kalan isleri hata olarak isaretler."""
+        rows = self.query("SELECT id FROM jobs WHERE status IN ('queued', 'running')")
+        for row in rows:
+            self.execute(
+                "UPDATE jobs SET status = 'error', error = ?, finished_at = ? WHERE id = ?",
+                ("Sunucu yeniden başlatıldı; araştırma tamamlanamadı.", time.time(), row["id"]),
+            )
+        return len(rows)
 
     # ------------------------------------------------------------------ metric geçmişi
     def record_metric(self, coin: str, metric: str, value: float, ts: float | None = None) -> None:

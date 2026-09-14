@@ -32,3 +32,12 @@ def test_due_watchlist_selection():
     ]
     due = [entry["coin"] for entry in _due_watchlist(entries, now, 24)]
     assert due == ["btc", "ada"]
+
+
+def test_watchlist_get_normalizes_auto_run_bool(tmp_path):
+    db = Database(tmp_path / "test.db")
+    db.watchlist_add("bitcoin", auto_run=False)
+    entry = db.watchlist_get("bitcoin")
+    assert entry["auto_run"] is False
+    db.watchlist_add("bitcoin", auto_run=True)
+    assert db.watchlist_get("bitcoin")["auto_run"] is True
