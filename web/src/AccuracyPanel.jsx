@@ -24,6 +24,7 @@ export default function AccuracyPanel({ coin }) {
   const [data, setData] = useState(null);
   const [calibration, setCalibration] = useState(null);
   const [models, setModels] = useState([]);
+  const [drift, setDrift] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -43,6 +44,10 @@ export default function AccuracyPanel({ coin }) {
       .models()
       .then(setModels)
       .catch(() => setModels([]));
+    api
+      .learningStatus()
+      .then((status) => setDrift(status?.drift || null))
+      .catch(() => setDrift(null));
   };
 
   useEffect(load, [coin]);
@@ -118,6 +123,15 @@ export default function AccuracyPanel({ coin }) {
                 </p>
               );
             })()}
+          {drift && (
+            <p className="muted small">
+              Drift: {drift.alarm_count ? `${drift.alarm_count} alarm` : "temiz"} ·{" "}
+              {(drift.metrics || []).map((metric) => {
+                const value = metric.value === null || metric.value === undefined ? "—" : metric.value;
+                return `${metric.metric}=${value}${metric.alarm ? " ⚠" : ""}`;
+              }).join(" · ") || "henüz ölçüm yok"}
+            </p>
+          )}
           {calibration.n >= 100 && calibration.bins?.length > 0 && (
             <div className="table-wrap">
               <table className="accuracy-table">

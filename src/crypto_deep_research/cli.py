@@ -432,6 +432,85 @@ def ml_eval(
         )
 
 
+@app.command("ml-activate")
+def ml_activate(
+    model_id: str = typer.Argument(...),
+    retire_others: bool = typer.Option(True, "--retire-others/--keep-others"),
+) -> None:
+    """Bir modeli aktiflestirir; ayni ufuktaki digerlerini emekliye ayirir."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    target = next((model for model in db.model_list() if model["model_id"] == model_id), None)
+    if target is None:
+        console.print(f"[red]Model bulunamadı: {model_id}[/red]")
+        raise typer.Exit(code=1)
+    if retire_others:
+        for model in db.model_list():
+            if model["model_id"] != model_id and model["horizon_days"] == target["horizon_days"]:
+                db.model_set_status(model["model_id"], "retired")
+    db.model_set_status(model_id, "active")
+    console.print(f"{model_id} aktifleştirildi (ufuk {target['horizon_days']}g).")
+
+
+@app.command("ml-retire")
+def ml_retire(model_id: str = typer.Argument(...)) -> None:
+    """Bir modeli emekliye ayirir."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    db.model_set_status(model_id, "retired")
+    console.print(f"{model_id} emekliye ayrıldı.")
+
+
+@app.command("learning-drift")
+def learning_drift(
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Kapsam, skor dagilimi ve kalibrasyon icin drift metriklerini hesaplar."""
+    from crypto_deep_research.learning.drift import compute_drift, drift_summary
+
+    settings = get_settings()
+    db = Database(settings.db_path)
+    entries = compute_drift(
+        db, window_days=settings.drift_window_days, baseline_days=settings.drift_baseline_days
+    )
+    summary = drift_summary(entries)
+    if json_output:
+        console.print_json(json.dumps(summary, default=str))
+        return
+    if not entries:
+        console.print("Drift icin yeterli veri yok.")
+        return
+    for entry in entries:
+        flag = "ALARM" if entry.get("alarm") else "ok"
+        console.print(
+            f"  {entry['metric']}: {flag} · deger {entry.get('value')} · temel {entry.get('baseline')}"
+            + (f" · PSI {entry.get('psi')}" if entry.get("psi") is not None else "")
+        )
+
+
+@app.command("archive")
+def archive_command(
+    days: int = typer.Option(0, "--days", help="0: ayardaki CDR_ARCHIVE_RUNS_DAYS degeri"),
+    path: str = typer.Option("data/archive/runs.sqlite", "--path"),
+    delete: bool = typer.Option(False, "--delete", help="Arsive kopyaladiktan sonra ana DB'den sil"),
+) -> None:
+    """Eski kosulari ve raporlari ayri bir SQLite dosyasina arsivler."""
+    from crypto_deep_research.storage.archive import archive_runs
+
+    settings = get_settings()
+    db = Database(settings.db_path)
+    result = archive_runs(
+        db,
+        archive_path=path,
+        older_than_days=days or settings.archive_runs_days,
+        delete=delete,
+    )
+    console.print(
+        f"{result['runs']} koşu, {result['reports']} rapor arşivlendi → {result['path']}"
+        + (f" · silinen kayıt: {result['deleted']}" if delete else " (silme kapalı)")
+    )
+
+
 @app.command("telegram")
 def telegram_command(
     token: str | None = typer.Option(

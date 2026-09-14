@@ -84,6 +84,7 @@ export const api = {
   predictions: (coin) =>
     request(`/api/predictions/${encodeURIComponent(coin)}`, { timeoutMs: 60000 }),
   watchlist: () => request("/api/watchlist"),
+  watchlistSeed: () => request("/api/watchlist/seed", { method: "POST", timeoutMs: 60000 }),
   watchlistAdd: (payload) =>
     request("/api/watchlist", { method: "POST", body: JSON.stringify(payload), timeoutMs: 60000 }),
   watchlistUpdate: (coin, payload) =>

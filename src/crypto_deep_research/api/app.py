@@ -25,6 +25,7 @@ from crypto_deep_research.deep_research.engine import DeepResearchEngine, DeepRe
 from crypto_deep_research.deep_research.profiles import profile_summary
 from crypto_deep_research.deep_research.registry import registry_summary
 from crypto_deep_research.learning.calibration import calibration_table, heuristic_probability
+from crypto_deep_research.learning.drift import compute_drift, drift_summary
 from crypto_deep_research.learning.outcomes import fill_due_outcomes
 from crypto_deep_research.learning.trainer import latest_model_prediction, train_all
 from crypto_deep_research.llm import OpenRouterClient, OpenRouterError
@@ -121,6 +122,31 @@ async def _learning_scheduler() -> None:
                 except Exception as exc:
                     logger.exception("Model egitimi hatasi")
                     db.scheduled_job_finish("retrain_daily", "error", str(exc))
+            if db.scheduled_job_acquire("drift_daily", lease_seconds=23 * 3600):
+                try:
+                    entries = await asyncio.to_thread(
+                        compute_drift,
+                        db,
+                        window_days=settings.drift_window_days,
+                        baseline_days=settings.drift_baseline_days,
+                    )
+                    alarms = [entry for entry in entries if entry.get("alarm")]
+                    if alarms:
+                        logger.warning("Drift alarmi: %s", [entry["metric"] for entry in alarms])
+                    db.scheduled_job_finish("drift_daily", "ok")
+                except Exception as exc:
+                    logger.exception("Drift hesaplama hatasi")
+                    db.scheduled_job_finish("drift_daily", "error", str(exc))
+            if db.scheduled_job_acquire("cache_prune", lease_seconds=23 * 3600):
+                try:
+                    removed = await asyncio.to_thread(
+                        db.prune_cache, settings.cache_prune_days * 86400
+                    )
+                    logger.info("Onbellek temizligi: %s kayit silindi", removed)
+                    db.scheduled_job_finish("cache_prune", "ok")
+                except Exception as exc:
+                    logger.exception("Onbellek temizligi hatasi")
+                    db.scheduled_job_finish("cache_prune", "error", str(exc))
         except asyncio.CancelledError:
             raise
         except Exception as exc:
@@ -137,6 +163,10 @@ async def lifespan(_: FastAPI):
     stale = _job_database().job_mark_stale()
     if stale:
         logger.warning("%s yarım kalan araştırma işi hata olarak işaretlendi", stale)
+    if settings.watchlist_seed:
+        seeded = _job_database().seed_watchlist()
+        if seeded:
+            logger.info("%s coin takip listesine eklendi (otomatik gunluk arastirma acik)", seeded)
     task = asyncio.create_task(_watchlist_scheduler())
     learning_task = (
         asyncio.create_task(_learning_scheduler()) if settings.learning_enabled else None
@@ -441,6 +471,15 @@ async def watchlist() -> list[dict[str, Any]]:
     settings = get_settings()
     db = Database(settings.db_path)
     return db.watchlist_list()
+
+
+@app.post("/api/watchlist/seed")
+async def watchlist_seed() -> dict[str, Any]:
+    """Onerilen coinleri takip listesine ekler (yalnizca eksik olanlar)."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    added = db.seed_watchlist(only_if_empty=False)
+    return {"added": added, "entries": db.watchlist_list()}
 
 
 @app.post("/api/watchlist")
@@ -827,10 +866,18 @@ async def learning_status() -> dict[str, Any]:
     settings = get_settings()
     db = Database(settings.db_path)
     counts = db.learning_status_counts()
+    drift_rows = db.drift_latest()
+    drift = (
+        drift_summary([{**row, "alarm": bool(row.get("alarm"))} for row in drift_rows])
+        if drift_rows
+        else {"metrics": [], "alarm_count": 0, "degraded": False, "computed_at": None}
+    )
     return {
         "enabled": settings.learning_enabled,
         **counts,
         "due_pending": len(db.outcomes_due(limit=1000)),
+        "drift": drift,
+        "cache": db.cache_stats(),
         "jobs": db.query(
             "SELECT job_key, last_finished_at, last_status, run_count FROM scheduled_jobs"
         ),

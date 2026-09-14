@@ -123,6 +123,20 @@ export default function WatchlistPanel({ initialCoin, onNotify }) {
     return () => clearInterval(timer);
   }, [alarms]);
 
+  const seedWatchlist = async () => {
+    try {
+      const result = await api.watchlistSeed();
+      setEntries(result.entries || []);
+      notifyRef.current?.(
+        result.added
+          ? `${result.added} coin takip listesine eklendi (günlük otomatik araştırma açık)`
+          : "Önerilen coinler zaten takip listesinde"
+      );
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const addToWatchlist = async (coin) => {
     if (!coin?.id) return;
     setError("");
@@ -239,10 +253,15 @@ export default function WatchlistPanel({ initialCoin, onNotify }) {
         </div>
         <div className="toolbar">
           <CoinSelect placeholder="Takip listesine coin ekle…" onSelect={addToWatchlist} />
+          <button onClick={seedWatchlist} title="Önerilen 10 major coini otomatik araştırmayla ekler">
+            Önerilenleri ekle
+          </button>
           <button onClick={load} disabled={loading}>
             <IconRefresh width={14} height={14} /> Yenile
           </button>
-          <span className="muted">{entries.length} coin</span>
+          <span className="muted">
+            {entries.length} coin · {entries.filter((entry) => entry.auto_run).length} otomatik
+          </span>
         </div>
         {entries.length === 0 && (
           <p className="muted">

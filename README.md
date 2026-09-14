@@ -30,7 +30,9 @@ Kripto varlıklar için **tamamen yerel** derin araştırma sistemi. Ücretsiz v
 - **Skorlama profilleri:** Dengeli / Muhafazakâr / Agresif; kategori ağırlıkları profile göre ölçeklenir.
 - **İsabet panosu:** geçmiş koşuların skorları sonraki 1/7/30 günlük gerçek getirilerle karşılaştırılır.
 - **Öğrenme döngüsü:** her koşu 66 madde izi + ileri getiri etiketleriyle saklanır; kalibrasyon
-  kovaları ve "heuristik/kalibre" etiketiyle şeffaf olasılık sunumu yapılır.
+  kovaları, model katmanı ve "heuristik/kalibre" etiketiyle şeffaf olasılık sunumu yapılır.
+- **Veri hızlandırma:** ilk açılışta 10 major coin otomatik takibe alınır (günlük araştırma) ve
+  drift/önbellek/arşiv işleri kendiliğinden çalışır.
 - **Karşılaştırma modu:** 2–4 varlık fiyat, momentum ve son skorla yan yana.
 - **Takip listesi ve alarmlar:** coinleri takibe alın (günlük otomatik araştırma), fiyat/skor/olasılık
   eşikleri için tarayıcı bildirimi kurun.
@@ -97,6 +99,9 @@ uv run cdr learning-backfill                                     # geçmiş koş
 uv run cdr learning-fill                                         # vadesi gelen getiri etiketlerini doldur
 uv run cdr ml-train                                              # model eğit (shadow/aktif kapılı)
 uv run cdr ml-eval --horizon 7                                   # model durumu ve metrikleri
+uv run cdr ml-activate <model_id>                                # modeli aktifleştir (kapılı)
+uv run cdr learning-drift                                        # drift metrikleri (PSI/ECE)
+uv run cdr archive --days 540 [--delete]                         # eski koşuları arşivle
 uv run cdr telegram                                              # Telegram botu (token gerekir)
 uv run cdr mcp                                                   # MCP server (stdio)
 ```
@@ -155,6 +160,11 @@ Sistem "tahmin edip unutmaz": her koşu, sonraki getirilerle karşılaştırıla
 - **Model katmanı (shadow):** yeterli etiket birikince (≥30) L2 lojistik + Platt kalibrasyonu
   purged walk-forward ile eğitilir; **n<200 veya OOS metrikleri geçene kadar asla "aktif" olmaz**.
   Aktif model Brier'in temel orandan iyi ve AUC≥0,55 olması şartına bağlıdır.
+- **Drift izleme:** kapsam sapması, skor dağılımı (PSI) ve kalibrasyon hatası (ECE) günlük ölçülür;
+  eşik aşımları `drift_metrics` tablosunda alarm olarak işaretlenir ve İsabet sekmesinde görünür.
+- **Bakım işleri:** HTTP önbelleği günlük temizlenir, raporlar `cdr archive` ile ayrı SQLite
+  dosyasına taşınabilir (türev/öğrenme verisi asla silinmez). Model `ml-activate`/`ml-retire`
+  ile geri alınabilir.
 - **Yol haritası:** n≈100 L2 lojistik → n≈300 hiyerarşik (coin bazlı shrinkage) → n≈1000 gradyan
   artırma + izotonik kalibrasyon; her geçiş önceden tanımlı kapılarla.
 
@@ -195,6 +205,10 @@ Tüm ayarlar `.env` üzerinden yönetilir; hiçbiri zorunlu değildir:
 | `CDR_WATCHLIST_AUTO_RUN_HOURS` | Aynı coin için otomatik koşu sıklığı (varsayılan: 24 saat) |
 | `CDR_LEARNING_ENABLED` | Özellik kaydı ve ileri getiri etiketleme (varsayılan: açık) |
 | `CDR_OUTCOME_INTERVAL_MINUTES` | Etiket doldurma kontrol aralığı (varsayılan: 60 dk) |
+| `CDR_WATCHLIST_SEED` | İlk açılışta önerilen coinleri takibe ekler (varsayılan: açık) |
+| `CDR_DRIFT_WINDOW_DAYS` / `CDR_DRIFT_BASELINE_DAYS` | Drift penceresi / taban penceresi (30/90 gün) |
+| `CDR_CACHE_PRUNE_DAYS` | HTTP önbelleğinde saklama süresi (varsayılan: 7 gün) |
+| `CDR_ARCHIVE_RUNS_DAYS` | Arşivleme kesim yaşı (varsayılan: 540 gün) |
 | `CDR_TELEGRAM_TOKEN` | Telegram botu tokeni (`cdr telegram` komutu için) |
 
 Anahtarsız çalışan kaynaklar: CoinGecko, Binance/OKX/Bybit, DefiLlama, RSS, GDELT,

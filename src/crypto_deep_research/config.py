@@ -68,6 +68,11 @@ class Settings(BaseSettings):
     learning_enabled: bool = True
     outcome_interval_minutes: int = 60
     outcome_max_attempts: int = 14
+    watchlist_seed: bool = True
+    drift_window_days: int = 30
+    drift_baseline_days: int = 90
+    cache_prune_days: int = 7
+    archive_runs_days: int = 540
 
     @property
     def effective_state_dir(self) -> Path:

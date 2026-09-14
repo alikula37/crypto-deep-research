@@ -1051,6 +1051,108 @@ class Database:
             (coin, limit),
         )
 
+    DEFAULT_WATCHLIST: tuple[tuple[str, str, str], ...] = (
+        ("bitcoin", "BTC", "Bitcoin"),
+        ("ethereum", "ETH", "Ethereum"),
+        ("solana", "SOL", "Solana"),
+        ("binancecoin", "BNB", "BNB"),
+        ("ripple", "XRP", "XRP"),
+        ("cardano", "ADA", "Cardano"),
+        ("dogecoin", "DOGE", "Dogecoin"),
+        ("chainlink", "LINK", "Chainlink"),
+        ("avalanche-2", "AVAX", "Avalanche"),
+        ("polkadot", "DOT", "Polkadot"),
+    )
+
+    def seed_watchlist(self, *, only_if_empty: bool = True) -> int:
+        """Veri birikimini hizlandirmak icin onerilen coinleri takibe ekler (idempotent)."""
+        if only_if_empty and self.query("SELECT 1 FROM watchlist LIMIT 1"):
+            return 0
+        added = 0
+        for coin, symbol, name in self.DEFAULT_WATCHLIST:
+            exists = self.query("SELECT 1 FROM watchlist WHERE coin = ? LIMIT 1", (coin,))
+            if exists:
+                continue
+            self.execute(
+                """
+                INSERT OR IGNORE INTO watchlist
+                  (coin, symbol, name, profile, timeframe, auto_run, added_at)
+                VALUES (?, ?, ?, 'balanced', '1d', 1, ?)
+                """,
+                (coin, symbol, name, time.time()),
+            )
+            added += 1
+        return added
+
+    def drift_save(self, entries: list[dict[str, Any]]) -> None:
+        self.executemany(
+            """
+            INSERT INTO drift_metrics
+              (computed_at, window_label, metric, scope, value, baseline, delta, psi, n,
+               alarm, threshold, details)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    entry["computed_at"], entry["window_label"], entry["metric"],
+                    entry.get("scope", "global"), entry.get("value"), entry.get("baseline"),
+                    entry.get("delta"), entry.get("psi"), entry.get("n"),
+                    1 if entry.get("alarm") else 0, entry.get("threshold"),
+                    _dumps(entry.get("details")) if entry.get("details") is not None else None,
+                )
+                for entry in entries
+            ],
+        )
+
+    def drift_latest(self, limit: int = 50) -> list[dict[str, Any]]:
+        return self.query(
+            """
+            SELECT * FROM drift_metrics
+            WHERE computed_at = (SELECT MAX(computed_at) FROM drift_metrics)
+            ORDER BY metric LIMIT ?
+            """,
+            (limit,),
+        )
+
+    def feature_scores_between(self, start: float, end: float) -> list[float]:
+        rows = self.query(
+            "SELECT weighted_score AS value FROM feature_snapshots WHERE created_at >= ? AND created_at < ?",
+            (start, end),
+        )
+        return [float(row["value"]) for row in rows if row["value"] is not None]
+
+    def coverage_between(self, start: float, end: float) -> tuple[int, float | None]:
+        rows = self.query(
+            "SELECT coverage_ratio AS value FROM feature_snapshots WHERE created_at >= ? AND created_at < ?",
+            (start, end),
+        )
+        values = [float(row["value"]) for row in rows if row["value"] is not None]
+        return len(values), (sum(values) / len(values) if values else None)
+
+    def runs_to_archive(self, cutoff: float) -> list[dict[str, Any]]:
+        return self.query(
+            "SELECT run_id, coin, created_at, payload FROM runs WHERE created_at < ? ORDER BY created_at",
+            (cutoff,),
+        )
+
+    def reports_to_archive(self, cutoff: float) -> list[dict[str, Any]]:
+        return self.query(
+            "SELECT * FROM reports WHERE created_at < ? ORDER BY created_at",
+            (cutoff,),
+        )
+
+    def delete_runs(self, run_ids: list[str]) -> int:
+        if not run_ids:
+            return 0
+        placeholders = ",".join("?" for _ in run_ids)
+        return self.execute(f"DELETE FROM runs WHERE run_id IN ({placeholders})", run_ids).rowcount
+
+    def delete_reports(self, names: list[str]) -> int:
+        if not names:
+            return 0
+        placeholders = ",".join("?" for _ in names)
+        return self.execute(f"DELETE FROM reports WHERE name IN ({placeholders})", names).rowcount
+
     def job_mark_stale(self) -> int:
         """Sunucu yeniden baslarken yarim kalan isleri hata olarak isaretler."""
         rows = self.query("SELECT id FROM jobs WHERE status IN ('queued', 'running')")
