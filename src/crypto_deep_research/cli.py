@@ -323,6 +323,61 @@ def analyses_command():
         console.print(f"- [bold]{item['key']}[/bold]: {item['title']}")
 
 
+@app.command("learning-backfill")
+def learning_backfill(
+    limit: int = typer.Option(500, "--limit", help="Islenecek maksimum kosu sayisi"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Mevcut kosulardan ogrenme ozelliklerini geriye donuk cikarir."""
+    from crypto_deep_research.deep_research.engine import compute_group_factors
+    from crypto_deep_research.deep_research.profiles import weight_multipliers
+    from crypto_deep_research.deep_research.registry import load_registry
+    from crypto_deep_research.learning.features import persist_run
+    from crypto_deep_research.models import ResearchRun
+
+    settings = get_settings()
+    db = Database(settings.db_path)
+    specs = load_registry()
+    factors = compute_group_factors(specs)
+    rows = db.runs_missing_features(limit=limit)
+    written = 0
+    for row in rows:
+        try:
+            run = ResearchRun.model_validate_json(row["payload"])
+        except Exception:
+            continue
+        multipliers = weight_multipliers(getattr(run, "profile", "balanced"), specs)
+        if persist_run(db, run, specs, group_factors=factors, multipliers=multipliers):
+            written += 1
+    payload = {"missing": len(rows), "written": written}
+    if json_output:
+        console.print_json(json.dumps(payload))
+        return
+    console.print(f"{written} koşu için özellikler yazıldı ({len(rows)} eksikti).")
+
+
+@app.command("learning-fill")
+def learning_fill() -> None:
+    """Vadesi gelen ileri getiri etiketlerini hemen doldurur."""
+    from crypto_deep_research.learning.outcomes import fill_due_outcomes
+
+    settings, db, providers = _providers()
+
+    async def _run() -> dict:
+        try:
+            return await fill_due_outcomes(
+                providers, db, max_attempts=settings.outcome_max_attempts
+            )
+        finally:
+            await providers.aclose()
+
+    result = asyncio.run(_run())
+    console.print(
+        f"Vadesi gelen: {result['due']} · doldurulan: {result['filled']} · "
+        f"bekleyen: {result['pending']} · eksik: {result['missing']}"
+    )
+
+
 @app.command("telegram")
 def telegram_command(
     token: str | None = typer.Option(

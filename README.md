@@ -29,6 +29,8 @@ Kripto varlıklar için **tamamen yerel** derin araştırma sistemi. Ücretsiz v
 - **tr-TR sayı biçimi:** 1.234,56; mikro fiyatlar (ör. $0,00000338) kaybolmaz.
 - **Skorlama profilleri:** Dengeli / Muhafazakâr / Agresif; kategori ağırlıkları profile göre ölçeklenir.
 - **İsabet panosu:** geçmiş koşuların skorları sonraki 1/7/30 günlük gerçek getirilerle karşılaştırılır.
+- **Öğrenme döngüsü:** her koşu 66 madde izi + ileri getiri etiketleriyle saklanır; kalibrasyon
+  kovaları ve "heuristik/kalibre" etiketiyle şeffaf olasılık sunumu yapılır.
 - **Karşılaştırma modu:** 2–4 varlık fiyat, momentum ve son skorla yan yana.
 - **Takip listesi ve alarmlar:** coinleri takibe alın (günlük otomatik araştırma), fiyat/skor/olasılık
   eşikleri için tarayıcı bildirimi kurun.
@@ -69,7 +71,7 @@ Gereksinimler: Python 3.10+ ve [uv](https://docs.astral.sh/uv/). Web geliştirme
 | --- | --- |
 | Genel Bakış | Anlık fiyat/mcap, mum grafiği, skor geçmişi, olasılık dağılımı, modül durumları |
 | Araştırma Bulguları | 66 kriter: açıklama, bulgu, skor, güven (koşu öncesi tüm kriterler listelenir) |
-| İsabet | Geçmiş koşuların 1/7/30 günlük getirilerle isabet oranı ve ort. getiri tablosu |
+| İsabet | Geçmiş koşuların 1/7/30 günlük getirilerle isabet oranı, ort. getiri tablosu ve kalibrasyon şeridi |
 | Karşılaştır | 2–4 varlık: fiyat, 24s/7g/30g, son skor, olasılık ve beklenen aralık |
 | Takip | Takip listesi (günlük otomatik araştırma) + fiyat/skor/olasılık alarmları |
 | Portföy | Manuel pozisyonlar: canlı değer, kâr/zarar, portföy payı |
@@ -91,6 +93,8 @@ uv run cdr search "ETF akışları" --coin bitcoin                  # yerel RAG 
 uv run cdr ask "BTC likidasyon riski nedir?" --coin bitcoin      # RAG + isteğe bağlı LLM
 uv run cdr items                                                 # 66 kriter ve açıklamaları
 uv run cdr prompt bitcoin --raw                                  # son promptu yazdır (pipe için)
+uv run cdr learning-backfill                                     # geçmiş koşulardan özellik çıkar
+uv run cdr learning-fill                                         # vadesi gelen getiri etiketlerini doldur
 uv run cdr telegram                                              # Telegram botu (token gerekir)
 uv run cdr mcp                                                   # MCP server (stdio)
 ```
@@ -133,6 +137,24 @@ uv run cdr telegram              # veya CDR_TELEGRAM_AUTOSTART=true ile sunucuyl
 | `/arastir <coin> [dengeli\|muhafazakar\|agresif]` | Yeni derin araştırma başlatır |
 | `/yardim` | Komut listesi |
 
+## Öğrenme Döngüsü ve Kalibrasyon
+
+Sistem "tahmin edip unutmaz": her koşu, sonraki getirilerle karşılaştırılabilecek şekilde saklanır.
+
+- **Özellik kaydı:** her derin araştırma koşusunda 66 maddenin skor/güven/durum izleri, kategori
+  kompozitleri, kapsam oranı ve **sinyal gücü** (nötr kütle dışlanmış normalize skor) SQLite'a yazılır.
+- **İleri getiri etiketleri:** 1/7/30 günlük vade satırları koşu anında açılır; saatlik iş
+  Binance kapanışlarıyla (yedek: CoinGecko) doldurur. Vadesi gelmemişler `pending` kalır.
+- **Kalibrasyon:** doldurulmuş etiketlerden olasılık kovaları, Beta-binom düzeltmesi ve Wilson
+  güven aralıkları üretilir (Brier, ECE, AUC). **n < 100 iken çıktılar açıkça "heuristik" etiketlenir**;
+  kalibre olasılık iddiası için Brier'in temel orandan iyi olması şartı aranır.
+- **Dürüst sınır:** 1 günlük kripto yönünde gerçekçi bant %48–55'tir; %50'ye yakın değerler düşük
+  bilgi içeriğinin yansımasıdır. Amaç sayıyı şişirmek değil, ölçülebilir ve kalibre edilmiş hale getirmektir.
+- **Yol haritası:** veri biriktikçe (n≈100 L2 lojistik → n≈300 hiyerarşik model → n≈1000 gradyan
+  artırma + izotonik kalibrasyon) purged walk-forward doğrulamayla kapılı geçiş yapılır.
+
+---
+
 ## REST API
 
 `uv run cdr serve` ile birlikte gelir; Swagger: `http://127.0.0.1:8000/docs`
@@ -166,6 +188,8 @@ Tüm ayarlar `.env` üzerinden yönetilir; hiçbiri zorunlu değildir:
 | `CDR_WATCHLIST_ENABLED` | Takip listesi otomatik koşuları (varsayılan: açık) |
 | `CDR_WATCHLIST_INTERVAL_MINUTES` | Zamanlayıcı kontrol aralığı (varsayılan: 60) |
 | `CDR_WATCHLIST_AUTO_RUN_HOURS` | Aynı coin için otomatik koşu sıklığı (varsayılan: 24 saat) |
+| `CDR_LEARNING_ENABLED` | Özellik kaydı ve ileri getiri etiketleme (varsayılan: açık) |
+| `CDR_OUTCOME_INTERVAL_MINUTES` | Etiket doldurma kontrol aralığı (varsayılan: 60 dk) |
 | `CDR_TELEGRAM_TOKEN` | Telegram botu tokeni (`cdr telegram` komutu için) |
 
 Anahtarsız çalışan kaynaklar: CoinGecko, Binance/OKX/Bybit, DefiLlama, RSS, GDELT,

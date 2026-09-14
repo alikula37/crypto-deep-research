@@ -64,6 +64,11 @@ class Settings(BaseSettings):
     telegram_token: str | None = None
     telegram_autostart: bool = False
 
+    # Ogrenme dongusu (ozellik kaydi + outcome etiketleme)
+    learning_enabled: bool = True
+    outcome_interval_minutes: int = 60
+    outcome_max_attempts: int = 14
+
     @property
     def effective_state_dir(self) -> Path:
         return self.state_dir or self.data_dir

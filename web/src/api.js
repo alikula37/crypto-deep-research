@@ -73,6 +73,14 @@ export const api = {
     }),
   accuracy: (coin) =>
     request(`/api/accuracy${coin ? `?coin=${encodeURIComponent(coin)}` : ""}`, { timeoutMs: 120000 }),
+  calibration: (horizon = 7, coin) =>
+    request(
+      `/api/calibration?horizon=${horizon}${coin ? `&coin=${encodeURIComponent(coin)}` : ""}`,
+      { timeoutMs: 60000 }
+    ),
+  learningStatus: () => request("/api/learning/status", { timeoutMs: 30000 }),
+  predictions: (coin) =>
+    request(`/api/predictions/${encodeURIComponent(coin)}`, { timeoutMs: 60000 }),
   watchlist: () => request("/api/watchlist"),
   watchlistAdd: (payload) =>
     request("/api/watchlist", { method: "POST", body: JSON.stringify(payload), timeoutMs: 60000 }),

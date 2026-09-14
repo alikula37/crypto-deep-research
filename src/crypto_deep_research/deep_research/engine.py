@@ -133,6 +133,17 @@ class DeepResearchEngine:
             self.control_plane.register_item(coin.id, item)
         self.control_plane.register_run(run)
         self.db.save_run(run)
+        if self.settings.learning_enabled:
+            from crypto_deep_research.learning.features import persist_run
+
+            persist_run(
+                self.db,
+                run,
+                specs,
+                group_factors=group_factors,
+                multipliers=multipliers,
+                analysis_results=analysis_results,
+            )
 
         notify(92, "Rapor ve prompt üretiliyor…")
         prompt = build_prompt(run, analysis_results, item_results, self.control_plane, language=language)

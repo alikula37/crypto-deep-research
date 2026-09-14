@@ -8,6 +8,9 @@ import ScoreHistoryChart from "./ScoreHistoryChart.jsx";
 import AccuracyPanel from "./AccuracyPanel.jsx";
 import ComparePanel from "./ComparePanel.jsx";
 import WatchlistPanel from "./WatchlistPanel.jsx";
+import CommandPalette from "./CommandPalette.jsx";
+import { GROUPS, TAB_LABELS, groupOfTab } from "./navigation.js";
+import { IconRail, RunBar, SettingsSheet, ViewHeader } from "./Shell.jsx";
 import PortfolioPanel from "./PortfolioPanel.jsx";
 import {
   IconAlert,
@@ -860,6 +863,8 @@ export default function App() {
   const [reportQuery, setReportQuery] = useState("");
   const [runHistory, setRunHistory] = useState([]);
   const [showShortcuts, setShowShortcuts] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [ragStats, setRagStats] = useState(null);
   const [selectedReport, setSelectedReport] = useState(null);
   const [copied, setCopied] = useState("");
@@ -955,6 +960,9 @@ export default function App() {
       } else if (event.key === "?" && !typing) {
         event.preventDefault();
         setShowShortcuts((value) => !value);
+      } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setPaletteOpen((value) => !value);
       } else if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
         if (typing) return;
         event.preventDefault();
@@ -1182,6 +1190,46 @@ export default function App() {
   const deepBusy = busy === "deep";
   deepResearchRef.current = runDeepResearch;
 
+  const activeGroup = groupOfTab(tab);
+
+  const searchCoins = async (query) => {
+    const response = await fetch(`/api/coins/search?q=${encodeURIComponent(query)}&limit=6`);
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.results || [];
+  };
+
+  const paletteCommands = useMemo(() => {
+    const navigation = [];
+    GROUPS.forEach((group) => {
+      group.tabs.forEach((tabId) => {
+        navigation.push({
+          id: `go:${tabId}`,
+          label: `Git: ${TAB_LABELS[tabId]}`,
+          group: group.label,
+          keywords: `${tabId} ${group.label}`,
+          run: () => setTab(tabId),
+        });
+      });
+    });
+    const actions = [
+      { id: "run:analyze", label: "Analiz çalıştır", group: "Çalıştır", keywords: "analiz baslat", run: () => runAnalyze() },
+      { id: "run:deep", label: "Derin araştırma başlat", group: "Çalıştır", keywords: "derin arastirma deep research", run: () => runDeepResearch() },
+      { id: "mod:all", label: "Modüllerin tümünü seç", group: "Modüller", run: selectAllAnalyses },
+      { id: "mod:none", label: "Modül seçimini temizle", group: "Modüller", run: clearAnalyses },
+      { id: "settings", label: "Modüller ve ayarlar panelini aç", group: "Sistem", run: () => setSheetOpen(true) },
+      { id: "help", label: "Klavye kısayolları", group: "Sistem", run: () => setShowShortcuts(true) },
+    ];
+    const modules = analysesList.map((analysis) => ({
+      id: `mod:${analysis.key}`,
+      label: `${selected.includes(analysis.key) ? "Kapat" : "Aç"}: ${analysis.title}`,
+      group: "Modüller",
+      keywords: `modul ${analysis.title}`,
+      run: () => toggleAnalysis(analysis.key),
+    }));
+    return [...navigation, ...actions, ...modules];
+  }, [analysesList, selected]);
+
   const promptText = deep?.prompt || latestPrompt?.prompt || "";
   const promptSourceLabel = deep?.prompt
     ? "Bu koşunun promptu"
@@ -1200,212 +1248,52 @@ export default function App() {
 
   return (
     <div className="app">
-      <aside className="sidebar">
-        <h1>
-          Crypto<span>DeepResearch</span>
-        </h1>
-        <p className="muted small">Kripto varlıklar için yerel RAG ve derin araştırma altyapısı</p>
-
-        <div className="field">
-          <span>Varlık (sembol veya CoinGecko kimliği)</span>
-          <CoinSelect
-            defaultValue={coin}
-            placeholder="örn. bitcoin, eth, chainlink"
-            onManualChange={(value) => setCoin(value)}
-            onSelect={(suggestion) => {
-              setCoin(suggestion.id);
-              loadSnapshot(suggestion.id);
-            }}
-            onSubmit={(value) => {
-              setCoin(value);
-              loadSnapshot(value);
-            }}
-          />
-        </div>
-
-        <div className="field-row">
-          <label className="field">
-            <span>Zaman Dilimi</span>
-            <select value={timeframe} onChange={(event) => setTimeframe(event.target.value)}>
-              {TIMEFRAMES.map((value) => (
-                <option key={value} value={value}>{value}</option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>Geriye Dönük Veri (gün)</span>
-            <input
-              type="number"
-              min="30"
-              max="3650"
-              value={lookback}
-              onChange={(event) => setLookback(event.target.value)}
-            />
-          </label>
-        </div>
-
-        <div className="field">
-          <div className="field-head">
-            <span>Analiz Modülleri</span>
-            <span className="muted">
-              {selected.length}/{analysesList.length || 10} seçili
-            </span>
-          </div>
-          <div className="field-actions">
-            <button type="button" className="mini-btn" onClick={selectAllAnalyses}>
-              Tümünü seç
-            </button>
-            <button type="button" className="mini-btn" onClick={clearAnalyses}>
-              Temizle
-            </button>
-          </div>
-          <div className="checklist">
-            {analysesList.map((analysis) => (
-              <label key={analysis.key} className="check">
-                <input
-                  type="checkbox"
-                  checked={selected.includes(analysis.key)}
-                  onChange={() => toggleAnalysis(analysis.key)}
-                />
-                <span>{analysis.title}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div className="field-row">
-          <label className="field">
-            <span>Prompt Hedefi</span>
-            <select value={platform} onChange={(event) => setPlatform(event.target.value)}>
-              <option value="generic">Genel</option>
-              <option value="claude">Claude</option>
-              <option value="codex">Codex</option>
-              <option value="chatgpt">ChatGPT</option>
-            </select>
-          </label>
-          <label className="field">
-            <span>Skorlama Profili</span>
-            <select
-              value={profile}
-              onChange={(event) => setProfile(event.target.value)}
-              title={profilesList.find((item) => item.key === profile)?.description || ""}
-            >
-              {(profilesList.length
-                ? profilesList
-                : [
-                    { key: "balanced", label: "Dengeli" },
-                    { key: "conservative", label: "Muhafazakâr" },
-                    { key: "aggressive", label: "Agresif" },
-                  ]
-              ).map((item) => (
-                <option key={item.key} value={item.key}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>Prompt Dili</span>
-            <select
-              value={language}
-              onChange={(event) => setLanguage(event.target.value)}
-              title="Harici AI'dan yanıtın hangi dilde isteneceği. Rapor çevirisi için Rapor sekmesindeki 'İngilizce'ye Çevir' düğmesini kullanın."
-            >
-              <option value="tr">Türkçe</option>
-              <option value="en">İngilizce</option>
-            </select>
-          </label>
-        </div>
-
-        <button
-          className="primary"
-          onClick={runAnalyze}
-          disabled={!!busy || selected.length === 0}
-          title={selected.length === 0 ? "En az bir analiz modülü seçin" : ""}
-        >
-          {busy === "analyze" ? (
+      <RunBar
+        coin={coin}
+        onCoinManual={(value) => setCoin(value)}
+        onCoinSelect={(suggestion) => {
+          setCoin(suggestion.id);
+          loadSnapshot(suggestion.id);
+        }}
+        onCoinSubmit={(value) => {
+          setCoin(value);
+          loadSnapshot(value);
+        }}
+        livePrice={snapshotData ? price(snapshotData.snapshot.price_usd) : null}
+        change24h={snapshotData?.snapshot?.change_24h_pct}
+        timeframe={timeframe}
+        onTimeframe={setTimeframe}
+        profile={profile}
+        onProfile={setProfile}
+        profilesList={profilesList}
+        selectedCount={selected.length}
+        moduleCount={analysesList.length}
+        onOpenSettings={() => setSheetOpen(true)}
+        onRunAnalyze={runAnalyze}
+        onRunDeep={runDeepResearch}
+        busy={busy}
+        onOpenPalette={() => setPaletteOpen(true)}
+        verdict={
+          run ? (
             <>
-              <span className="spinner" /> Analiz çalışıyor…
-            </>
-          ) : (
-            <>
-              <IconPlay width={13} height={13} /> Analiz Çalıştır
-            </>
-          )}
-        </button>
-        <button
-          className="accent"
-          onClick={runDeepResearch}
-          disabled={!!busy || selected.length === 0}
-          title={selected.length === 0 ? "En az bir analiz modülü seçin" : ""}
-        >
-          {busy === "deep" ? (
-            <>
-              <span className="spinner" /> Derin araştırma sürüyor…
-            </>
-          ) : (
-            <>
-              <IconSparkles width={14} height={14} /> Derin Araştırma Başlat
-            </>
-          )}
-        </button>
-
-        {snapshotData && (
-          <div
-            className={`sidebar-price ${
-              (snapshotData.snapshot.change_24h_pct ?? 0) >= 0 ? "up" : "down"
-            }`}
-          >
-            {snapshotData.snapshot.coin.symbol.toUpperCase()} {price(snapshotData.snapshot.price_usd)}
-          </div>
-        )}
-
-        <div className="sidebar-footer">
-          {health && (
-            <>
-              <div className="muted small">
-                API anahtarları: {Object.entries(health.keys).filter(([, value]) => value).map(([key]) => key).join(", ") || "tanımlı değil"}
-              </div>
-              <div className="muted small">
-                OpenRouter: {health.openrouter ? "aktif" : "pasif (yalnızca prompt üretilir)"}
-              </div>
-              <div className="muted small">
-                Rapor: {health.reports} · Vektör kaydı: {ragStats?.vectors ?? 0}
-              </div>
-            </>
-          )}
-          <button className="mini-btn" onClick={() => setShowShortcuts(true)}>
-            Klavye kısayolları (?)
-          </button>
-        </div>
-      </aside>
-
-      <main className="main">
-        <header className="topbar">
-          <nav className="tabs">
-            {TABS.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  className={tab === item.id ? "active" : ""}
-                  onClick={() => setTab(item.id)}
-                >
-                  <Icon width={14} height={14} />
-                  {item.label}
-                </button>
-              );
-            })}
-          </nav>
-          {run && (
-            <div className="score-summary">
               <span className={scoreColor(run.weighted_score)}>Skor {score(run.weighted_score)}</span>
               <span className="up">Yükseliş %{Number(run.up_probability).toFixed(1)}</span>
               <span className="down">Düşüş %{Number(run.down_probability).toFixed(1)}</span>
               <span className="range">{priceRange(run.expected_low, run.expected_high)}</span>
-            </div>
-          )}
-        </header>
+            </>
+          ) : null
+        }
+      />
+
+      <div className="shell">
+        <IconRail
+          activeGroupId={activeGroup.id}
+          onSelectGroup={(group) => setTab(group.tabs[0])}
+          onHelp={() => setShowShortcuts(true)}
+        />
+
+        <main className="main">
+          <ViewHeader group={activeGroup} tab={tab} onSelectTab={setTab} />
 
         {error && (
           <div className="error">
@@ -1436,6 +1324,10 @@ export default function App() {
                   <div className="range-line">
                     Beklenen fiyat aralığı: <b>{priceRange(run.expected_low, run.expected_high)}</b>
                   </div>
+                  <p className="muted small">
+                    Olasılıklar heuristiktir (kalibre değil); gerçekleşen sonuçlar biriktikçe İsabet
+                    sekmesindeki kalibrasyonla karşılaştırılacaktır.
+                  </p>
                   {run.profile && run.profile !== "balanced" && (
                     <div className="muted small">
                       Skorlama profili:{" "}
@@ -1745,7 +1637,41 @@ export default function App() {
             </>
           )}
         </section>
-      </main>
+        </main>
+      </div>
+
+      <SettingsSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        analysesList={analysesList}
+        selected={selected}
+        onToggle={toggleAnalysis}
+        onSelectAll={selectAllAnalyses}
+        onClear={clearAnalyses}
+        lookback={lookback}
+        onLookback={setLookback}
+        platform={platform}
+        onPlatform={setPlatform}
+        language={language}
+        onLanguage={setLanguage}
+        health={health}
+        ragStats={ragStats}
+        onShortcuts={() => {
+          setSheetOpen(false);
+          setShowShortcuts(true);
+        }}
+      />
+
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        commands={paletteCommands}
+        onSearchCoins={searchCoins}
+        onPickCoin={(suggestion) => {
+          setCoin(suggestion.id);
+          loadSnapshot(suggestion.id);
+        }}
+      />
 
       <ShortcutHelp open={showShortcuts} onClose={() => setShowShortcuts(false)} />
       <Toast toast={toast} />

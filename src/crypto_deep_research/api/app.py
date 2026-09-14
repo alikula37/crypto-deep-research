@@ -24,6 +24,8 @@ from crypto_deep_research.deep_research.accuracy import compute_accuracy
 from crypto_deep_research.deep_research.engine import DeepResearchEngine, DeepResearchOutput
 from crypto_deep_research.deep_research.profiles import profile_summary
 from crypto_deep_research.deep_research.registry import registry_summary
+from crypto_deep_research.learning.calibration import calibration_table, heuristic_probability
+from crypto_deep_research.learning.outcomes import fill_due_outcomes
 from crypto_deep_research.llm import OpenRouterClient, OpenRouterError
 from crypto_deep_research.models import Kline
 from crypto_deep_research.portfolio import value_portfolio
@@ -82,6 +84,36 @@ async def _watchlist_scheduler() -> None:
             break  # ayni anda tek kosu
 
 
+async def _learning_scheduler() -> None:
+    """Vadesi gelen ileri getiri etiketlerini periyodik olarak doldurur."""
+    settings = get_settings()
+    interval = max(300, settings.outcome_interval_minutes * 60)
+    while True:
+        await asyncio.sleep(interval)
+        db = _job_database()
+        try:
+            if not db.scheduled_job_acquire("outcome_filler", lease_seconds=interval * 0.8):
+                continue
+            _, _, providers = _services()
+            try:
+                result = await fill_due_outcomes(
+                    providers, db, max_attempts=settings.outcome_max_attempts
+                )
+            finally:
+                await providers.aclose()
+            if result.get("due"):
+                logger.info("Outcome filler: %s", result)
+            db.scheduled_job_finish("outcome_filler", "ok")
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            logger.exception("Outcome filler hatasi")
+            try:
+                db.scheduled_job_finish("outcome_filler", "error", str(exc))
+            except Exception:
+                logger.exception("Outcome filler durumu yazilamadi")
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     settings = get_settings()
@@ -89,6 +121,9 @@ async def lifespan(_: FastAPI):
     if stale:
         logger.warning("%s yarım kalan araştırma işi hata olarak işaretlendi", stale)
     task = asyncio.create_task(_watchlist_scheduler())
+    learning_task = (
+        asyncio.create_task(_learning_scheduler()) if settings.learning_enabled else None
+    )
     if settings.telegram_autostart and settings.telegram_token:
         try:
             await telegram_bot.start(settings.telegram_token)
@@ -101,6 +136,10 @@ async def lifespan(_: FastAPI):
         task.cancel()
         with suppress(asyncio.CancelledError):
             await task
+        if learning_task is not None:
+            learning_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await learning_task
         await telegram_bot.stop()
 
 
@@ -763,6 +802,79 @@ async def accuracy(coin: str | None = None) -> dict[str, Any]:
         return await compute_accuracy(providers, db, coin=coin)
     finally:
         await providers.aclose()
+
+
+@app.get("/api/learning/status")
+async def learning_status() -> dict[str, Any]:
+    """Ogrenme dongusu durumu: ozellik kapsami, outcome sayaclari, isler."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    counts = db.learning_status_counts()
+    return {
+        "enabled": settings.learning_enabled,
+        **counts,
+        "due_pending": len(db.outcomes_due(limit=1000)),
+        "jobs": db.query(
+            "SELECT job_key, last_finished_at, last_status, run_count FROM scheduled_jobs"
+        ),
+    }
+
+
+@app.get("/api/calibration")
+async def calibration(horizon: int = 7, coin: str | None = None) -> dict[str, Any]:
+    """Doldurulmus outcome'lardan kalibrasyon kovalari ve metrikler."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    rows = db.outcomes_dataset(horizon, coin=coin)
+    return {"horizon_days": horizon, "coin": coin, **calibration_table(rows)}
+
+
+@app.get("/api/predictions/{coin}")
+async def predictions(coin: str) -> dict[str, Any]:
+    """Son kosunun sinyal gucu ve ufuk bazli (heuristik/kalibre) olasiliklari."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    snapshot = db.latest_feature_snapshot(coin)
+    if not snapshot:
+        raise HTTPException(status_code=404, detail="Bu coin için özellik kaydı bulunamadı.")
+    score = snapshot.get("weighted_score")
+    horizons: dict[str, Any] = {}
+    for horizon in (1, 7, 30):
+        table = calibration_table(db.outcomes_dataset(horizon, coin=coin))
+        probability = heuristic_probability(score)
+        bin_row = None
+        for bucket in table.get("bins", []):
+            if bucket["bin_low"] <= probability / 100 <= bucket["bin_high"]:
+                bin_row = bucket
+                break
+        calibrated = bool(
+            table.get("n", 0) >= 100
+            and table.get("brier") is not None
+            and table.get("baseline_brier")
+            and table["brier"] < table["baseline_brier"]
+        )
+        horizons[str(horizon)] = {
+            "up": round(probability, 1),
+            "down": round(100 - probability, 1),
+            "is_calibrated": calibrated,
+            "n_observations": table.get("n", 0),
+            "brier": table.get("brier"),
+            "baseline_brier": table.get("baseline_brier"),
+            "observed_in_bin": bin_row["observed_rate"] if bin_row else None,
+            "observed_n": bin_row["n"] if bin_row else 0,
+        }
+    return {
+        "coin": coin,
+        "run_id": snapshot["run_id"],
+        "created_at": snapshot["created_at"],
+        "weighted_score": score,
+        "signal_strength": snapshot.get("signal_strength"),
+        "coverage_ratio": snapshot.get("coverage_ratio"),
+        "scored_items": (snapshot.get("n_ok") or 0) + (snapshot.get("n_partial") or 0),
+        "profile": snapshot.get("profile"),
+        "label": "kalibre" if any(h["is_calibrated"] for h in horizons.values()) else "heuristik",
+        "horizons": horizons,
+    }
 
 
 @app.get("/api/contexts")

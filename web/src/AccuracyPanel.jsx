@@ -22,6 +22,7 @@ function ReturnCell({ value }) {
 
 export default function AccuracyPanel({ coin }) {
   const [data, setData] = useState(null);
+  const [calibration, setCalibration] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,6 +34,10 @@ export default function AccuracyPanel({ coin }) {
       .then(setData)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
+    api
+      .calibration(7, coin)
+      .then(setCalibration)
+      .catch(() => setCalibration(null));
   };
 
   useEffect(load, [coin]);
@@ -71,6 +76,54 @@ export default function AccuracyPanel({ coin }) {
             İsabet oranı için koşunun üzerinden en az 1/7/30 gün geçmesi gerekir. Koşular biriktikçe
             bu pano otomatik dolar; geçmiş tarihli koşular varsa getiriler anında hesaplanır.
           </p>
+        </div>
+      )}
+
+      {calibration && (
+        <div className="card calibration-strip">
+          <div className="card-head">
+            <h3>Kalibrasyon (7 gün)</h3>
+            <span className={`status-badge tone-${calibration.n >= 100 ? "ok" : "muted"}`}>
+              {calibration.n >= 100 ? "Örneklem yeterli" : `Heuristik · n=${calibration.n}`}
+            </span>
+          </div>
+          <p className="muted small">
+            {calibration.n === 0
+              ? "Doldurulmuş sonuç etiketi yok; olasılıklar şimdilik kalibre edilmemiş heuristik değerlerdir."
+              : `Brier ${calibration.brier ?? "—"} (temel ${calibration.baseline_brier ?? "—"}) · ECE ${
+                  calibration.ece ?? "—"
+                } · AUC ${calibration.auc ?? "—"} · yönlü gözlem ${calibration.directional ?? 0}`}
+          </p>
+          {calibration.n >= 100 && calibration.bins?.length > 0 && (
+            <div className="table-wrap">
+              <table className="accuracy-table">
+                <thead>
+                  <tr>
+                    <th>Olasılık aralığı</th>
+                    <th>Gözlem</th>
+                    <th>Tahmin</th>
+                    <th>Gözlenen</th>
+                    <th>%95 GA</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {calibration.bins.map((bin) => (
+                    <tr key={bin.bin_index}>
+                      <td>
+                        %{(bin.bin_low * 100).toFixed(0)}–{(bin.bin_high * 100).toFixed(0)}
+                      </td>
+                      <td>{bin.n}</td>
+                      <td>%{(bin.predicted_mean * 100).toFixed(1)}</td>
+                      <td>%{(bin.observed_rate * 100).toFixed(1)}</td>
+                      <td className="muted">
+                        %{((bin.ci_low ?? 0) * 100).toFixed(0)}–{((bin.ci_high ?? 0) * 100).toFixed(0)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

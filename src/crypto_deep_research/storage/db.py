@@ -144,6 +144,147 @@ CREATE TABLE IF NOT EXISTS documents (
 );
 CREATE INDEX IF NOT EXISTS idx_documents_coin ON documents(coin, kind);
 
+CREATE TABLE IF NOT EXISTS feature_snapshots (
+  run_id TEXT PRIMARY KEY,
+  coin TEXT NOT NULL,
+  created_at REAL NOT NULL,
+  profile TEXT NOT NULL DEFAULT 'balanced',
+  feature_schema_version INTEGER NOT NULL DEFAULT 1,
+  n_ok INTEGER NOT NULL DEFAULT 0,
+  n_partial INTEGER NOT NULL DEFAULT 0,
+  n_no_data INTEGER NOT NULL DEFAULT 0,
+  n_error INTEGER NOT NULL DEFAULT 0,
+  coverage_ratio REAL,
+  coverage_weighted REAL,
+  weighted_score REAL,
+  signal_strength REAL,
+  score_mean REAL,
+  score_dispersion REAL,
+  confidence_mean REAL,
+  category_scores TEXT,
+  atr_pct REAL,
+  regime TEXT,
+  volatility_bucket TEXT,
+  current_price REAL,
+  up_probability REAL,
+  down_probability REAL,
+  expected_low REAL,
+  expected_high REAL,
+  items_hash TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_feature_snapshots_coin_time ON feature_snapshots(coin, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS item_features (
+  run_id TEXT NOT NULL,
+  item_id INTEGER NOT NULL,
+  coin TEXT NOT NULL,
+  category TEXT,
+  source TEXT,
+  weight REAL,
+  score REAL,
+  confidence REAL NOT NULL DEFAULT 0,
+  status TEXT NOT NULL,
+  contribution REAL,
+  PRIMARY KEY (run_id, item_id)
+);
+CREATE INDEX IF NOT EXISTS idx_item_features_item ON item_features(item_id, coin);
+
+CREATE TABLE IF NOT EXISTS outcomes (
+  run_id TEXT NOT NULL,
+  horizon_days INTEGER NOT NULL,
+  coin TEXT NOT NULL,
+  symbol TEXT,
+  entry_price REAL,
+  entry_at REAL NOT NULL,
+  target_date TEXT NOT NULL,
+  due_at REAL NOT NULL,
+  exit_price REAL,
+  return_pct REAL,
+  hit INTEGER,
+  direction_at_run TEXT,
+  weighted_score REAL,
+  price_source TEXT,
+  status TEXT NOT NULL DEFAULT 'pending',
+  attempts INTEGER NOT NULL DEFAULT 0,
+  last_attempt_at REAL,
+  filled_at REAL,
+  note TEXT,
+  PRIMARY KEY (run_id, horizon_days)
+);
+CREATE INDEX IF NOT EXISTS idx_outcomes_due ON outcomes(status, due_at);
+CREATE INDEX IF NOT EXISTS idx_outcomes_coin ON outcomes(coin, horizon_days, target_date DESC);
+
+CREATE TABLE IF NOT EXISTS model_registry (
+  model_id TEXT PRIMARY KEY,
+  kind TEXT NOT NULL,
+  horizon_days INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'shadow',
+  trained_at REAL,
+  train_rows INTEGER,
+  feature_schema_version INTEGER NOT NULL DEFAULT 1,
+  params TEXT,
+  metrics TEXT,
+  notes TEXT
+);
+
+CREATE TABLE IF NOT EXISTS calibration_bins (
+  model_id TEXT NOT NULL,
+  horizon_days INTEGER NOT NULL,
+  bin_index INTEGER NOT NULL,
+  bin_low REAL NOT NULL,
+  bin_high REAL NOT NULL,
+  n INTEGER NOT NULL DEFAULT 0,
+  predicted_mean REAL,
+  observed_rate REAL,
+  ci_low REAL,
+  ci_high REAL,
+  computed_at REAL NOT NULL,
+  PRIMARY KEY (model_id, horizon_days, bin_index)
+);
+
+CREATE TABLE IF NOT EXISTS predictions (
+  run_id TEXT NOT NULL,
+  horizon_days INTEGER NOT NULL,
+  model_id TEXT NOT NULL,
+  heuristic_up REAL,
+  probability_up REAL NOT NULL,
+  probability_down REAL NOT NULL,
+  n_train INTEGER,
+  calibration_n INTEGER,
+  calibration_observed REAL,
+  is_shadow INTEGER NOT NULL DEFAULT 1,
+  created_at REAL NOT NULL,
+  PRIMARY KEY (run_id, horizon_days, model_id)
+);
+
+CREATE TABLE IF NOT EXISTS drift_metrics (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  computed_at REAL NOT NULL,
+  window_label TEXT NOT NULL,
+  metric TEXT NOT NULL,
+  scope TEXT NOT NULL DEFAULT 'global',
+  value REAL,
+  baseline REAL,
+  delta REAL,
+  psi REAL,
+  n INTEGER,
+  alarm INTEGER NOT NULL DEFAULT 0,
+  threshold REAL,
+  details TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_drift_metrics_lookup ON drift_metrics(metric, scope, computed_at DESC);
+
+CREATE TABLE IF NOT EXISTS scheduled_jobs (
+  job_key TEXT PRIMARY KEY,
+  last_started_at REAL,
+  last_finished_at REAL,
+  last_status TEXT,
+  lease_until REAL,
+  cursor TEXT,
+  last_error TEXT,
+  run_count INTEGER NOT NULL DEFAULT 0
+);
+
 CREATE VIRTUAL TABLE IF NOT EXISTS documents_fts USING fts5(
   doc_id UNINDEXED, coin UNINDEXED, source UNINDEXED, text
 );
@@ -611,6 +752,228 @@ class Database:
             except (ValueError, TypeError):
                 pass
         return payload
+
+    def executemany(self, sql: str, rows: list[tuple]) -> int:
+        with self._lock, self._conn:
+            cursor = self._conn.executemany(sql, rows)
+            return cursor.rowcount or 0
+
+    # ------------------------------------------------------------------ ogrenme dongusu
+    def save_learning_run(
+        self,
+        features: dict[str, Any],
+        items: list[dict[str, Any]],
+        outcomes: list[dict[str, Any]],
+    ) -> None:
+        """Ozellik anlik goruntusu + madde izleri + bekleyen outcome satirlarini tek transactionda yazar."""
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                INSERT OR REPLACE INTO feature_snapshots
+                  (run_id, coin, created_at, profile, feature_schema_version,
+                   n_ok, n_partial, n_no_data, n_error, coverage_ratio, coverage_weighted,
+                   weighted_score, signal_strength, score_mean, score_dispersion, confidence_mean,
+                   category_scores, atr_pct, regime, volatility_bucket, current_price,
+                   up_probability, down_probability, expected_low, expected_high, items_hash)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    features["run_id"], features["coin"], features["created_at"],
+                    features.get("profile", "balanced"), features.get("feature_schema_version", 1),
+                    features.get("n_ok", 0), features.get("n_partial", 0),
+                    features.get("n_no_data", 0), features.get("n_error", 0),
+                    features.get("coverage_ratio"), features.get("coverage_weighted"),
+                    features.get("weighted_score"), features.get("signal_strength"),
+                    features.get("score_mean"), features.get("score_dispersion"),
+                    features.get("confidence_mean"), features.get("category_scores"),
+                    features.get("atr_pct"), features.get("regime"), features.get("volatility_bucket"),
+                    features.get("current_price"), features.get("up_probability"),
+                    features.get("down_probability"), features.get("expected_low"),
+                    features.get("expected_high"), features.get("items_hash"),
+                ),
+            )
+            self._conn.execute("DELETE FROM item_features WHERE run_id = ?", (features["run_id"],))
+            self._conn.executemany(
+                """
+                INSERT INTO item_features
+                  (run_id, item_id, coin, category, source, weight, score, confidence, status, contribution)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                [
+                    (
+                        item["run_id"], item["item_id"], item["coin"], item.get("category"),
+                        item.get("source"), item.get("weight"), item.get("score"),
+                        item.get("confidence", 0.0), item.get("status", "no_data"),
+                        item.get("contribution"),
+                    )
+                    for item in items
+                ],
+            )
+            self._conn.executemany(
+                """
+                INSERT OR IGNORE INTO outcomes
+                  (run_id, horizon_days, coin, symbol, entry_price, entry_at, target_date, due_at,
+                   direction_at_run, weighted_score, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')
+                """,
+                [
+                    (
+                        outcome["run_id"], outcome["horizon_days"], outcome["coin"],
+                        outcome.get("symbol"), outcome.get("entry_price"), outcome["entry_at"],
+                        outcome["target_date"], outcome["due_at"], outcome.get("direction_at_run"),
+                        outcome.get("weighted_score"),
+                    )
+                    for outcome in outcomes
+                ],
+            )
+
+    def runs_missing_features(self, limit: int = 200) -> list[dict[str, Any]]:
+        return self.query(
+            """
+            SELECT r.run_id, r.coin, r.created_at, r.payload
+            FROM runs r LEFT JOIN feature_snapshots f ON f.run_id = r.run_id
+            WHERE f.run_id IS NULL
+            ORDER BY r.created_at ASC LIMIT ?
+            """,
+            (limit,),
+        )
+
+    def learning_status_counts(self) -> dict[str, Any]:
+        runs_total = self.query("SELECT COUNT(*) AS n FROM runs")[0]["n"]
+        runs_with = self.query("SELECT COUNT(*) AS n FROM feature_snapshots")[0]["n"]
+        rows = self.query("SELECT status, COUNT(*) AS n FROM outcomes GROUP BY status")
+        outcomes = {row["status"]: row["n"] for row in rows}
+        return {"runs_total": runs_total, "runs_with_features": runs_with, "outcomes": outcomes}
+
+    def outcomes_due(self, limit: int = 50) -> list[dict[str, Any]]:
+        return self.query(
+            """
+            SELECT * FROM outcomes
+            WHERE status = 'pending' AND due_at <= ?
+            ORDER BY due_at ASC LIMIT ?
+            """,
+            (time.time(), limit),
+        )
+
+    def outcome_mark_filled(
+        self,
+        run_id: str,
+        horizon_days: int,
+        *,
+        exit_price: float | None,
+        return_pct: float | None,
+        hit: int | None,
+        price_source: str | None,
+        note: str | None = None,
+    ) -> None:
+        self.execute(
+            """
+            UPDATE outcomes SET
+              exit_price = ?, return_pct = ?, hit = ?, price_source = ?, note = ?,
+              status = 'filled', attempts = attempts + 1, last_attempt_at = ?, filled_at = ?
+            WHERE run_id = ? AND horizon_days = ?
+            """,
+            (
+                exit_price, return_pct, hit, price_source, note,
+                time.time(), time.time(), run_id, horizon_days,
+            ),
+        )
+
+    def outcome_mark_failure(self, run_id: str, horizon_days: int, status: str, note: str) -> None:
+        self.execute(
+            """
+            UPDATE outcomes SET status = ?, attempts = attempts + 1, last_attempt_at = ?, note = ?
+            WHERE run_id = ? AND horizon_days = ?
+            """,
+            (status, time.time(), note, run_id, horizon_days),
+        )
+
+    def outcomes_dataset(self, horizon_days: int, coin: str | None = None) -> list[dict[str, Any]]:
+        if coin:
+            return self.query(
+                """
+                SELECT o.*, f.weighted_score AS f_score, f.up_probability AS f_up, f.coverage_ratio
+                FROM outcomes o JOIN feature_snapshots f ON f.run_id = o.run_id
+                WHERE o.horizon_days = ? AND o.status = 'filled' AND o.coin = ?
+                ORDER BY o.target_date ASC
+                """,
+                (horizon_days, coin),
+            )
+        return self.query(
+            """
+            SELECT o.*, f.weighted_score AS f_score, f.up_probability AS f_up, f.coverage_ratio
+            FROM outcomes o JOIN feature_snapshots f ON f.run_id = o.run_id
+            WHERE o.horizon_days = ? AND o.status = 'filled'
+            ORDER BY o.target_date ASC
+            """,
+            (horizon_days,),
+        )
+
+    def scheduled_job_acquire(self, job_key: str, lease_seconds: float) -> bool:
+        now = time.time()
+        with self._lock, self._conn:
+            cursor = self._conn.execute(
+                """
+                UPDATE scheduled_jobs
+                SET lease_until = ?, last_started_at = ?
+                WHERE job_key = ? AND (lease_until IS NULL OR lease_until < ?)
+                """,
+                (now + lease_seconds, now, job_key, now),
+            )
+            if cursor.rowcount == 0:
+                self._conn.execute(
+                    "INSERT OR IGNORE INTO scheduled_jobs (job_key, lease_until, last_started_at) VALUES (?, ?, ?)",
+                    (job_key, now + lease_seconds, now),
+                )
+                cursor = self._conn.execute(
+                    "UPDATE scheduled_jobs SET lease_until = ?, last_started_at = ? WHERE job_key = ?",
+                    (now + lease_seconds, now, job_key),
+                )
+            return cursor.rowcount > 0
+
+    def scheduled_job_finish(self, job_key: str, status: str, error: str | None = None) -> None:
+        self.execute(
+            """
+            UPDATE scheduled_jobs
+            SET lease_until = NULL, last_finished_at = ?, last_status = ?, last_error = ?,
+                run_count = run_count + 1
+            WHERE job_key = ?
+            """,
+            (time.time(), status, error, job_key),
+        )
+
+    def feature_predictions(self, run_id: str) -> list[dict[str, Any]]:
+        return self.query("SELECT * FROM predictions WHERE run_id = ?", (run_id,))
+
+    def prediction_save(self, payload: dict[str, Any]) -> None:
+        self.execute(
+            """
+            INSERT OR REPLACE INTO predictions
+              (run_id, horizon_days, model_id, heuristic_up, probability_up, probability_down,
+               n_train, calibration_n, calibration_observed, is_shadow, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                payload["run_id"], payload["horizon_days"], payload["model_id"],
+                payload.get("heuristic_up"), payload["probability_up"], payload["probability_down"],
+                payload.get("n_train"), payload.get("calibration_n"),
+                payload.get("calibration_observed"), 1 if payload.get("is_shadow", True) else 0,
+                time.time(),
+            ),
+        )
+
+    def latest_feature_snapshot(self, coin: str) -> dict[str, Any] | None:
+        rows = self.query(
+            "SELECT * FROM feature_snapshots WHERE coin = ? ORDER BY created_at DESC LIMIT 1",
+            (coin,),
+        )
+        return rows[0] if rows else None
+
+    def feature_snapshots_for_coin(self, coin: str, limit: int = 200) -> list[dict[str, Any]]:
+        return self.query(
+            "SELECT * FROM feature_snapshots WHERE coin = ? ORDER BY created_at DESC LIMIT ?",
+            (coin, limit),
+        )
 
     def job_mark_stale(self) -> int:
         """Sunucu yeniden baslarken yarim kalan isleri hata olarak isaretler."""
