@@ -370,49 +370,141 @@ function AnalysisCard({ result, description }) {
   );
 }
 
-function FindingsTable({ items }) {
+const FINDING_FILTERS = [
+  ["all", "Tümü"],
+  ["ok", "Tam"],
+  ["partial", "Kısmi"],
+  ["no_data", "Veri Yok"],
+  ["scored", "Skorlanan"],
+];
+
+function sourceLabel(item) {
+  if (item.source_type === "analysis") return `Analiz modülü · ${item.source_ref}`;
+  if (item.source_type === "special") return "Yerel hesaplama motoru";
+  if (item.source_type === "news") return `Haber taraması · "${item.query}"`;
+  if (item.source_type === "unavailable") return "Doğrulanabilir ücretsiz veri kaynağı yok";
+  return "";
+}
+
+function normalizeFinding(item, hasRun) {
+  if (hasRun) return item;
+  const [sourceType, sourceRef] = (item.source || "").split(":", 2);
+  return {
+    item_id: item.id,
+    title_tr: item.title,
+    description_tr: item.description,
+    status: "not_run",
+    score: null,
+    confidence: null,
+    weight: item.weight,
+    category: item.category,
+    summary: "",
+    note: item.note,
+    data: null,
+    sources: [],
+    source_type: sourceType,
+    source_ref: sourceRef,
+    query: item.query,
+  };
+}
+
+function FindingsList({ items, hasRun }) {
   const [filter, setFilter] = useState("all");
+  const [category, setCategory] = useState("all");
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("order");
+  const [openItems, setOpenItems] = useState({});
+  const [allOpen, setAllOpen] = useState(false);
+
+  const normalized = useMemo(
+    () => items.map((item) => normalizeFinding(item, hasRun)),
+    [items, hasRun]
+  );
+
+  const categories = useMemo(
+    () =>
+      [...new Set(normalized.map((item) => item.category).filter(Boolean))].sort((a, b) =>
+        a.localeCompare(b, "tr")
+      ),
+    [normalized]
+  );
+
+  const counts = useMemo(() => {
+    const result = { all: normalized.length, scored: 0 };
+    for (const item of normalized) {
+      result[item.status] = (result[item.status] || 0) + 1;
+      if (item.score !== null && item.score !== undefined && item.confidence > 0) {
+        result.scored += 1;
+      }
+    }
+    return result;
+  }, [normalized]);
 
   const filtered = useMemo(() => {
-    let list = items;
-    if (filter === "scored") list = list.filter((item) => item.score !== null && item.confidence > 0);
-    else if (filter !== "all") list = list.filter((item) => item.status === filter);
-    if (query.trim()) {
-      const needle = query.trim().toLowerCase();
+    let list = normalized;
+    if (filter === "scored") {
+      list = list.filter((item) => item.score !== null && item.score !== undefined && item.confidence > 0);
+    } else if (filter !== "all") {
+      list = list.filter((item) => item.status === filter);
+    }
+    if (category !== "all") list = list.filter((item) => item.category === category);
+    const needle = query.trim().toLowerCase();
+    if (needle) {
       list = list.filter(
         (item) =>
           item.title_tr.toLowerCase().includes(needle) ||
           (item.description_tr || "").toLowerCase().includes(needle) ||
-          (item.category || "").toLowerCase().includes(needle) ||
-          (item.summary || "").toLowerCase().includes(needle)
+          (item.summary || "").toLowerCase().includes(needle) ||
+          (item.category || "").toLowerCase().includes(needle)
       );
     }
-    if (sort === "score-desc") list = [...list].sort((a, b) => (b.score ?? -99) - (a.score ?? -99));
-    else if (sort === "score-asc") list = [...list].sort((a, b) => (a.score ?? 99) - (b.score ?? 99));
-    else if (sort === "confidence") list = [...list].sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0));
-    return list;
-  }, [items, filter, query, sort]);
+    const sorted = [...list];
+    if (sort === "score-desc") sorted.sort((a, b) => (b.score ?? -99) - (a.score ?? -99));
+    else if (sort === "score-asc") sorted.sort((a, b) => (a.score ?? 99) - (b.score ?? 99));
+    else if (sort === "confidence") sorted.sort((a, b) => (b.confidence ?? -1) - (a.confidence ?? -1));
+    else if (sort === "contribution") {
+      sorted.sort((a, b) => Math.abs(b.score ?? 0) * b.weight - Math.abs(a.score ?? 0) * a.weight);
+    }
+    return sorted;
+  }, [normalized, filter, category, query, sort]);
+
+  const groups = useMemo(() => {
+    const map = new Map();
+    for (const item of filtered) {
+      if (!map.has(item.category)) map.set(item.category, []);
+      map.get(item.category).push(item);
+    }
+    return [...map.entries()];
+  }, [filtered]);
+
+  const toggle = (id) => {
+    setOpenItems((previous) => ({ ...previous, [id]: !previous[id] }));
+    setAllOpen(false);
+  };
+
+  const toggleAll = () => {
+    const next = !allOpen;
+    setAllOpen(next);
+    setOpenItems(next ? Object.fromEntries(filtered.map((item) => [item.item_id, true])) : {});
+  };
 
   return (
     <div>
-      <div className="filter-row">
-        {[
-          ["all", "Tümü"],
-          ["scored", "Skorlanan"],
-          ["ok", "Tam"],
-          ["partial", "Kısmi"],
-          ["no_data", "Veri Yok"],
-        ].map(([id, label]) => (
-          <button
-            key={id}
-            className={`chip ${filter === id ? "active" : ""}`}
-            onClick={() => setFilter(id)}
-          >
+      <div className="findings-toolbar">
+        {FINDING_FILTERS.map(([id, label]) => (
+          <button key={id} className={`chip ${filter === id ? "active" : ""}`} onClick={() => setFilter(id)}>
             {label}
+            {counts[id] !== undefined ? ` (${counts[id]})` : ""}
           </button>
         ))}
+        <select value={category} onChange={(event) => setCategory(event.target.value)} className="sort-select">
+          <option value="all">Tüm kategoriler</option>
+          {categories.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
         <input
           className="search-input"
           data-search-input
@@ -425,119 +517,122 @@ function FindingsTable({ items }) {
           <option value="score-desc">Skor (azalan)</option>
           <option value="score-asc">Skor (artan)</option>
           <option value="confidence">Güven</option>
+          <option value="contribution">Katkı (ağırlık × skor)</option>
         </select>
+        <button className="mini-btn" onClick={toggleAll}>
+          {allOpen ? "Tümünü kapat" : "Tümünü aç"}
+        </button>
         <span className="muted">{filtered.length} kriter</span>
       </div>
-      <div className="items-grid">
-        {filtered.map((item) => (
-          <div className="card item-card" key={item.item_id}>
-            <div className="card-head">
-              <h4>
-                <span className="item-no">{item.item_id}</span> {item.title_tr}
-              </h4>
-              <div className="card-meta">
-                <StatusBadge status={item.status} />
-                <ScorePill value={item.score} />
-              </div>
-            </div>
-            {item.description_tr && (
-              <p className="item-desc">
-                <span className="section-label">Ne araştırılır?</span> {item.description_tr}
-              </p>
-            )}
-            <div className="item-finding">
-              <span className="section-label">Bulgu</span>
-              <p className="summary clamp-3">{item.summary}</p>
-            </div>
-            {item.note && (
-              <p className="item-note">
-                <IconInfo width={12} height={12} /> {item.note}
-              </p>
-            )}
-            <div className="item-footer">
-              <span
-                className="muted"
-                title="Kategori · Ağırlık: kriterin genel skora katkı katsayısı (aynı modül grubunda bir kez sayılır) · Güven: verinin güvenilirliği (0–1)"
-              >
-                {item.category} · Ağırlık {item.weight} · Güven {(item.confidence ?? 0).toFixed(2)}
+
+      {groups.length === 0 && (
+        <div className="empty-state">
+          <h3>Eşleşen kriter yok</h3>
+          <p>Filtreyi veya arama terimini değiştirin.</p>
+        </div>
+      )}
+
+      {groups.map(([groupName, list]) => {
+        const scoredList = list.filter(
+          (item) => item.score !== null && item.score !== undefined && item.confidence > 0
+        );
+        const avgScore = scoredList.length
+          ? scoredList.reduce((sum, item) => sum + item.score, 0) / scoredList.length
+          : null;
+        const issues = list.filter(
+          (item) => item.status === "partial" || item.status === "no_data"
+        ).length;
+        return (
+          <section className="findings-group" key={groupName}>
+            <div className="findings-group-head">
+              <h4>{groupName || "Diğer"}</h4>
+              <span className="muted">
+                {list.length} kriter
+                {avgScore !== null ? ` · ort. skor ${score(avgScore)}` : ""}
+                {issues ? ` · ${issues} eksik/kısmi` : ""}
               </span>
-              {item.sources?.length > 0 && (
-                <span className="muted">
-                  {[...new Set(item.sources.map((s) => s.name))].slice(0, 3).join(", ")}
-                </span>
-              )}
             </div>
-            {item.data && Object.keys(item.data).length > 0 && (
-              <details className="item-data">
-                <summary>Hesaplanan ham veriyi göster</summary>
-                <pre>{JSON.stringify(item.data, null, 2)}</pre>
-              </details>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function sourceLabel(item) {
-  if (item.source_type === "analysis") return `Analiz modülü · ${item.source_ref}`;
-  if (item.source_type === "special") return "Yerel hesaplama motoru";
-  if (item.source_type === "news") return `Haber taraması · "${item.query}"`;
-  return "Doğrulanabilir ücretsiz veri kaynağı yok";
-}
-
-function CriteriaCatalog({ items }) {
-  const [query, setQuery] = useState("");
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    if (!needle) return items;
-    return items.filter(
-      (item) =>
-        item.title.toLowerCase().includes(needle) ||
-        (item.description || "").toLowerCase().includes(needle) ||
-        item.category.toLowerCase().includes(needle)
-    );
-  }, [items, query]);
-
-  return (
-    <div>
-      <div className="filter-row">
-        <input
-          className="search-input"
-          data-search-input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="66 kriter arasında ara…"
-        />
-        <span className="muted">{filtered.length} kriter</span>
-      </div>
-      <div className="items-grid">
-        {filtered.map((item) => (
-          <div className="card item-card catalog-card" key={item.id}>
-            <div className="card-head">
-              <h4>
-                <span className="item-no">{item.id}</span> {item.title}
-              </h4>
-              <div className="card-meta">
-                <span className="category-chip">{item.category}</span>
-                <span className="weight-chip" title="Genel skora katkı katsayısı">
-                  Ağırlık {item.weight}
-                </span>
+            <div className="findings-rows">
+              <div className="findings-grid-head" aria-hidden="true">
+                <span>#</span>
+                <span>Kriter</span>
+                <span>Durum</span>
+                <span className="num">Skor</span>
+                <span className="num col-confidence">Güven</span>
+                <span className="num col-weight">Ağırlık</span>
               </div>
+              {list.map((item) => {
+                const isOpen = !!openItems[item.item_id];
+                const tone = (STATUS_META[item.status] || STATUS_META.no_data).tone;
+                return (
+                  <div className={`findings-row tone-${tone}`} key={item.item_id}>
+                    <button
+                      className="findings-row-head"
+                      onClick={() => toggle(item.item_id)}
+                      aria-expanded={isOpen}
+                    >
+                      <span className="item-no">{item.item_id}</span>
+                      <span className="findings-title" title={item.title_tr}>
+                        {item.title_tr}
+                      </span>
+                      <StatusBadge status={item.status} />
+                      <span className={`num score ${scoreColor(item.score)}`}>{score(item.score)}</span>
+                      <span className="num muted col-confidence">
+                        {item.confidence !== null && item.confidence !== undefined
+                          ? item.confidence.toFixed(2)
+                          : "—"}
+                      </span>
+                      <span className="num muted col-weight">{item.weight ?? "—"}</span>
+                    </button>
+                    {isOpen && (
+                      <div className="findings-detail">
+                        {item.description_tr && (
+                          <div>
+                            <span className="section-label">Ne araştırılır?</span>
+                            <p className="item-desc">{item.description_tr}</p>
+                          </div>
+                        )}
+                        {item.summary && (
+                          <div className="item-finding">
+                            <span className="section-label">Bulgu</span>
+                            <p className="summary">{item.summary}</p>
+                          </div>
+                        )}
+                        {item.note && (
+                          <p className="item-note">
+                            <IconInfo width={12} height={12} /> {item.note}
+                          </p>
+                        )}
+                        {item.sources?.length > 0 && (
+                          <div>
+                            <span className="section-label">Kaynaklar</span>
+                            <div className="sources">
+                              {[...new Set(item.sources.map((source) => source.name))].map((name) => (
+                                <span className="source-chip" key={name}>
+                                  {name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {!hasRun && sourceLabel(item) && (
+                          <p className="muted small">{sourceLabel(item)}</p>
+                        )}
+                        {item.data && Object.keys(item.data).length > 0 && (
+                          <details className="item-data">
+                            <summary>Hesaplanan ham veriyi göster</summary>
+                            <pre>{JSON.stringify(item.data, null, 2)}</pre>
+                          </details>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-            <p className="item-desc">{item.description}</p>
-            {item.note && (
-              <p className="item-note">
-                <IconInfo width={12} height={12} /> {item.note}
-              </p>
-            )}
-            <div className="item-footer">
-              <span className="muted">{sourceLabel(item)}</span>
-            </div>
-          </div>
-        ))}
-      </div>
+          </section>
+        );
+      })}
     </div>
   );
 }
@@ -718,22 +813,15 @@ function EmptyState({ title, children }) {
   return (
     <div className="empty-state">
       <svg width="132" height="76" viewBox="0 0 132 76" className="empty-art" aria-hidden="true">
-        <defs>
-          <linearGradient id="emptyGradient" x1="0" x2="1">
-            <stop offset="0%" stopColor="#4c8dff" />
-            <stop offset="100%" stopColor="#7c5cff" />
-          </linearGradient>
-        </defs>
-        <rect x="10" y="34" width="13" height="32" rx="4" fill="url(#emptyGradient)" opacity=".45" />
-        <rect x="30" y="22" width="13" height="44" rx="4" fill="url(#emptyGradient)" opacity=".7" />
-        <rect x="50" y="42" width="13" height="24" rx="4" fill="url(#emptyGradient)" opacity=".45" />
-        <rect x="70" y="12" width="13" height="54" rx="4" fill="url(#emptyGradient)" />
-        <rect x="90" y="28" width="13" height="38" rx="4" fill="url(#emptyGradient)" opacity=".7" />
-        <circle cx="114" cy="18" r="4.5" fill="#2ecc8f" />
-        <circle cx="120" cy="30" r="2.5" fill="#4c8dff" />
+        <rect x="10" y="34" width="13" height="32" rx="3" fill="currentColor" opacity=".35" />
+        <rect x="30" y="22" width="13" height="44" rx="3" fill="currentColor" opacity=".55" />
+        <rect x="50" y="42" width="13" height="24" rx="3" fill="currentColor" opacity=".3" />
+        <rect x="70" y="14" width="13" height="52" rx="3" fill="currentColor" opacity=".75" />
+        <rect x="90" y="30" width="13" height="36" rx="3" fill="currentColor" opacity=".45" />
+        <rect x="110" y="24" width="13" height="42" rx="3" fill="currentColor" opacity=".6" />
       </svg>
       <h3>{title}</h3>
-      <div className="muted">{children}</div>
+      {children && <p>{children}</p>}
     </div>
   );
 }
@@ -839,6 +927,17 @@ export default function App() {
   }, [coin, deep]);
 
   useEffect(() => {
+    // Coin degisince onceki coinin kosu/analiz ciktilari ekranda kalmasin.
+    setDeep(null);
+    setAnalysisResults([]);
+    setTranslatedReport("");
+    setLatestPrompt(null);
+    setPromptAnswer("");
+    setSelectedReport(null);
+    setError("");
+  }, [coin]);
+
+  useEffect(() => {
     const handler = (event) => {
       const target = event.target;
       const typing =
@@ -857,6 +956,7 @@ export default function App() {
         event.preventDefault();
         setShowShortcuts((value) => !value);
       } else if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        if (typing) return;
         event.preventDefault();
         deepResearchRef.current?.();
       }
@@ -1217,7 +1317,12 @@ export default function App() {
           </label>
         </div>
 
-        <button className="primary" onClick={runAnalyze} disabled={!!busy}>
+        <button
+          className="primary"
+          onClick={runAnalyze}
+          disabled={!!busy || selected.length === 0}
+          title={selected.length === 0 ? "En az bir analiz modülü seçin" : ""}
+        >
           {busy === "analyze" ? (
             <>
               <span className="spinner" /> Analiz çalışıyor…
@@ -1228,7 +1333,12 @@ export default function App() {
             </>
           )}
         </button>
-        <button className="accent" onClick={runDeepResearch} disabled={!!busy}>
+        <button
+          className="accent"
+          onClick={runDeepResearch}
+          disabled={!!busy || selected.length === 0}
+          title={selected.length === 0 ? "En az bir analiz modülü seçin" : ""}
+        >
           {busy === "deep" ? (
             <>
               <span className="spinner" /> Derin araştırma sürüyor…
@@ -1241,7 +1351,11 @@ export default function App() {
         </button>
 
         {snapshotData && (
-          <div className="sidebar-price">
+          <div
+            className={`sidebar-price ${
+              (snapshotData.snapshot.change_24h_pct ?? 0) >= 0 ? "up" : "down"
+            }`}
+          >
             {snapshotData.snapshot.coin.symbol.toUpperCase()} {price(snapshotData.snapshot.price_usd)}
           </div>
         )}
@@ -1373,16 +1487,18 @@ export default function App() {
           {tab === "findings" && (
             <>
               <PageIntro id="findings" />
-              {!run && (
-                <>
-                  <EmptyState title="Henüz araştırma çalıştırılmadı">
-                    Aşağıda <b>Derin Araştırma Başlat</b> ile çalıştırılacak 66 kriter, her birinin neyi
-                    araştırdığıyla birlikte listeleniyor.
-                  </EmptyState>
-                  {items.length > 0 && <CriteriaCatalog items={items} />}
-                </>
+              {!run && items.length === 0 && (
+                <EmptyState title="Kriterler yükleniyor…">
+                  Liste alınamadıysa sayfayı yenileyin veya API bağlantısını kontrol edin.
+                </EmptyState>
               )}
-              {run && <FindingsTable items={run.items} />}
+              {items.length > 0 && <FindingsList items={run ? run.items : items} hasRun={!!run} />}
+              {!run && items.length > 0 && (
+                <p className="findings-footnote">
+                  Henüz bu oturumda araştırma çalıştırılmadı; yukarıdaki 66 kriter{" "}
+                  <b>Derin Araştırma Başlat</b> ile doldurulur.
+                </p>
+              )}
             </>
           )}
 

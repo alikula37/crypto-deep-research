@@ -333,7 +333,12 @@ export default function WatchlistPanel({ initialCoin, onNotify }) {
         {alarms.map((alarm) => (
           <div className={`alarm-row ${alarm.triggered ? "triggered" : ""}`} key={alarm.id}>
             <label className="watchlist-field">
-              <input type="checkbox" checked={alarm.enabled} onChange={() => toggleAlarm(alarm.id)} />
+              <input
+                type="checkbox"
+                checked={alarm.enabled}
+                onChange={() => toggleAlarm(alarm.id)}
+                aria-label={`${alarm.coin.toUpperCase()} alarmını etkinleştir`}
+              />
             </label>
             <span className="watchlist-symbol">{alarm.coin.toUpperCase()}</span>
             <span>

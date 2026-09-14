@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 export default function CoinSelect({
   defaultValue = "",
@@ -15,6 +15,7 @@ export default function CoinSelect({
   const wrapperRef = useRef(null);
   const debounceRef = useRef(null);
   const requestRef = useRef(0);
+  const suggestionsId = useId();
 
   useEffect(() => {
     const handleOutside = (event) => {
@@ -98,7 +99,7 @@ export default function CoinSelect({
         role="combobox"
         aria-expanded={open}
         aria-autocomplete="list"
-        aria-controls="coin-suggestions"
+        aria-controls={suggestionsId}
         autoComplete="off"
         value={text}
         placeholder={placeholder}
@@ -110,7 +111,7 @@ export default function CoinSelect({
         }}
       />
       {open && (
-        <ul className="coin-dropdown" id="coin-suggestions" role="listbox">
+        <ul className="coin-dropdown" id={suggestionsId} role="listbox">
           {loading && <li className="coin-empty">Aranıyor…</li>}
           {!loading && results.length === 0 && (
             <li className="coin-empty">Sonuç bulunamadı; tam kimlik yazıp Enter'a basabilirsiniz.</li>
@@ -119,6 +120,7 @@ export default function CoinSelect({
             results.map((coin, index) => (
               <li
                 key={coin.id}
+                id={`${suggestionsId}-option-${index}`}
                 role="option"
                 aria-selected={index === highlight}
                 className={`coin-option ${index === highlight ? "active" : ""}`}
