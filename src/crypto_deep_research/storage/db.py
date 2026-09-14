@@ -505,8 +505,11 @@ class Database:
         for row in rows:
             row["auto_run"] = bool(row["auto_run"])
             last = self.query("SELECT MAX(created_at) AS ts FROM runs WHERE coin = ?", (row["coin"],))
-            if last and last[0]["ts"]:
-                row["last_run_at"] = last[0]["ts"]
+            run_ts = last[0]["ts"] if last and last[0]["ts"] else None
+            # Deneme isareti (touch) ile tamamlanan son kosunun en yenisi gecerlidir;
+            # aksi halde eski kosu tarihi touch'i ezip scheduler'i tekrar tetikler.
+            candidates = [value for value in (row.get("last_run_at"), run_ts) if value is not None]
+            row["last_run_at"] = max(candidates) if candidates else None
         return rows
 
     def watchlist_touch(self, coin: str, ts: float | None = None) -> None:

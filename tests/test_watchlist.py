@@ -41,3 +41,22 @@ def test_watchlist_get_normalizes_auto_run_bool(tmp_path):
     assert entry["auto_run"] is False
     db.watchlist_add("bitcoin", auto_run=True)
     assert db.watchlist_get("bitcoin")["auto_run"] is True
+
+
+def test_watchlist_touch_survives_older_completed_run(tmp_path):
+    """Touch isareti, eski kosu tarihiyle ezilmemeli (scheduler tekrar tetiklemesin)."""
+    db = Database(tmp_path / "test.db")
+    db.watchlist_add("bitcoin")
+    db.execute(
+        "INSERT INTO runs (run_id, coin, created_at, payload) VALUES (?, ?, ?, ?)",
+        ("r1", "bitcoin", 100.0, "{}"),
+    )
+    db.watchlist_touch("bitcoin", ts=200.0)
+    entry = db.watchlist_list()[0]
+    assert entry["last_run_at"] == 200.0
+    # Yeni bir kosu tamamlanirsa daha yeni tarih gecerli olur.
+    db.execute(
+        "INSERT INTO runs (run_id, coin, created_at, payload) VALUES (?, ?, ?, ?)",
+        ("r2", "bitcoin", 300.0, "{}"),
+    )
+    assert db.watchlist_list()[0]["last_run_at"] == 300.0
