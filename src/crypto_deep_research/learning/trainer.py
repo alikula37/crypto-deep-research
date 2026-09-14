@@ -60,12 +60,20 @@ def _write_predictions(
     params: dict[str, Any],
     status: str,
     n_train: int,
+    source: str | None = None,
 ) -> int:
-    """Tum kosular icin shadow/aktif model tahmini yazar (gecmis karsilastirmasi icin)."""
+    """Ayni kaynaktaki (live/backfill) kosular icin model tahmini yazar."""
     written = 0
-    snapshots = db.query(
-        "SELECT * FROM feature_snapshots ORDER BY created_at DESC LIMIT 2000"
-    )
+    if source:
+        snapshots = db.query(
+            "SELECT * FROM feature_snapshots WHERE COALESCE(source, 'live') = ? "
+            "ORDER BY created_at DESC LIMIT 2000",
+            (source,),
+        )
+    else:
+        snapshots = db.query(
+            "SELECT * FROM feature_snapshots ORDER BY created_at DESC LIMIT 2000"
+        )
     for snapshot in snapshots:
         try:
             probability = predict_snapshot(snapshot, params)
@@ -95,9 +103,10 @@ def train_horizon(
     min_samples: int = MIN_SAMPLES,
     activate_min: int = ACTIVATE_MIN_SAMPLES,
     coin: str | None = None,
+    source: str | None = None,
 ) -> dict[str, Any]:
     """Tek ufuk icin model egitir; yetersiz veride egitim yapmaz."""
-    rows = db.learning_rows(horizon, coin=coin)
+    rows = db.learning_rows(horizon, coin=coin, source=source)
     dataset = build_dataset(rows)
     n = len(dataset["y"])
     if n < min_samples:
@@ -143,8 +152,12 @@ def train_horizon(
         bins = probability_bins(oos_labels, calibrated)
 
     final = LogisticModel(l2=1.0).fit(dataset["X"], dataset["y"])
-    model_id = f"logreg_platt_h{horizon}_{int(time.time())}"
+    kind = "logreg_platt_bf" if source == "backfill" else "logreg_platt"
+    model_id = f"{kind}_h{horizon}_{int(time.time())}"
     status = _status_gate(metrics, n, activate_min)
+    if source == "backfill":
+        # Tarihsel replay modelleri manuel inceleme olmadan aktiflesmez.
+        status = "shadow"
     params = {
         "logistic": final.to_params(),
         "calibration": calibration,
@@ -153,7 +166,7 @@ def train_horizon(
     db.model_save(
         {
             "model_id": model_id,
-            "kind": "logreg_platt",
+            "kind": kind,
             "horizon_days": horizon,
             "status": status,
             "trained_at": time.time(),
@@ -161,12 +174,15 @@ def train_horizon(
             "feature_schema_version": 1,
             "params": __import__("json").dumps(params),
             "metrics": __import__("json").dumps(metrics),
-            "notes": "Purged walk-forward OOS metrikleri; kalibrasyon Platt (OOS).",
+            "notes": (
+                "Purged walk-forward OOS metrikleri; kalibrasyon Platt (OOS). "
+                + ("Egitim: tarihsel replay (fiyat turevli maddeler, backfill_v1)." if source == "backfill" else "Egitim: canli kosular.")
+            ),
         }
     )
     if bins:
         db.calibration_bins_save(model_id, horizon, bins)
-    written = _write_predictions(db, horizon, model_id, params, status, n)
+    written = _write_predictions(db, horizon, model_id, params, status, n, source=source)
     return {
         "status": "trained",
         "model_id": model_id,
@@ -174,13 +190,19 @@ def train_horizon(
         "n": n,
         "model_status": status,
         "activated": status == "active",
+        "source": source or "live",
         "predictions_written": written,
         "metrics": metrics,
     }
 
 
-def train_all(db, *, min_samples: int = MIN_SAMPLES) -> list[dict[str, Any]]:
-    return [train_horizon(db, horizon, min_samples=min_samples) for horizon in (1, 7, 30)]
+def train_all(
+    db, *, min_samples: int = MIN_SAMPLES, source: str | None = None
+) -> list[dict[str, Any]]:
+    return [
+        train_horizon(db, horizon, min_samples=min_samples, source=source)
+        for horizon in (1, 7, 30)
+    ]
 
 
 def latest_model_prediction(db, coin: str, horizon: int = 7) -> dict[str, Any] | None:

@@ -320,6 +320,8 @@ class Database:
             self._conn.execute("PRAGMA journal_mode=WAL")
             self._conn.execute("PRAGMA synchronous=NORMAL")
             self._conn.executescript(SCHEMA)
+        self._ensure_column("feature_snapshots", "source", "TEXT DEFAULT 'live'")
+        self._ensure_column("outcomes", "source", "TEXT DEFAULT 'live'")
 
     # ------------------------------------------------------------------ temel
     def execute(self, sql: str, params: tuple | list = ()) -> sqlite3.Cursor:
@@ -753,6 +755,67 @@ class Database:
                 pass
         return payload
 
+    def _ensure_column(self, table: str, column: str, definition: str) -> None:
+        with self._lock:
+            columns = [row["name"] for row in self._conn.execute(f"PRAGMA table_info({table})")]
+            if column not in columns:
+                self._conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {definition}")
+                self._conn.commit()
+
+    def save_backfill_batch(self, samples: list[dict[str, Any]]) -> int:
+        """Tarihsel replay orneklerini (ozellik + madde + doldurulmus outcome) toplu yazar."""
+        if not samples:
+            return 0
+        with self._lock, self._conn:
+            self._conn.executemany(
+                """
+                INSERT OR REPLACE INTO feature_snapshots
+                  (run_id, coin, created_at, profile, feature_schema_version,
+                   n_ok, n_partial, n_no_data, n_error, coverage_ratio, coverage_weighted,
+                   weighted_score, signal_strength, score_mean, score_dispersion, confidence_mean,
+                   category_scores, atr_pct, regime, volatility_bucket, current_price,
+                   up_probability, down_probability, expected_low, expected_high, items_hash, source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                [
+                    (
+                        sample["run_id"], sample["coin"], sample["created_at"],
+                        sample.get("profile", "balanced"), 1,
+                        sample.get("n_ok", 0), sample.get("n_partial", 0),
+                        sample.get("n_no_data", 0), sample.get("n_error", 0),
+                        sample.get("coverage_ratio"), sample.get("coverage_weighted"),
+                        sample.get("weighted_score"), sample.get("signal_strength"),
+                        sample.get("score_mean"), sample.get("score_dispersion"),
+                        sample.get("confidence_mean"), sample.get("category_scores"),
+                        sample.get("atr_pct"), sample.get("regime"), sample.get("volatility_bucket"),
+                        sample.get("current_price"), sample.get("up_probability"),
+                        sample.get("down_probability"), sample.get("expected_low"),
+                        sample.get("expected_high"), sample.get("items_hash", "backfill"),
+                        "backfill",
+                    )
+                    for sample in samples
+                ],
+            )
+            self._conn.executemany(
+                """
+                INSERT OR REPLACE INTO item_features
+                  (run_id, item_id, coin, category, source, weight, score, confidence, status, contribution)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                [tuple(item) for sample in samples for item in sample["items"]],
+            )
+            self._conn.executemany(
+                """
+                INSERT OR REPLACE INTO outcomes
+                  (run_id, horizon_days, coin, symbol, entry_price, entry_at, target_date, due_at,
+                   exit_price, return_pct, hit, direction_at_run, weighted_score, price_source,
+                   status, attempts, filled_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'backfill', 'filled', 1, ?)
+                """,
+                [tuple(outcome) for sample in samples for outcome in sample["outcomes"]],
+            )
+        return len(samples)
+
     def executemany(self, sql: str, rows: list[tuple]) -> int:
         with self._lock, self._conn:
             cursor = self._conn.executemany(sql, rows)
@@ -774,8 +837,8 @@ class Database:
                    n_ok, n_partial, n_no_data, n_error, coverage_ratio, coverage_weighted,
                    weighted_score, signal_strength, score_mean, score_dispersion, confidence_mean,
                    category_scores, atr_pct, regime, volatility_bucket, current_price,
-                   up_probability, down_probability, expected_low, expected_high, items_hash)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                   up_probability, down_probability, expected_low, expected_high, items_hash, source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 (
                     features["run_id"], features["coin"], features["created_at"],
@@ -790,6 +853,7 @@ class Database:
                     features.get("current_price"), features.get("up_probability"),
                     features.get("down_probability"), features.get("expected_low"),
                     features.get("expected_high"), features.get("items_hash"),
+                    features.get("source", "live"),
                 ),
             )
             self._conn.execute("DELETE FROM item_features WHERE run_id = ?", (features["run_id"],))
@@ -962,10 +1026,22 @@ class Database:
             ),
         )
 
-    def learning_rows(self, horizon_days: int, coin: str | None = None) -> list[dict[str, Any]]:
+    def learning_rows(
+        self,
+        horizon_days: int,
+        coin: str | None = None,
+        source: str | None = None,
+    ) -> list[dict[str, Any]]:
         """Egitim veri seti: ozellik anlik goruntusu + doldurulmus outcome."""
-        where_coin = " AND o.coin = ?" if coin else ""
-        params: tuple = (horizon_days, coin) if coin else (horizon_days,)
+        conditions = ["o.horizon_days = ?", "o.status = 'filled'", "o.return_pct IS NOT NULL"]
+        params: list[Any] = [horizon_days]
+        if coin:
+            conditions.append("o.coin = ?")
+            params.append(coin)
+        if source:
+            conditions.append("COALESCE(f.source, 'live') = ?")
+            params.append(source)
+        where = " AND ".join(conditions)
         return self.query(
             f"""
             SELECT o.run_id, o.coin, o.target_date, o.entry_at, o.return_pct, o.hit,
@@ -973,12 +1049,13 @@ class Database:
                    f.created_at, f.profile, f.weighted_score, f.signal_strength,
                    f.coverage_ratio, f.coverage_weighted, f.score_mean, f.score_dispersion,
                    f.confidence_mean, f.category_scores, f.atr_pct, f.regime,
-                   f.volatility_bucket, f.n_ok, f.n_partial, f.n_no_data, f.n_error
+                   f.volatility_bucket, f.n_ok, f.n_partial, f.n_no_data, f.n_error,
+                   COALESCE(f.source, 'live') AS source
             FROM outcomes o JOIN feature_snapshots f ON f.run_id = o.run_id
-            WHERE o.horizon_days = ? AND o.status = 'filled' AND o.return_pct IS NOT NULL{where_coin}
+            WHERE {where}
             ORDER BY o.target_date ASC
             """,
-            params,
+            tuple(params),
         )
 
     def model_list(self) -> list[dict[str, Any]]:

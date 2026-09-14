@@ -382,6 +382,7 @@ def learning_fill() -> None:
 def ml_train(
     horizon: int = typer.Option(0, "--horizon", help="0: tum ufuklar (1/7/30)"),
     min_samples: int = typer.Option(30, "--min-samples", help="Egitim icin gereken asgari etiket"),
+    source: str = typer.Option("live", "--source", help="live | backfill | all"),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     """Ozniteliklerden yon modeli egitir (purged walk-forward + Platt kalibrasyon)."""
@@ -389,10 +390,11 @@ def ml_train(
 
     settings = get_settings()
     db = Database(settings.db_path)
+    resolved_source = None if source == "all" else source
     results = (
-        [train_horizon(db, horizon, min_samples=min_samples)]
+        [train_horizon(db, horizon, min_samples=min_samples, source=resolved_source)]
         if horizon
-        else train_all(db, min_samples=min_samples)
+        else train_all(db, min_samples=min_samples, source=resolved_source)
     )
     if json_output:
         console.print_json(json.dumps(results, default=str))
@@ -405,7 +407,7 @@ def ml_train(
             continue
         metrics = result.get("metrics", {})
         console.print(
-            f"  {result['horizon_days']}g: {result['model_status']} · n={result['n']} · "
+            f"  {result['horizon_days']}g [{result.get('source', 'live')}]: {result['model_status']} · n={result['n']} · "
             f"AUC {metrics.get('auc')} · Brier {metrics.get('brier')} "
             f"(temel {metrics.get('baseline_brier')}) · ECE {metrics.get('ece')}"
         )
@@ -509,6 +511,37 @@ def archive_command(
         f"{result['runs']} koşu, {result['reports']} rapor arşivlendi → {result['path']}"
         + (f" · silinen kayıt: {result['deleted']}" if delete else " (silme kapalı)")
     )
+
+
+@app.command("ml-backfill-history")
+def ml_backfill_history(
+    coin: str = typer.Option("bitcoin", "--coin"),
+    days: int = typer.Option(730, "--days", help="Replay edilecek gun sayisi"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Fiyat turevli maddeleri gecmis gunler icin yeniden hesaplayip egitim seti uretir."""
+    from crypto_deep_research.learning.replay import replay_coin
+
+    settings, db, providers = _providers()
+
+    async def _run() -> dict:
+        try:
+            ref = await providers.coingecko.resolve(coin)
+            return await replay_coin(providers, db, ref.id, ref.symbol.upper(), days=days)
+        finally:
+            await providers.aclose()
+
+    result = asyncio.run(_run())
+    if json_output:
+        console.print_json(json.dumps(result, default=str))
+        return
+    if result.get("samples"):
+        console.print(
+            f"{result['coin']}: {result['samples']} tarihsel ornek yazildi "
+            f"({result.get('history_days', 0)} gunluk seri, backfill_v1)."
+        )
+    else:
+        console.print(f"{result['coin']}: ornek uretilemedi ({result.get('reason', 'bilinmeyen')}).")
 
 
 @app.command("telegram")

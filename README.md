@@ -98,6 +98,7 @@ uv run cdr prompt bitcoin --raw                                  # son promptu y
 uv run cdr learning-backfill                                     # geçmiş koşulardan özellik çıkar
 uv run cdr learning-fill                                         # vadesi gelen getiri etiketlerini doldur
 uv run cdr ml-train                                              # model eğit (shadow/aktif kapılı)
+uv run cdr ml-backfill-history --coin bitcoin --days 730         # geçmişten eğitim seti üret
 uv run cdr ml-eval --horizon 7                                   # model durumu ve metrikleri
 uv run cdr ml-activate <model_id>                                # modeli aktifleştir (kapılı)
 uv run cdr learning-drift                                        # drift metrikleri (PSI/ECE)
@@ -160,6 +161,13 @@ Sistem "tahmin edip unutmaz": her koşu, sonraki getirilerle karşılaştırıla
 - **Model katmanı (shadow):** yeterli etiket birikince (≥30) L2 lojistik + Platt kalibrasyonu
   purged walk-forward ile eğitilir; **n<200 veya OOS metrikleri geçene kadar asla "aktif" olmaz**.
   Aktif model Brier'in temel orandan iyi ve AUC≥0,55 olması şartına bağlıdır.
+- **Tarihsel replay (backfill_v1):** 13 fiyat-türevli kriter her gün için nokta-zamanında yeniden
+  hesaplanır (sızıntısız); BTC+ETH 2 yılda ~1.480 örnek dakikalar içinde üretilir. Haber/sosyal
+  kriterler geçmişte dürüstçe kurulamadığı için kapsam dışıdır ve `source=backfill` etiketiyle ayrılır.
+- **İlk tarihsel bulgu (BTC+ETH, 2 yıl, 1.480 örnek, purged walk-forward):** 1g AUC 0,483 ·
+  7g AUC 0,536 · 30g AUC 0,503; ECE 0,004–0,026 (iyi kalibre). Fiyat-türevli alt kümede yön
+  sinyali zayıf; modeller kapıları (AUC≥0,55, Brier<temel) geçemediği için **shadow kaldı** —
+  hiçbir model otomatik yayına alınmadı.
 - **Drift izleme:** kapsam sapması, skor dağılımı (PSI) ve kalibrasyon hatası (ECE) günlük ölçülür;
   eşik aşımları `drift_metrics` tablosunda alarm olarak işaretlenir ve İsabet sekmesinde görünür.
 - **Bakım işleri:** HTTP önbelleği günlük temizlenir, raporlar `cdr archive` ile ayrı SQLite
