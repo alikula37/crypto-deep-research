@@ -29,7 +29,22 @@ EXTENDED_ITEM_IDS: dict[str, int] = {
     "stable_30d": 114,
 }
 
-EXTENDED_FEATURE_NAMES = [f"x_{name}" for name in EXTENDED_ITEM_IDS]
+CROSS_ITEM_IDS: dict[str, int] = {
+    "xs_rs_btc_7d": 121,
+    "xs_rs_btc_30d": 122,
+    "xs_rs_eth_30d": 123,
+    "xs_rank_7d": 124,
+    "xs_rank_30d": 125,
+    "xs_market_7d": 126,
+    "xs_breadth_30d": 127,
+    "xs_altseason_30d": 128,
+    "xs_beta_btc_30d": 129,
+    "xs_corr_btc_30d": 130,
+}
+
+ALL_PSEUDO_ITEM_IDS: dict[str, int] = {**EXTENDED_ITEM_IDS, **CROSS_ITEM_IDS}
+EXTENDED_FEATURE_NAMES = [f"x_{name}" for name in ALL_PSEUDO_ITEM_IDS]
+EXTENDED_ORDER = list(ALL_PSEUDO_ITEM_IDS.values())
 EXTENDED_CATEGORY = "extended"
 
 

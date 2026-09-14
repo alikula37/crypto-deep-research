@@ -101,6 +101,7 @@ uv run cdr ml-train                                              # model eğit (
 uv run cdr ml-backfill-history --coin bitcoin --days 730         # geçmişten eğitim seti üret (extended)
 uv run cdr ml-eval --horizon 7                                   # model durumu ve metrikleri
 uv run cdr ml-activate <model_id>                                # modeli aktifleştir (kapılı)
+uv run cdr ml-cross-section                                      # kesitsel özellikleri hesapla
 uv run cdr learning-drift                                        # drift metrikleri (PSI/ECE)
 uv run cdr archive --days 540 [--delete]                         # eski koşuları arşivle
 uv run cdr telegram                                              # Telegram botu (token gerekir)
@@ -167,11 +168,23 @@ Sistem "tahmin edip unutmaz": her koşu, sonraki getirilerle karşılaştırıla
 - **Genişletilmiş replay (backfill_v2):** funding + perp/spot basis + makro (DXY/altın/SPX/10Y/VIX)
   + Fear&Greed + stablecoin arzı da nokta-zamanında eklenir (25 özellik); 10 major coin × 2 yıl =
   **7.400 örnek** ~2 dakikada üretilir.
-- **Tarihsel bulgular (purged walk-forward, 10 coin, 7.400 örnek):** 1g AUC 0,511 · 7g AUC 0,541 ·
-  30g AUC 0,524; ECE 0,003–0,021 (iyi kalibre). Ekonomik doğrulama (10 bps maliyet, pozisyon
-  (p−0,5)×2): **7g net Sharpe 0,92** (işlem günlerinin %20'sinde pozisyon), 30g 0,45, 1g ~0
-  (model neredeyse hiç pozisyon almıyor — kenar görmediğinde işlem yapmıyor). Modeller AUC≥0,55
-  kapısını geçemediği için **shadow** kaldı; hiçbiri otomatik yayına alınmadı.
+- **Ablasyon (7g, 7.400 örnek):** taban özellikler (10) AUC 0,5495 · +makro/funding/F&G 0,5289 ·
+  +kesitsel (35 özellik) 0,5345. Bu örneklemde ek özellikler sıralama kalitesini düşürdüğü için
+  **varsayılan eğitim taban özelliklerle** yapılır (`--features base|base+extended|all`).
+- **Algoritma seçimi:** L2 lojistik ve gradyan artırma purged walk-forward OOS'ta yarışır; önce
+  sağlık kontrolü (Brier≤temel, ECE≤0,10, net Sharpe>0), sonra AUC üstünlüğü. Kalibrasyon
+  n_oos≥300 ise izotonik, değilse Platt. Sağlığı geçmeyen model `rejected` olur ve tahminlerde
+  kullanılmaz.
+- **Nihai tarihsel tablo (10 coin, 7.400 örnek, OOS):**
+  | Ufuk | Durum | AUC | Brier (temel) | ECE | Net Sharpe | Aktif oran |
+  | --- | --- | --- | --- | --- | --- | --- |
+  | 1g | **rejected** | 0,490 | 0,2493 (0,2492) | 0,004 | 0,26 | %0,5 |
+  | 7g | shadow | 0,5495 | 0,2445 (0,2467) | 0,006 | 0,69 | %17 |
+  | **30g** | shadow | **0,5777** | 0,2378 (0,2439) | 0,011 | 0,64 | %27 |
+
+  30g modeli ilk kez AUC≥0,55 kapısını geçti; backfill modelleri manuel inceleme gerektirdiği
+  için **shadow** kaldı (`cdr ml-activate <model_id>` ile yayına alınabilir). 1g modeli kenar
+  bulamadığı için otomatik reddedildi — sistem işlem yapmadığında bunu açıkça söylüyor.
 - **Uyarı:** Backfill örnekleri aynı piyasa günlerini paylaştığı için etkin örneklem daha küçüktür
   ve Sharpe iyimser olabilir; doğrulama canlı koşu birikimiyle yapılır.
 - **Drift izleme:** kapsam sapması, skor dağılımı (PSI) ve kalibrasyon hatası (ECE) günlük ölçülür;

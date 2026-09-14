@@ -383,6 +383,11 @@ def ml_train(
     horizon: int = typer.Option(0, "--horizon", help="0: tum ufuklar (1/7/30)"),
     min_samples: int = typer.Option(30, "--min-samples", help="Egitim icin gereken asgari etiket"),
     source: str = typer.Option("live", "--source", help="live | backfill | all"),
+    features: str = typer.Option(
+        "base",
+        "--features",
+        help="base (varsayilan, ablasyonda en iyi) | base+extended | all",
+    ),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     """Ozniteliklerden yon modeli egitir (purged walk-forward + Platt kalibrasyon)."""
@@ -391,10 +396,33 @@ def ml_train(
     settings = get_settings()
     db = Database(settings.db_path)
     resolved_source = None if source == "all" else source
+    group_map = {
+        "base": ["base"],
+        "base+extended": ["base", "extended"],
+        "base+extended+cross": ["base", "extended", "cross"],
+        "all": ["base", "extended", "cross"],
+    }
+    feature_groups = group_map.get(features, None)
+    from crypto_deep_research.learning.cross_section import compute_cross_section
+
+    for target in (("live", "backfill") if resolved_source is None else (resolved_source,)):
+        info = compute_cross_section(db, source=target)
+        if info.get("written") and not json_output:
+            console.print(
+                f"  kesitsel [{target}]: {info['written']} özellik güncellendi "
+                f"({info.get('coins', 0)} coin, {info.get('days', 0)} gün)"
+            )
     results = (
-        [train_horizon(db, horizon, min_samples=min_samples, source=resolved_source)]
+        [
+            train_horizon(
+                db, horizon, min_samples=min_samples, source=resolved_source,
+                feature_groups=feature_groups,
+            )
+        ]
         if horizon
-        else train_all(db, min_samples=min_samples, source=resolved_source)
+        else train_all(
+            db, min_samples=min_samples, source=resolved_source, feature_groups=feature_groups
+        )
     )
     if json_output:
         console.print_json(json.dumps(results, default=str))
@@ -511,6 +539,28 @@ def archive_command(
         f"{result['runs']} koşu, {result['reports']} rapor arşivlendi → {result['path']}"
         + (f" · silinen kayıt: {result['deleted']}" if delete else " (silme kapalı)")
     )
+
+
+@app.command("ml-cross-section")
+def ml_cross_section(
+    source: str = typer.Option("backfill", "--source", help="backfill | live"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Ayni gun icin coinlerin birbirine gore konumunu (kesitsel ozellikler) hesaplar."""
+    from crypto_deep_research.learning.cross_section import compute_cross_section
+
+    settings = get_settings()
+    db = Database(settings.db_path)
+    result = compute_cross_section(db, source=source)
+    if json_output:
+        console.print_json(json.dumps(result, default=str))
+        return
+    if result.get("written"):
+        console.print(
+            f"{result['written']} kesitsel özellik yazıldı ({result['coins']} coin, {result['days']} gün, {source})."
+        )
+    else:
+        console.print(f"Kesitsel özellik üretilemedi: {result.get('reason', 'bilinmeyen')}")
 
 
 @app.command("ml-backfill-history")

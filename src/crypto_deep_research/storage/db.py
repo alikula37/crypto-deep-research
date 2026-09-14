@@ -1115,6 +1115,22 @@ class Database:
     def predictions_for_run(self, run_id: str) -> list[dict[str, Any]]:
         return self.query("SELECT * FROM predictions WHERE run_id = ?", (run_id,))
 
+    def save_pseudo_features(
+        self, rows: list[tuple[str, int, str, str, str, float, float, float, str]]
+    ) -> int:
+        """Pseudo-madde ozelliklerini (>=100) toplu yazar: (run_id, item_id, coin, category, source, score)."""
+        if not rows:
+            return 0
+        self.executemany(
+            """
+            INSERT OR REPLACE INTO item_features
+              (run_id, item_id, coin, category, source, weight, score, confidence, status, contribution)
+            VALUES (?, ?, ?, ?, ?, 0.0, ?, 1.0, 'ok', NULL)
+            """,
+            rows,
+        )
+        return len(rows)
+
     def extended_features(self, run_ids: list[str]) -> dict[str, dict[int, float]]:
         """Pseudo-madde (>=100) genisletilmis ozellikleri run_id bazinda dondurur."""
         if not run_ids:

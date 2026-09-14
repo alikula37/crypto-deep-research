@@ -51,13 +51,13 @@ def test_vector_for_and_dataset_with_extended():
         "category_scores": '{"Teknik": 0.2}',
     }
     vector = vector_for(snapshot, {101: 0.01, 111: 50.0})
-    assert len(vector) == 25
-    assert vector[-1] == round(2 / 14, 4)  # varlik orani
+    assert len(vector) == 35
+    assert vector[-1] == round(2 / 24, 4)  # varlik orani
     rows = [{**snapshot, "return_pct": -1.0, "run_id": "r1", "target_date": "2026-01-02", "coin": "bitcoin"}]
     dataset = build_dataset(rows, {"r1": {101: 0.01}})
     assert dataset["y"] == [0]
     assert dataset["returns"] == [-1.0]
-    assert len(dataset["feature_names"]) == 25
+    assert len(dataset["feature_names"]) == 35
 
 
 def test_economic_metrics_direction():

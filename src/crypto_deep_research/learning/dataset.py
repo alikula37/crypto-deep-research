@@ -6,7 +6,7 @@ import json
 import math
 from typing import Any
 
-from crypto_deep_research.learning.history import EXTENDED_FEATURE_NAMES, EXTENDED_ITEM_IDS
+from crypto_deep_research.learning.history import EXTENDED_FEATURE_NAMES, EXTENDED_ORDER
 
 FEATURE_NAMES = [
     "weighted_score",
@@ -21,7 +21,6 @@ FEATURE_NAMES = [
     "category_spread",
 ]
 
-EXTENDED_ORDER = list(EXTENDED_ITEM_IDS.values())
 FULL_FEATURE_NAMES = FEATURE_NAMES + EXTENDED_FEATURE_NAMES + ["x_present_ratio"]
 
 
@@ -103,3 +102,30 @@ def build_dataset(
         "run_ids": run_ids,
         "feature_names": list(FULL_FEATURE_NAMES),
     }
+
+
+def select_features(dataset: dict[str, Any], groups: list[str] | None = None) -> dict[str, Any]:
+    """Ozellik gruplarini secer: base | extended | cross (x_present_ratio extended'a dahil)."""
+    if not groups:
+        return dataset
+    names = dataset["feature_names"]
+    keep: list[int] = []
+    for index, name in enumerate(names):
+        if index < 10:
+            if "base" in groups:
+                keep.append(index)
+            continue
+        if name == "x_present_ratio":
+            if "extended" in groups or "cross" in groups:
+                keep.append(index)
+            continue
+        if name.startswith("x_xs_"):
+            if "cross" in groups:
+                keep.append(index)
+            continue
+        if "extended" in groups:
+            keep.append(index)
+    selected = dict(dataset)
+    selected["X"] = [[row[index] for index in keep] for row in dataset["X"]]
+    selected["feature_names"] = [names[index] for index in keep]
+    return selected
