@@ -1115,6 +1115,23 @@ class Database:
     def predictions_for_run(self, run_id: str) -> list[dict[str, Any]]:
         return self.query("SELECT * FROM predictions WHERE run_id = ?", (run_id,))
 
+    def extended_features(self, run_ids: list[str]) -> dict[str, dict[int, float]]:
+        """Pseudo-madde (>=100) genisletilmis ozellikleri run_id bazinda dondurur."""
+        if not run_ids:
+            return {}
+        placeholders = ",".join("?" for _ in run_ids)
+        rows = self.query(
+            f"""
+            SELECT run_id, item_id, score FROM item_features
+            WHERE item_id >= 100 AND score IS NOT NULL AND run_id IN ({placeholders})
+            """,
+            tuple(run_ids),
+        )
+        result: dict[str, dict[int, float]] = {}
+        for row in rows:
+            result.setdefault(row["run_id"], {})[int(row["item_id"])] = float(row["score"])
+        return result
+
     def latest_feature_snapshot(self, coin: str) -> dict[str, Any] | None:
         rows = self.query(
             "SELECT * FROM feature_snapshots WHERE coin = ? ORDER BY created_at DESC LIMIT 1",

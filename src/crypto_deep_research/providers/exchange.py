@@ -138,6 +138,58 @@ class ExchangeProvider:
                 continue
         return klines
 
+    async def funding_history(self, symbol: str, days: int = 900) -> list[tuple[int, float]]:
+        """Binance vadeli fonlama orani gecmisi (8 saatlik, sayfalanmis)."""
+        pair = self.perp_symbol(symbol)
+        now = int(datetime.now(timezone.utc).timestamp() * 1000)
+        cursor = now - days * 86_400_000
+        rows: list[tuple[int, float]] = []
+        for _ in range(6):
+            try:
+                data = await self.http.get_json(
+                    "binance",
+                    f"{BINANCE_FUTURES}/fapi/v1/fundingRate",
+                    params={"symbol": pair, "startTime": cursor, "endTime": now, "limit": 1000},
+                    ttl=3600,
+                )
+            except ProviderError:
+                break
+            if not data:
+                break
+            for item in data:
+                try:
+                    rows.append((int(item["fundingTime"]), float(item["fundingRate"])))
+                except (KeyError, ValueError, TypeError):
+                    continue
+            if len(data) < 1000:
+                break
+            cursor = int(data[-1]["fundingTime"]) + 1
+        return rows
+
+    async def perp_klines_range(
+        self, symbol: str, interval: str = "1d", *, start_ms: int, end_ms: int
+    ) -> list[Kline]:
+        """Vadeli piyasa mumlari (basis hesaplamalari icin)."""
+        if interval not in BINANCE_INTERVALS:
+            interval = "1d"
+        pair = self.perp_symbol(symbol)
+        try:
+            data = await self.http.get_json(
+                "binance",
+                f"{BINANCE_FUTURES}/fapi/v1/klines",
+                params={
+                    "symbol": pair,
+                    "interval": interval,
+                    "startTime": int(start_ms),
+                    "endTime": int(end_ms),
+                    "limit": 1500,
+                },
+                ttl=3600,
+            )
+        except ProviderError:
+            return []
+        return self._parse_klines(data)
+
     async def binance_ticker(self, symbol: str) -> dict[str, Any]:
         return await self.http.get_json(
             "binance",

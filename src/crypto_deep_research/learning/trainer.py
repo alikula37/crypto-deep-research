@@ -6,11 +6,12 @@ import logging
 import time
 from typing import Any
 
-from crypto_deep_research.learning.dataset import build_dataset, row_features
+from crypto_deep_research.learning.dataset import build_dataset, vector_for
 from crypto_deep_research.learning.models import (
     LogisticModel,
     auc_score,
     brier_score,
+    economic_metrics,
     expected_calibration_error,
     log_loss_score,
     logit,
@@ -25,6 +26,7 @@ logger = logging.getLogger(__name__)
 MIN_SAMPLES = 30
 ACTIVATE_MIN_SAMPLES = 200
 ACTIVATE_MIN_AUC = 0.55
+ACTIVATE_MIN_SHARPE = 0.3
 
 
 def _status_gate(metrics: dict[str, Any], n: int, activate_min: int) -> str:
@@ -36,15 +38,20 @@ def _status_gate(metrics: dict[str, Any], n: int, activate_min: int) -> str:
         and metrics.get("baseline_brier") is not None
         and metrics["brier"] < metrics["baseline_brier"]
     ):
+        net_sharpe = metrics.get("net_sharpe")
+        if net_sharpe is not None and net_sharpe < ACTIVATE_MIN_SHARPE:
+            return "shadow"
         return "active"
     return "shadow"
 
 
-def predict_snapshot(snapshot: dict[str, Any], params: dict[str, Any]) -> float:
+def predict_snapshot(
+    snapshot: dict[str, Any],
+    params: dict[str, Any],
+    extended: dict[int, float] | None = None,
+) -> float:
     """Kayitli model parametreleriyle tek anlik goruntu icin olasilik uretir."""
-    vector = [row_features(snapshot)[name] for name in params.get("feature_names") or []]
-    if not vector:
-        vector = list(row_features(snapshot).values())
+    vector = vector_for(snapshot, extended)
     model = LogisticModel.from_params(params["logistic"])
     raw = model.predict_proba([vector])[0]
     calibration = params.get("calibration")
@@ -74,9 +81,12 @@ def _write_predictions(
         snapshots = db.query(
             "SELECT * FROM feature_snapshots ORDER BY created_at DESC LIMIT 2000"
         )
+    extended_map = db.extended_features([snapshot["run_id"] for snapshot in snapshots])
     for snapshot in snapshots:
         try:
-            probability = predict_snapshot(snapshot, params)
+            probability = predict_snapshot(
+                snapshot, params, extended_map.get(snapshot["run_id"])
+            )
         except Exception:
             logger.warning("Tahmin uretilemedi: %s", snapshot.get("run_id"))
             continue
@@ -107,7 +117,8 @@ def train_horizon(
 ) -> dict[str, Any]:
     """Tek ufuk icin model egitir; yetersiz veride egitim yapmaz."""
     rows = db.learning_rows(horizon, coin=coin, source=source)
-    dataset = build_dataset(rows)
+    extended = db.extended_features([row["run_id"] for row in rows])
+    dataset = build_dataset(rows, extended)
     n = len(dataset["y"])
     if n < min_samples:
         return {
@@ -122,6 +133,7 @@ def train_horizon(
     )
     oos_probability: list[float] = []
     oos_labels: list[int] = []
+    oos_returns: list[float] = []
     for train_idx, test_idx in windows:
         model = LogisticModel(l2=1.0).fit(
             [dataset["X"][index] for index in train_idx],
@@ -129,6 +141,7 @@ def train_horizon(
         )
         oos_probability.extend(model.predict_proba([dataset["X"][index] for index in test_idx]))
         oos_labels.extend(dataset["y"][index] for index in test_idx)
+        oos_returns.extend(dataset["returns"][index] for index in test_idx)
 
     metrics: dict[str, Any] = {"n": n, "n_oos": len(oos_labels), "folds": len(windows)}
     calibration: dict[str, float] | None = None
@@ -147,6 +160,9 @@ def train_horizon(
                 "ece": expected_calibration_error(oos_labels, calibrated),
                 "base_rate": round(base_rate, 4),
             }
+        )
+        metrics.update(
+            economic_metrics(calibrated, oos_returns, horizon_days=horizon)
         )
         calibration = {"platt_a": a, "platt_b": b}
         bins = probability_bins(oos_labels, calibrated)
@@ -215,7 +231,8 @@ def latest_model_prediction(db, coin: str, horizon: int = 7) -> dict[str, Any] |
         return None
     try:
         params = json.loads(model.get("params") or "{}")
-        probability = predict_snapshot(snapshot, params)
+        extended = db.extended_features([snapshot["run_id"]]).get(snapshot["run_id"])
+        probability = predict_snapshot(snapshot, params, extended)
     except Exception:
         return None
     return {

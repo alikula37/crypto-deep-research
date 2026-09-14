@@ -239,6 +239,7 @@ def _build_sample(
     index: int,
     specs: list,
     factors: dict[int, float],
+    extended: dict[int, float] | None = None,
 ) -> dict[str, Any] | None:
     scores = components["scores"]
     items: list[ItemResult] = []
@@ -325,6 +326,11 @@ def _build_sample(
         )
         for item in items
     ]
+    for pseudo_id, value in (extended or {}).items():
+        # Genisletilmis ozellikler skorlamaya girmez (weight 0); yalnizca ML ozelligi.
+        item_rows.append(
+            (run_id, pseudo_id, coin_id, "extended", "backfill:extended", 0.0, float(value), 1.0, "ok", None)
+        )
     direction = "up" if weighted >= 0.05 else ("down" if weighted <= -0.05 else "neutral")
     entry_price = float(closes[index])
     entry_dt = datetime.fromtimestamp(timestamp, tz=timezone.utc)
@@ -381,6 +387,7 @@ async def replay_coin(
     symbol: str,
     *,
     days: int = 730,
+    extended: bool = True,
 ) -> dict[str, Any]:
     """Bir coin icin gunluk tarihsel ornekler uretir ve kaydeder."""
     try:
@@ -398,6 +405,12 @@ async def replay_coin(
     factors = compute_group_factors(specs)
     closes = df["close"].values.astype(float)
     timestamps = [int(ts.timestamp()) for ts in df.index]
+    days_iso = [ts.date().isoformat() for ts in df.index]
+    bundle: dict[str, dict[str, float]] = {}
+    if extended:
+        from crypto_deep_research.learning.history import load_bundle
+
+        bundle = await load_bundle(providers, symbol, days=days)
 
     db.execute("DELETE FROM feature_snapshots WHERE run_id LIKE ?", (f"bf_{coin_id}_%",))
     db.execute("DELETE FROM outcomes WHERE run_id LIKE ?", (f"bf_{coin_id}_%",))
@@ -407,8 +420,16 @@ async def replay_coin(
     for index in range(MIN_HISTORY, len(df) - max(HORIZONS)):
         slice_df = df.iloc[: index + 1]
         components = compute_component_scores(slice_df)
+        extended_values = None
+        if bundle:
+            from crypto_deep_research.learning.history import extended_features_for_day
+
+            extended_values = extended_features_for_day(
+                bundle, components["price"], days_iso[index]
+            )
         sample = _build_sample(
-            coin_id, symbol, timestamps[index], components, closes, index, specs, factors
+            coin_id, symbol, timestamps[index], components, closes, index, specs, factors,
+            extended=extended_values,
         )
         if sample is None:
             continue
@@ -418,4 +439,4 @@ async def replay_coin(
             samples = []
     if samples:
         written += db.save_backfill_batch(samples)
-    return {"coin": coin_id, "samples": written, "history_days": len(df)}
+    return {"coin": coin_id, "samples": written, "history_days": len(df), "extended": bool(bundle)}

@@ -254,3 +254,49 @@ def purged_walk_forward(
             continue
         windows.append((train_indices, list(range(test_start, test_end))))
     return windows
+
+
+def economic_metrics(
+    probabilities: Any,
+    returns_pct: Any,
+    *,
+    horizon_days: int = 1,
+    cost_bps: float = 10.0,
+    scale: float = 2.0,
+) -> dict[str, Any]:
+    """Olasiliklardan basit pozisyon stratejisi turetir; maliyet sonrasi Sharpe hesaplar.
+
+    Pozisyon = clip((p - 0.5) x scale, -1, 1); her degisimde cost_bps maliyet duser.
+    Yilliklandirma sqrt(252 / horizon_days) ile yapilir.
+    """
+    positions: list[float] = []
+    gross: list[float] = []
+    net: list[float] = []
+    previous = 0.0
+    for probability, value in zip(probabilities, returns_pct, strict=False):
+        position = max(-1.0, min(1.0, (float(probability) - 0.5) * scale))
+        turnover = abs(position - previous)
+        gross_pnl = position * (float(value) / 100.0)
+        net_pnl = gross_pnl - turnover * cost_bps / 10_000
+        positions.append(position)
+        gross.append(gross_pnl)
+        net.append(net_pnl)
+        previous = position
+    if not net:
+        return {}
+
+    def _sharpe(values: list[float]) -> float | None:
+        mean = sum(values) / len(values)
+        variance = sum((value - mean) ** 2 for value in values) / max(len(values) - 1, 1)
+        deviation = variance ** 0.5
+        if deviation <= 0:
+            return None
+        factor = (252.0 / max(horizon_days, 1)) ** 0.5
+        return round(mean / deviation * factor, 3)
+
+    return {
+        "net_sharpe": _sharpe(net),
+        "gross_sharpe": _sharpe(gross),
+        "avg_abs_position": round(sum(abs(p) for p in positions) / len(positions), 3),
+        "active_ratio": round(sum(1 for p in positions if abs(p) > 0.2) / len(positions), 3),
+    }

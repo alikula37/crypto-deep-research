@@ -97,6 +97,48 @@ class MacroProvider:
             self.db.cache_set(cache_key, "yfinance", "yf.download", result, 3600, {"period": period})
         return result
 
+    async def history(self, period: str = "2y") -> dict[str, dict[str, float]]:
+        """yfinance gunluk kapanis serileri: label -> {ISO tarih: kapanis}."""
+        cache_key = stable_key("yfinance_history", period, list(YF_TICKERS))
+        cached = self.db.cache_get(cache_key)
+        if cached and cached[1]:
+            return cached[0]
+
+        def _download() -> dict[str, dict[str, float]]:
+            import yfinance as yf
+
+            result: dict[str, dict[str, float]] = {}
+            try:
+                data = yf.download(
+                    list(YF_TICKERS.values()),
+                    period=period,
+                    interval="1d",
+                    progress=False,
+                    threads=True,
+                    auto_adjust=True,
+                )
+            except Exception as exc:
+                logger.info("yfinance gecmis indirme hatasi: %s", exc)
+                return result
+            if data is None or data.empty:
+                return result
+            closes = data["Close"] if "Close" in data.columns else data
+            for label, ticker in YF_TICKERS.items():
+                try:
+                    series = closes[ticker].dropna()
+                    result[label] = {
+                        index.date().isoformat(): round(float(value), 6)
+                        for index, value in series.items()
+                    }
+                except Exception:
+                    continue
+            return result
+
+        result = await asyncio.to_thread(_download)
+        if result:
+            self.db.cache_set(cache_key, "yfinance", "yf.history", result, 21600, {"period": period})
+        return result
+
     # ------------------------------------------------------------------ FRED
     async def fred_series(self, series_id: str, limit: int = 12) -> list[dict[str, Any]]:
         if not self.settings.fred_api_key:

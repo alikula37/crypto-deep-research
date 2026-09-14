@@ -88,7 +88,7 @@ def test_row_features_from_snapshot():
     assert features["category_spread"] == pytest.approx(0.6)
     dataset = build_dataset([{**row, "return_pct": 1.5, "target_date": "2026-01-02", "coin": "bitcoin", "run_id": "r1"}])
     assert dataset["y"] == [1]
-    assert len(dataset["X"][0]) == 10
+    assert len(dataset["X"][0]) == 25  # 10 temel + 14 genisletilmis + varlik orani
 
 
 def _synthetic_run(index: int, score: float) -> ResearchRun:

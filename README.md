@@ -98,7 +98,7 @@ uv run cdr prompt bitcoin --raw                                  # son promptu y
 uv run cdr learning-backfill                                     # geçmiş koşulardan özellik çıkar
 uv run cdr learning-fill                                         # vadesi gelen getiri etiketlerini doldur
 uv run cdr ml-train                                              # model eğit (shadow/aktif kapılı)
-uv run cdr ml-backfill-history --coin bitcoin --days 730         # geçmişten eğitim seti üret
+uv run cdr ml-backfill-history --coin bitcoin --days 730         # geçmişten eğitim seti üret (extended)
 uv run cdr ml-eval --horizon 7                                   # model durumu ve metrikleri
 uv run cdr ml-activate <model_id>                                # modeli aktifleştir (kapılı)
 uv run cdr learning-drift                                        # drift metrikleri (PSI/ECE)
@@ -164,10 +164,16 @@ Sistem "tahmin edip unutmaz": her koşu, sonraki getirilerle karşılaştırıla
 - **Tarihsel replay (backfill_v1):** 13 fiyat-türevli kriter her gün için nokta-zamanında yeniden
   hesaplanır (sızıntısız); BTC+ETH 2 yılda ~1.480 örnek dakikalar içinde üretilir. Haber/sosyal
   kriterler geçmişte dürüstçe kurulamadığı için kapsam dışıdır ve `source=backfill` etiketiyle ayrılır.
-- **İlk tarihsel bulgu (BTC+ETH, 2 yıl, 1.480 örnek, purged walk-forward):** 1g AUC 0,483 ·
-  7g AUC 0,536 · 30g AUC 0,503; ECE 0,004–0,026 (iyi kalibre). Fiyat-türevli alt kümede yön
-  sinyali zayıf; modeller kapıları (AUC≥0,55, Brier<temel) geçemediği için **shadow kaldı** —
-  hiçbir model otomatik yayına alınmadı.
+- **Genişletilmiş replay (backfill_v2):** funding + perp/spot basis + makro (DXY/altın/SPX/10Y/VIX)
+  + Fear&Greed + stablecoin arzı da nokta-zamanında eklenir (25 özellik); 10 major coin × 2 yıl =
+  **7.400 örnek** ~2 dakikada üretilir.
+- **Tarihsel bulgular (purged walk-forward, 10 coin, 7.400 örnek):** 1g AUC 0,511 · 7g AUC 0,541 ·
+  30g AUC 0,524; ECE 0,003–0,021 (iyi kalibre). Ekonomik doğrulama (10 bps maliyet, pozisyon
+  (p−0,5)×2): **7g net Sharpe 0,92** (işlem günlerinin %20'sinde pozisyon), 30g 0,45, 1g ~0
+  (model neredeyse hiç pozisyon almıyor — kenar görmediğinde işlem yapmıyor). Modeller AUC≥0,55
+  kapısını geçemediği için **shadow** kaldı; hiçbiri otomatik yayına alınmadı.
+- **Uyarı:** Backfill örnekleri aynı piyasa günlerini paylaştığı için etkin örneklem daha küçüktür
+  ve Sharpe iyimser olabilir; doğrulama canlı koşu birikimiyle yapılır.
 - **Drift izleme:** kapsam sapması, skor dağılımı (PSI) ve kalibrasyon hatası (ECE) günlük ölçülür;
   eşik aşımları `drift_metrics` tablosunda alarm olarak işaretlenir ve İsabet sekmesinde görünür.
 - **Bakım işleri:** HTTP önbelleği günlük temizlenir, raporlar `cdr archive` ile ayrı SQLite
