@@ -23,6 +23,7 @@ function ReturnCell({ value }) {
 export default function AccuracyPanel({ coin }) {
   const [data, setData] = useState(null);
   const [calibration, setCalibration] = useState(null);
+  const [models, setModels] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -38,6 +39,10 @@ export default function AccuracyPanel({ coin }) {
       .calibration(7, coin)
       .then(setCalibration)
       .catch(() => setCalibration(null));
+    api
+      .models()
+      .then(setModels)
+      .catch(() => setModels([]));
   };
 
   useEffect(load, [coin]);
@@ -94,6 +99,25 @@ export default function AccuracyPanel({ coin }) {
                   calibration.ece ?? "—"
                 } · AUC ${calibration.auc ?? "—"} · yönlü gözlem ${calibration.directional ?? 0}`}
           </p>
+          {models.length > 0 &&
+            (() => {
+              let metrics = {};
+              try {
+                metrics = JSON.parse(models[0].metrics || "{}");
+              } catch {
+                metrics = {};
+              }
+              const hasOos = metrics.auc !== null && metrics.auc !== undefined;
+              return (
+                <p className="muted small">
+                  Model: <b>{models[0].status === "active" ? "aktif" : "shadow"}</b> ·{" "}
+                  {models[0].model_id} · n={models[0].train_rows} ·{" "}
+                  {hasOos
+                    ? `AUC ${metrics.auc} · Brier ${metrics.brier} (temel ${metrics.baseline_brier}) · ECE ${metrics.ece} · ${metrics.n_oos} OOS örnek`
+                    : "OOS metrik yok (pencere için yetersiz örnek)"}
+                </p>
+              );
+            })()}
           {calibration.n >= 100 && calibration.bins?.length > 0 && (
             <div className="table-wrap">
               <table className="accuracy-table">

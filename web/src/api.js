@@ -79,6 +79,8 @@ export const api = {
       { timeoutMs: 60000 }
     ),
   learningStatus: () => request("/api/learning/status", { timeoutMs: 30000 }),
+  models: () => request("/api/models", { timeoutMs: 30000 }),
+  retrainModels: () => request("/api/models/retrain", { method: "POST", timeoutMs: 60000 }),
   predictions: (coin) =>
     request(`/api/predictions/${encodeURIComponent(coin)}`, { timeoutMs: 60000 }),
   watchlist: () => request("/api/watchlist"),

@@ -962,6 +962,82 @@ class Database:
             ),
         )
 
+    def learning_rows(self, horizon_days: int, coin: str | None = None) -> list[dict[str, Any]]:
+        """Egitim veri seti: ozellik anlik goruntusu + doldurulmus outcome."""
+        where_coin = " AND o.coin = ?" if coin else ""
+        params: tuple = (horizon_days, coin) if coin else (horizon_days,)
+        return self.query(
+            f"""
+            SELECT o.run_id, o.coin, o.target_date, o.entry_at, o.return_pct, o.hit,
+                   o.direction_at_run, o.weighted_score AS outcome_score,
+                   f.created_at, f.profile, f.weighted_score, f.signal_strength,
+                   f.coverage_ratio, f.coverage_weighted, f.score_mean, f.score_dispersion,
+                   f.confidence_mean, f.category_scores, f.atr_pct, f.regime,
+                   f.volatility_bucket, f.n_ok, f.n_partial, f.n_no_data, f.n_error
+            FROM outcomes o JOIN feature_snapshots f ON f.run_id = o.run_id
+            WHERE o.horizon_days = ? AND o.status = 'filled' AND o.return_pct IS NOT NULL{where_coin}
+            ORDER BY o.target_date ASC
+            """,
+            params,
+        )
+
+    def model_list(self) -> list[dict[str, Any]]:
+        return self.query("SELECT * FROM model_registry ORDER BY trained_at DESC")
+
+    def model_get(self, horizon_days: int, *, statuses: tuple[str, ...] = ("active", "shadow")) -> dict[str, Any] | None:
+        placeholders = ",".join("?" for _ in statuses)
+        rows = self.query(
+            f"""
+            SELECT * FROM model_registry
+            WHERE horizon_days = ? AND status IN ({placeholders})
+            ORDER BY CASE status WHEN 'active' THEN 0 ELSE 1 END, trained_at DESC LIMIT 1
+            """,
+            (horizon_days, *statuses),
+        )
+        return rows[0] if rows else None
+
+    def model_save(self, payload: dict[str, Any]) -> None:
+        self.execute(
+            """
+            INSERT OR REPLACE INTO model_registry
+              (model_id, kind, horizon_days, status, trained_at, train_rows,
+               feature_schema_version, params, metrics, notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                payload["model_id"], payload["kind"], payload["horizon_days"], payload["status"],
+                payload.get("trained_at"), payload.get("train_rows"),
+                payload.get("feature_schema_version", 1),
+                payload.get("params"), payload.get("metrics"), payload.get("notes"),
+            ),
+        )
+
+    def model_set_status(self, model_id: str, status: str) -> None:
+        self.execute("UPDATE model_registry SET status = ? WHERE model_id = ?", (status, model_id))
+
+    def calibration_bins_save(self, model_id: str, horizon_days: int, bins: list[dict[str, Any]]) -> None:
+        self.execute("DELETE FROM calibration_bins WHERE model_id = ? AND horizon_days = ?", (model_id, horizon_days))
+        self.executemany(
+            """
+            INSERT INTO calibration_bins
+              (model_id, horizon_days, bin_index, bin_low, bin_high, n, predicted_mean,
+               observed_rate, ci_low, ci_high, computed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    model_id, horizon_days, bucket["bin_index"], bucket["bin_low"],
+                    bucket["bin_high"], bucket.get("n", 0), bucket.get("predicted_mean"),
+                    bucket.get("observed_rate"), bucket.get("ci_low"), bucket.get("ci_high"),
+                    time.time(),
+                )
+                for bucket in bins
+            ],
+        )
+
+    def predictions_for_run(self, run_id: str) -> list[dict[str, Any]]:
+        return self.query("SELECT * FROM predictions WHERE run_id = ?", (run_id,))
+
     def latest_feature_snapshot(self, coin: str) -> dict[str, Any] | None:
         rows = self.query(
             "SELECT * FROM feature_snapshots WHERE coin = ? ORDER BY created_at DESC LIMIT 1",

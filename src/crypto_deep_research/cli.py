@@ -378,6 +378,60 @@ def learning_fill() -> None:
     )
 
 
+@app.command("ml-train")
+def ml_train(
+    horizon: int = typer.Option(0, "--horizon", help="0: tum ufuklar (1/7/30)"),
+    min_samples: int = typer.Option(30, "--min-samples", help="Egitim icin gereken asgari etiket"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Ozniteliklerden yon modeli egitir (purged walk-forward + Platt kalibrasyon)."""
+    from crypto_deep_research.learning.trainer import train_all, train_horizon
+
+    settings = get_settings()
+    db = Database(settings.db_path)
+    results = (
+        [train_horizon(db, horizon, min_samples=min_samples)]
+        if horizon
+        else train_all(db, min_samples=min_samples)
+    )
+    if json_output:
+        console.print_json(json.dumps(results, default=str))
+        return
+    for result in results:
+        if result["status"] == "insufficient":
+            console.print(
+                f"  {result['horizon_days']}g: yetersiz örnek ({result['n']}/{result['min_samples']})"
+            )
+            continue
+        metrics = result.get("metrics", {})
+        console.print(
+            f"  {result['horizon_days']}g: {result['model_status']} · n={result['n']} · "
+            f"AUC {metrics.get('auc')} · Brier {metrics.get('brier')} "
+            f"(temel {metrics.get('baseline_brier')}) · ECE {metrics.get('ece')}"
+        )
+
+
+@app.command("ml-eval")
+def ml_eval(
+    horizon: int = typer.Option(7, "--horizon"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Kayitli modellerin durumunu ve metriklerini gosterir."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    models = [model for model in db.model_list() if model["horizon_days"] == horizon]
+    if json_output:
+        console.print_json(json.dumps(models, default=str))
+        return
+    if not models:
+        console.print(f"{horizon}g için kayıtlı model yok.")
+        return
+    for model in models:
+        console.print(
+            f"  {model['model_id']} · {model['status']} · n={model['train_rows']} · {model['metrics']}"
+        )
+
+
 @app.command("telegram")
 def telegram_command(
     token: str | None = typer.Option(

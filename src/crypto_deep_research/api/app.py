@@ -26,6 +26,7 @@ from crypto_deep_research.deep_research.profiles import profile_summary
 from crypto_deep_research.deep_research.registry import registry_summary
 from crypto_deep_research.learning.calibration import calibration_table, heuristic_probability
 from crypto_deep_research.learning.outcomes import fill_due_outcomes
+from crypto_deep_research.learning.trainer import latest_model_prediction, train_all
 from crypto_deep_research.llm import OpenRouterClient, OpenRouterError
 from crypto_deep_research.models import Kline
 from crypto_deep_research.portfolio import value_portfolio
@@ -104,6 +105,22 @@ async def _learning_scheduler() -> None:
             if result.get("due"):
                 logger.info("Outcome filler: %s", result)
             db.scheduled_job_finish("outcome_filler", "ok")
+            if db.scheduled_job_acquire("retrain_daily", lease_seconds=23 * 3600):
+                try:
+                    results = await asyncio.to_thread(train_all, db)
+                    trained = [item for item in results if item.get("status") == "trained"]
+                    if trained:
+                        logger.info(
+                            "Model egitimi: %s",
+                            [
+                                (item["horizon_days"], item["model_status"], item["n"])
+                                for item in trained
+                            ],
+                        )
+                    db.scheduled_job_finish("retrain_daily", "ok")
+                except Exception as exc:
+                    logger.exception("Model egitimi hatasi")
+                    db.scheduled_job_finish("retrain_daily", "error", str(exc))
         except asyncio.CancelledError:
             raise
         except Exception as exc:
@@ -829,6 +846,32 @@ async def calibration(horizon: int = 7, coin: str | None = None) -> dict[str, An
     return {"horizon_days": horizon, "coin": coin, **calibration_table(rows)}
 
 
+@app.get("/api/models")
+async def models_list() -> list[dict[str, Any]]:
+    """Kayitli tahmin modelleri (shadow/aktif)."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    return db.model_list()
+
+
+async def _retrain_runner(job: Job) -> dict[str, Any]:
+    settings = get_settings()
+    db = Database(settings.db_path)
+    job.update(10, "Model eğitimi hazırlanıyor…")
+    results = await asyncio.to_thread(train_all, db)
+    return {"horizons": results}
+
+
+@app.post("/api/models/retrain")
+async def models_retrain() -> dict[str, Any]:
+    """Tum ufuklar icin model egitimini arka planda baslatir."""
+    if jobs.has_running():
+        raise HTTPException(status_code=409, detail="Zaten çalışan bir iş var; bitince deneyin.")
+    jobs.prune()
+    job = jobs.create(_retrain_runner)
+    return {"job_id": job.id, "status": job.status, "message": job.message}
+
+
 @app.get("/api/predictions/{coin}")
 async def predictions(coin: str) -> dict[str, Any]:
     """Son kosunun sinyal gucu ve ufuk bazli (heuristik/kalibre) olasiliklari."""
@@ -873,6 +916,7 @@ async def predictions(coin: str) -> dict[str, Any]:
         "scored_items": (snapshot.get("n_ok") or 0) + (snapshot.get("n_partial") or 0),
         "profile": snapshot.get("profile"),
         "label": "kalibre" if any(h["is_calibrated"] for h in horizons.values()) else "heuristik",
+        "model": latest_model_prediction(db, coin, 7),
         "horizons": horizons,
     }
 

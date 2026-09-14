@@ -95,6 +95,8 @@ uv run cdr items                                                 # 66 kriter ve 
 uv run cdr prompt bitcoin --raw                                  # son promptu yazdır (pipe için)
 uv run cdr learning-backfill                                     # geçmiş koşulardan özellik çıkar
 uv run cdr learning-fill                                         # vadesi gelen getiri etiketlerini doldur
+uv run cdr ml-train                                              # model eğit (shadow/aktif kapılı)
+uv run cdr ml-eval --horizon 7                                   # model durumu ve metrikleri
 uv run cdr telegram                                              # Telegram botu (token gerekir)
 uv run cdr mcp                                                   # MCP server (stdio)
 ```
@@ -150,8 +152,11 @@ Sistem "tahmin edip unutmaz": her koşu, sonraki getirilerle karşılaştırıla
   kalibre olasılık iddiası için Brier'in temel orandan iyi olması şartı aranır.
 - **Dürüst sınır:** 1 günlük kripto yönünde gerçekçi bant %48–55'tir; %50'ye yakın değerler düşük
   bilgi içeriğinin yansımasıdır. Amaç sayıyı şişirmek değil, ölçülebilir ve kalibre edilmiş hale getirmektir.
-- **Yol haritası:** veri biriktikçe (n≈100 L2 lojistik → n≈300 hiyerarşik model → n≈1000 gradyan
-  artırma + izotonik kalibrasyon) purged walk-forward doğrulamayla kapılı geçiş yapılır.
+- **Model katmanı (shadow):** yeterli etiket birikince (≥30) L2 lojistik + Platt kalibrasyonu
+  purged walk-forward ile eğitilir; **n<200 veya OOS metrikleri geçene kadar asla "aktif" olmaz**.
+  Aktif model Brier'in temel orandan iyi ve AUC≥0,55 olması şartına bağlıdır.
+- **Yol haritası:** n≈100 L2 lojistik → n≈300 hiyerarşik (coin bazlı shrinkage) → n≈1000 gradyan
+  artırma + izotonik kalibrasyon; her geçiş önceden tanımlı kapılarla.
 
 ---
 
