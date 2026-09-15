@@ -595,6 +595,8 @@ def strategy_scan(
 def carry_lab(
     days: int = typer.Option(2000, "--days", help="Fonlama gecmisi gunu"),
     cost_bps: float = typer.Option(6.0, "--cost-bps"),
+    universe: int = typer.Option(0, "--universe", help="0=mevcut 10 coin; >0: en likit N perp"),
+    top_n: int = typer.Option(4, "--top-n", help="Kesitsel secimde tutulacak coin sayisi"),
 ) -> None:
     """Fonlama carry varyantlarini uzun vadede karsilastirir."""
     from crypto_deep_research.learning.strategies import (
@@ -607,15 +609,19 @@ def carry_lab(
 
     async def _load() -> dict[str, dict[str, float]]:
         try:
+            if universe > 0:
+                pairs = await providers.exchange.perp_universe(top=universe)
+            else:
+                pairs = [symbol for _coin, symbol, _name in Database.DEFAULT_WATCHLIST]
             funding: dict[str, dict[str, float]] = {}
-            for coin, symbol, _name in Database.DEFAULT_WATCHLIST:
+            for symbol in pairs:
                 rows = await providers.exchange.funding_history(symbol, days=days)
                 daily: dict[str, list[float]] = {}
                 for timestamp, rate in rows:
                     day = datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc).date().isoformat()
                     daily.setdefault(day, []).append(rate)
                 if daily:
-                    funding[coin] = {day: sum(values) for day, values in daily.items()}
+                    funding[symbol] = {day: sum(values) for day, values in daily.items()}
             return funding
         finally:
             await providers.aclose()
@@ -628,10 +634,10 @@ def carry_lab(
     start, end = frame.index.min(), frame.index.max()
 
     variants = {
-        "esit agir (10 coin)": _equal_carry(funding, cost_bps),
-        "kesitsel ust-4 (filtresiz)": carry_xs(funding, top_n=4, rebalance=7, cost_bps=cost_bps, target_vol=None, min_avg=-1.0),
-        "kesitsel + filtre (fk>0)": carry_xs(funding, top_n=4, rebalance=7, cost_bps=cost_bps, target_vol=None, min_avg=0.0),
-        "kesitsel + vol %10 (3x tavan)": carry_xs(funding, top_n=4, rebalance=7, cost_bps=cost_bps, target_vol=0.10, max_leverage=3.0),
+        f"esit agir ({len(funding)} coin)": _equal_carry(funding, cost_bps),
+        f"kesitsel ust-{top_n} (filtresiz)": carry_xs(funding, top_n=top_n, rebalance=7, cost_bps=cost_bps, target_vol=None, min_avg=-1.0),
+        f"kesitsel ust-{top_n} + filtre": carry_xs(funding, top_n=top_n, rebalance=7, cost_bps=cost_bps, target_vol=None, min_avg=0.0),
+        f"kesitsel ust-{top_n} + vol %10": carry_xs(funding, top_n=top_n, rebalance=7, cost_bps=cost_bps, target_vol=0.10, max_leverage=3.0),
     }
     console.print(f"Fonlama carry laboratuvari · {len(funding)} coin · {start.date()} → {end.date()}")
     table = Table("Varyant", "Yillik", "Sharpe", "MaxDD", "Vol", "Gun")

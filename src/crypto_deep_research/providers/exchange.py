@@ -138,6 +138,25 @@ class ExchangeProvider:
                 continue
         return klines
 
+    async def perp_universe(self, top: int = 40, min_volume_usd: float = 50_000_000) -> list[str]:
+        """24 saatlik hacme gore en likit USDT perpetual sembolleri."""
+        tickers = await self.http.get_json(
+            "binance", f"{BINANCE_FUTURES}/fapi/v1/ticker/24hr", ttl=3600
+        )
+        rows: list[tuple[float, str]] = []
+        for item in tickers or []:
+            symbol = str(item.get("symbol", ""))
+            if not symbol.endswith("USDT"):
+                continue
+            try:
+                volume = float(item.get("quoteVolume", 0) or 0)
+            except (TypeError, ValueError):
+                continue
+            if volume >= min_volume_usd:
+                rows.append((volume, symbol))
+        rows.sort(reverse=True)
+        return [symbol for _, symbol in rows[:top]]
+
     async def funding_history(self, symbol: str, days: int = 900) -> list[tuple[int, float]]:
         """Binance vadeli fonlama orani gecmisi (8 saatlik, sayfalanmis)."""
         pair = self.perp_symbol(symbol)
