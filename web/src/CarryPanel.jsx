@@ -2,14 +2,19 @@ import { useEffect, useState } from "react";
 import { api } from "./api.js";
 import { IconRefresh } from "./icons.jsx";
 
-function signedPct(value) {
+function signedPct(value, digits = 2) {
   if (value === null || value === undefined) return "—";
-  return `${value >= 0 ? "+" : ""}${(value * 100).toFixed(2)}%`;
+  return `${value >= 0 ? "+" : ""}${(value * 100).toFixed(digits)}%`;
 }
 
 function fundingPct(value) {
   if (value === null || value === undefined) return "—";
   return `${(value * 100).toFixed(4)}%`;
+}
+
+function tone(value) {
+  if (value === null || value === undefined) return "muted";
+  return value >= 0 ? "up" : "down";
 }
 
 function sparklinePoints(series) {
@@ -58,7 +63,7 @@ export default function CarryPanel() {
   };
 
   const reset = async () => {
-    if (!window.confirm("Paper takip durumu sıfırlanacak. Emin misiniz?")) return;
+    if (!window.confirm("Paper takip sıfırlanacak. Emin misiniz?")) return;
     setError("");
     try {
       await api.carryReset();
@@ -73,8 +78,8 @@ export default function CarryPanel() {
   const ranking = state?.ranking || [];
   const series = data?.series || [];
   const points = sparklinePoints(series);
-  const params = state?.params || data?.defaults || {};
-  const heldSymbols = new Set(holdings.map((holding) => holding.symbol));
+  const cumulative = state ? state.equity - 1 : null;
+  const edge = data?.edge_30d_annual;
 
   return (
     <div>
@@ -86,126 +91,100 @@ export default function CarryPanel() {
         </div>
       )}
 
-      <div className="card">
-        <div className="card-head">
-          <h3>Fonlama Carry · Paper Takip</h3>
-          <div className="alarm-form">
-            <button onClick={step} disabled={stepping}>
-              {stepping ? "Çalışıyor…" : "Günlük adımı çalıştır"}
-            </button>
-            <button className="mini-btn" onClick={reset} title="Paper durumunu sıfırla">
-              Sıfırla
-            </button>
-            <button className="mini-btn" onClick={load} disabled={loading} title="Yenile">
-              <IconRefresh width={13} height={13} />
-            </button>
-          </div>
-        </div>
-        <p className="muted carry-note">
-          Long spot + short perp (delta-nötr): getiri = toplanan fonlama − işlem maliyeti, fiyat
-          yönü riski yoktur. Sinyal: 7g ortalama fonlaması en yüksek {params.top_n || 8} coin
-          ({params.universe || 40} perp evren, yalnız pozitif fonlamalılar),{" "}
-          {params.rebalance_days || 7} günde bir yeniden dengeleme. Maliyet varsayımı{" "}
-          {params.cost_bps || 6} bps/bacak.
-        </p>
-        <p className="muted">
-          {state
-            ? `Son güncelleme: ${state.as_of}${state.rebalanced ? " · yeniden dengelendi" : ""} · sonraki rebalance: ${data?.next_rebalance || "—"}`
-            : "Paper takip henüz başlamadı: Günlük adımı çalıştır ile başlatın."}
-        </p>
-      </div>
-
-      {state && (
-        <div className="portfolio-totals">
-          <div className="card portfolio-total">
-            <span className="muted">Equity (×)</span>
-            <b>{state.equity.toFixed(4)}</b>
-          </div>
-          <div className="card portfolio-total">
-            <span className="muted">Günlük</span>
-            <b className={state.daily_return >= 0 ? "up" : "down"}>
-              {signedPct(state.daily_return)}
-            </b>
-          </div>
-          <div className="card portfolio-total">
-            <span className="muted">Kümülatif</span>
-            <b className={state.equity >= 1 ? "up" : "down"}>{signedPct(state.equity - 1)}</b>
-          </div>
-          <div className="card portfolio-total">
-            <span className="muted">Bugünkü fonlama geliri</span>
-            <b className={state.funding_income >= 0 ? "up" : "down"}>
-              {signedPct(state.funding_income)}
-            </b>
-          </div>
-          <div className="card portfolio-total">
-            <span className="muted">Edge (30g, yıllık)</span>
-            <b
-              className={
-                data?.edge_30d_annual == null
-                  ? "muted"
-                  : data.edge_30d_annual >= 0
-                    ? "up"
-                    : "down"
-              }
-            >
-              {data?.edge_30d_annual != null ? signedPct(data.edge_30d_annual) : "—"}
-            </b>
-          </div>
-          <div className="card portfolio-total">
-            <span className="muted">Takip günü</span>
-            <b>{series.length}</b>
-          </div>
-        </div>
-      )}
-
-      {points && (
-        <div className="card">
-          <div className="card-head">
-            <h3>Equity Eğrisi</h3>
-            <span className="muted">
-              {series[0]?.as_of} → {series[series.length - 1]?.as_of}
-            </span>
-          </div>
-          <svg className="carry-spark" viewBox="0 0 100 32" preserveAspectRatio="none">
-            <polyline points={points} />
-          </svg>
-        </div>
-      )}
-
       {!state ? (
-        <div className="card compare-empty">
-          <h3>Paper takip bekleniyor</h3>
+        <div className="card carry-empty">
+          <h3>Paper takip henüz başlamadı</h3>
           <p className="muted">
-            5,5 yıllık testte bu kurulum %9,6/yıl getiri, Sharpe 4,35, maksimum %-4 düşüş üretti
-            (kaldıraçsız). Paper takip canlı fonlama verisiyle günlük olarak ilerler.
+            Strateji, fonlaması en yüksek coinlerde long spot + short perp pozisyonu tutar; getiri
+            toplanan fonlamadan gelir. Günlük adımı çalıştırınca canlı veriyle izlemeye başlar.
           </p>
+          <button onClick={step} disabled={stepping}>
+            {stepping ? "Başlatılıyor…" : "Paper takibi başlat"}
+          </button>
         </div>
       ) : (
         <>
+          <div className="card carry-hero">
+            <div className="carry-hero-value">
+              <span className="muted">Kümülatif getiri</span>
+              <b className={tone(cumulative)}>{signedPct(cumulative)}</b>
+              <span className="muted">
+                Equity {state.equity.toFixed(4)} · {series.length} gün · başlangıç {series[0]?.as_of}
+              </span>
+            </div>
+
+            <div className="carry-hero-metrics">
+              <div className="carry-metric">
+                <span>Günlük</span>
+                <b className={tone(state.daily_return)}>{signedPct(state.daily_return)}</b>
+              </div>
+              <div className="carry-metric">
+                <span>Yıllık carry (30g)</span>
+                <b className={tone(edge)}>{edge != null ? signedPct(edge) : "veri birikiyor"}</b>
+              </div>
+              <div className="carry-metric">
+                <span>Sonraki dengeleme</span>
+                <b>{data?.next_rebalance || "—"}</b>
+              </div>
+            </div>
+
+            <div className="carry-hero-actions">
+              <button onClick={step} disabled={stepping}>
+                {stepping ? "Çalışıyor…" : "Günlük adımı çalıştır"}
+              </button>
+              <button className="mini-btn" onClick={load} disabled={loading} title="Yenile">
+                <IconRefresh width={13} height={13} />
+              </button>
+              <button className="ghost-btn" onClick={reset}>
+                Sıfırla
+              </button>
+            </div>
+
+            <details className="carry-howto">
+              <summary>Nasıl çalışır?</summary>
+              <p>
+                7 günlük ortalama fonlaması en yüksek 8 coin seçilir (pozitif ve günlük %0,5 tavan
+                altı), eşit ağırlıkla long spot + short perp kurulur; fiyat yönü riski yoktur ve
+                getiri tamamen fonlamadan gelir. 3 günde bir yeniden dengelenir; hysteresis (2
+                bps/gün) gereksiz alım-satımı önler. Maliyet varsayımı 10 bps/bacak.{" "}
+                {state.rebalanced ? "Son adımda pozisyonlar yeniden dengelendi." : ""}
+                {state.note ? ` ${state.note}.` : ""}
+              </p>
+            </details>
+          </div>
+
+          {points && (
+            <div className="card">
+              <div className="card-head">
+                <h3>Getiri eğrisi</h3>
+                <span className="muted">
+                  {series[0]?.as_of} → {series[series.length - 1]?.as_of}
+                </span>
+              </div>
+              <svg className="carry-spark" viewBox="0 0 100 32" preserveAspectRatio="none">
+                <polyline points={points} />
+              </svg>
+            </div>
+          )}
+
           <div className="card">
             <div className="card-head">
               <h3>Pozisyonlar</h3>
-              <span className="muted">
-                Eşit ağırlık · toplam {holdings.length} pozisyon
-              </span>
+              <span className="muted">Eşit ağırlık · {holdings.length} pozisyon</span>
             </div>
-            <div className="table-wrap">
-              <table className="compare-table">
+            <div className="table-wrap carry-table-wrap">
+              <table className="compare-table carry-table">
                 <thead>
                   <tr>
                     <th>Coin</th>
-                    <th>Ağırlık</th>
-                    <th>7g ortalama fonlama (günlük)</th>
-                    <th>Günlük katkı tahmini</th>
+                    <th className="num">7g ortalama fonlama (günlük)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {holdings.map((holding) => (
                     <tr key={holding.symbol}>
                       <td className="compare-symbol">{holding.symbol}</td>
-                      <td>{fundingPct(holding.weight)}</td>
-                      <td className="up">{fundingPct(holding.avg_funding)}</td>
-                      <td>{signedPct((holding.avg_funding || 0) * holding.weight)}</td>
+                      <td className="num up">{fundingPct(holding.avg_funding)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -213,38 +192,37 @@ export default function CarryPanel() {
             </div>
           </div>
 
-          <div className="card">
-            <div className="card-head">
-              <h3>Fonlama Sıralaması</h3>
-              <span className="muted">En yüksek 7g ortalama fonlama · ✓ işaretliler pozisyonda</span>
-            </div>
-            <div className="table-wrap">
-              <table className="compare-table">
+          <details className="card carry-collapse">
+            <summary>
+              Fonlama sıralaması · ilk 15 <span className="muted">(✓ pozisyonda)</span>
+            </summary>
+            <div className="table-wrap carry-table-wrap">
+              <table className="compare-table carry-table">
                 <thead>
                   <tr>
-                    <th>#</th>
+                    <th className="num">#</th>
                     <th>Coin</th>
-                    <th>7g ortalama fonlama</th>
-                    <th>Veri günü</th>
-                    <th>Pozisyon</th>
+                    <th className="num">7g ortalama fonlama</th>
+                    <th className="num">Veri günü</th>
+                    <th className="num">Pozisyon</th>
                   </tr>
                 </thead>
                 <tbody>
                   {ranking.slice(0, 15).map((row, index) => (
                     <tr key={row.symbol}>
-                      <td className="muted">{index + 1}</td>
+                      <td className="num muted">{index + 1}</td>
                       <td className="compare-symbol">{row.symbol}</td>
-                      <td className={row.avg_funding >= 0 ? "up" : "down"}>
+                      <td className={`num ${row.avg_funding >= 0 ? "up" : "down"}`}>
                         {fundingPct(row.avg_funding)}
                       </td>
-                      <td className="muted">{row.days}</td>
-                      <td>{heldSymbols.has(row.symbol) ? "✓" : row.selected ? "seçili" : ""}</td>
+                      <td className="num muted">{row.days}</td>
+                      <td className="num">{row.selected ? "✓" : ""}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
+          </details>
         </>
       )}
     </div>

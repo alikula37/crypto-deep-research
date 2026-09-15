@@ -1197,13 +1197,45 @@ code { font-family: var(--mono); font-size: 11.5px; background: var(--bg-soft); 
 .calibration-strip { margin-bottom: var(--sp-3); }
 .calibration-strip h3 { margin: 0; font-size: 13px; }
 .calibration-strip .table-wrap { margin-top: var(--sp-2); }
-
 /* Fonlama carry paneli */
-.carry-note { max-width: 720px; line-height: 1.5; }
 .carry-spark { width: 100%; height: 72px; display: block; }
 .carry-spark polyline { fill: none; stroke: var(--accent); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.carry-hero { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--sp-5); }
+.carry-hero-value { display: flex; flex-direction: column; gap: 2px; min-width: 180px; }
+.carry-hero-value b { font-size: 30px; line-height: 1.1; }
+.carry-hero-value .muted { font-size: 12px; }
+.carry-hero-metrics { display: flex; flex-wrap: wrap; gap: var(--sp-5); }
+.carry-metric { display: flex; flex-direction: column; gap: 2px; }
+.carry-metric span { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+.carry-metric b { font-size: 16px; }
+.carry-hero-actions { display: flex; align-items: center; gap: var(--sp-2); margin-left: auto; }
+.carry-howto { flex-basis: 100%; border-top: 1px solid var(--border); padding-top: var(--sp-2); margin-top: var(--sp-1); }
+.carry-howto summary { cursor: pointer; color: var(--accent); font-size: 12px; user-select: none; }
+.carry-howto p { color: var(--text-muted); font-size: 12.5px; line-height: 1.55; max-width: 760px; margin: var(--sp-2) 0 0; }
+.carry-empty { text-align: center; padding: var(--sp-5); }
+.carry-empty p { max-width: 520px; margin: var(--sp-2) auto var(--sp-4); line-height: 1.55; }
+.carry-collapse { padding: 0; }
+.carry-collapse > summary { cursor: pointer; padding: var(--sp-3) var(--sp-5); font-weight: 600; font-size: 13px; user-select: none; list-style: none; }
+.carry-collapse > summary::-webkit-details-marker { display: none; }
+.carry-collapse > summary::before { content: "▸ "; color: var(--text-muted); }
+.carry-collapse[open] > summary { border-bottom: 1px solid var(--border); }
+.carry-collapse[open] > summary::before { content: "▾ "; }
+.carry-collapse .carry-table-wrap { border: 0; border-radius: 0 0 var(--r-lg) var(--r-lg); }
+.carry-table-wrap { margin-top: var(--sp-2); border: 0; background: transparent; }
+.carry-collapse .carry-table-wrap { margin-top: 0; }
+.carry-table th.num, .carry-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.ghost-btn { background: transparent; border-color: var(--border); color: var(--text-muted); }
+.ghost-btn:hover { color: var(--text); border-color: var(--border-strong); }
 
 /* Carry edge alarmi */
 .carry-alert { border: 1px solid; border-radius: 8px; padding: 8px 12px; margin-bottom: var(--sp-3); font-size: 13px; line-height: 1.45; }
 .carry-alert.warning { color: var(--warn); border-color: color-mix(in oklab, var(--warn) 45%, var(--border)); background: var(--warn-soft); }
 .carry-alert.critical { color: var(--down); border-color: color-mix(in oklab, var(--down) 45%, var(--border)); background: var(--down-soft); }
+
+/* Katlanabilir ek bilgi */
+.card-more { margin-top: var(--sp-2); }
+.card-more > summary { cursor: pointer; color: var(--accent); font-size: 12px; user-select: none; }
+.card-more > summary::-webkit-details-marker { display: none; }
+.card-more > summary::before { content: "▸ "; color: var(--text-muted); }
+.card-more[open] > summary::before { content: "▾ "; }
+.card-more p { margin: var(--sp-2) 0 0; }

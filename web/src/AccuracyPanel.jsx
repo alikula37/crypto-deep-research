@@ -104,7 +104,9 @@ export default function AccuracyPanel({ coin }) {
                   calibration.ece ?? "—"
                 } · AUC ${calibration.auc ?? "—"} · yönlü gözlem ${calibration.directional ?? 0}`}
           </p>
-          {models.length > 0 &&
+          <details className="card-more">
+            <summary>Model ve drift detayı</summary>
+            {models.length > 0 &&
             (() => {
               let metrics = {};
               try {
@@ -132,6 +134,7 @@ export default function AccuracyPanel({ coin }) {
               }).join(" · ") || "henüz ölçüm yok"}
             </p>
           )}
+          </details>
           {calibration.n >= 100 && calibration.bins?.length > 0 && (
             <div className="table-wrap">
               <table className="accuracy-table">

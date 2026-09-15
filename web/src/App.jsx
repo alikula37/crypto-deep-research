@@ -860,7 +860,10 @@ export default function App() {
   const [promptAnswer, setPromptAnswer] = useState("");
   const [promptRunning, setPromptRunning] = useState(false);
   const [profilesList, setProfilesList] = useState([]);
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useState(() => {
+    const requested = new URLSearchParams(window.location.search).get("tab");
+    return requested && TABS.some((entry) => entry.id === requested) ? requested : "overview";
+  });
   const [snapshotData, setSnapshotData] = useState(null);
   const [analysisResults, setAnalysisResults] = useState([]);
   const [deep, setDeep] = useState(null);
@@ -894,6 +897,13 @@ export default function App() {
     api.reports().then(setReports).catch(() => {});
     api.ragStats().then(setRagStats).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("tab") === tab) return;
+    url.searchParams.set("tab", tab);
+    window.history.replaceState(null, "", url);
+  }, [tab]);
 
   useEffect(() => {
     if (!selectionsInitialized.current && analysesList.length) {
