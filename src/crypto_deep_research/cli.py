@@ -541,6 +541,47 @@ def archive_command(
     )
 
 
+@app.command("ml-portfolio")
+def ml_portfolio(
+    horizon: int = typer.Option(30, "--horizon", help="OOS tahmin ufku (1/7/30)"),
+    top_k: int = typer.Option(3, "--top-k", help="Secilecek en iyi coin sayisi"),
+    cost_bps: float = typer.Option(10.0, "--cost-bps", help="Islem basi maliyet (bps)"),
+    rebalance_days: int = typer.Option(30, "--rebalance-days"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """OOS model siralamasiyla kesitsel portfoy backtest'i (ust-k vs evren vs BTC)."""
+    from crypto_deep_research.learning.portfolio import run_backtest
+
+    settings = get_settings()
+    db = Database(settings.db_path)
+    result = run_backtest(
+        db, horizon=horizon, top_k=top_k, cost_bps=cost_bps, rebalance_days=rebalance_days
+    )
+    if json_output:
+        console.print_json(json.dumps(result, default=str))
+        return
+    if result.get("status") != "ok":
+        console.print(f"Backtest calistirilamadi: {result.get('reason', 'bilinmeyen')}")
+        return
+    equity = result["equity"]
+    sharpe = result["net_sharpe"]
+    console.print(
+        f"{result['periods']} donem · {result['rebalance_days']}g yeniden dengeleme · maliyet {cost_bps} bps"
+    )
+    console.print(
+        f"  Ust-{top_k}: {equity['top_k']:.2f}x (net Sharpe {sharpe['top_k']}) · "
+        f"Long-short: {equity['long_short']:.2f}x ({sharpe['long_short']})"
+    )
+    console.print(
+        f"  Esit agirlik: {equity['equal_weight']:.2f}x ({sharpe['equal_weight']}) · "
+        f"BTC: {equity['btc']:.2f}x ({sharpe['btc']})"
+    )
+    console.print(
+        f"  Ort. ust-k getirisi %{result['avg_top_k_return_pct']} · "
+        f"ust-alt fark %{result['avg_spread_pct']} · isabet %{result['hit_rate']*100:.0f}"
+    )
+
+
 @app.command("ml-cross-section")
 def ml_cross_section(
     source: str = typer.Option("backfill", "--source", help="backfill | live"),

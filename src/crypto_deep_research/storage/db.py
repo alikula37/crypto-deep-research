@@ -322,6 +322,13 @@ class Database:
             self._conn.executescript(SCHEMA)
         self._ensure_column("feature_snapshots", "source", "TEXT DEFAULT 'live'")
         self._ensure_column("outcomes", "source", "TEXT DEFAULT 'live'")
+        self._ensure_column("predictions", "is_oos", "INTEGER NOT NULL DEFAULT 0")
+        with self._lock, self._conn:
+            self._conn.execute(
+                "UPDATE outcomes SET source = 'backfill' "
+                "WHERE (source IS NULL OR source = 'live') AND run_id LIKE 'bf_%'"
+            )
+            self._conn.commit()
 
     # ------------------------------------------------------------------ temel
     def execute(self, sql: str, params: tuple | list = ()) -> sqlite3.Cursor:
@@ -809,8 +816,8 @@ class Database:
                 INSERT OR REPLACE INTO outcomes
                   (run_id, horizon_days, coin, symbol, entry_price, entry_at, target_date, due_at,
                    exit_price, return_pct, hit, direction_at_run, weighted_score, price_source,
-                   status, attempts, filled_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'backfill', 'filled', 1, ?)
+                   status, attempts, filled_at, source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'backfill', 'filled', 1, ?, 'backfill')
                 """,
                 [tuple(outcome) for sample in samples for outcome in sample["outcomes"]],
             )
@@ -1014,15 +1021,15 @@ class Database:
             """
             INSERT OR REPLACE INTO predictions
               (run_id, horizon_days, model_id, heuristic_up, probability_up, probability_down,
-               n_train, calibration_n, calibration_observed, is_shadow, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+               n_train, calibration_n, calibration_observed, is_shadow, created_at, is_oos)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 payload["run_id"], payload["horizon_days"], payload["model_id"],
                 payload.get("heuristic_up"), payload["probability_up"], payload["probability_down"],
                 payload.get("n_train"), payload.get("calibration_n"),
                 payload.get("calibration_observed"), 1 if payload.get("is_shadow", True) else 0,
-                time.time(),
+                time.time(), 1 if payload.get("is_oos") else 0,
             ),
         )
 

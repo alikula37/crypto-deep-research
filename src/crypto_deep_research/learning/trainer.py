@@ -90,6 +90,7 @@ def _evaluate(
     oos_probability: list[float] = []
     oos_labels: list[int] = []
     oos_returns: list[float] = []
+    oos_indices: list[int] = []
     for train_idx, test_idx in windows:
         model = _algorithm_model(algorithm).fit(
             [dataset["X"][index] for index in train_idx],
@@ -98,6 +99,7 @@ def _evaluate(
         oos_probability.extend(model.predict_proba([dataset["X"][index] for index in test_idx]))
         oos_labels.extend(dataset["y"][index] for index in test_idx)
         oos_returns.extend(dataset["returns"][index] for index in test_idx)
+        oos_indices.extend(test_idx)
     if not oos_probability:
         return None
     calibrated, calibration = _calibrate(oos_probability, oos_labels)
@@ -118,6 +120,7 @@ def _evaluate(
         "calibration": calibration,
         "probabilities": calibrated,
         "labels": oos_labels,
+        "indices": oos_indices,
     }
 
 
@@ -228,6 +231,30 @@ def _write_predictions(
     return written
 
 
+def _write_oos_predictions(
+    db, horizon: int, model_id: str, chosen: dict[str, Any], dataset: dict[str, Any]
+) -> int:
+    """Backtest icin sizintisiz (walk-forward) OOS tahminlerini kaydeder."""
+    written = 0
+    for probability, index in zip(chosen["probabilities"], chosen["indices"], strict=False):
+        run_id = dataset["run_ids"][index]
+        if not run_id:
+            continue
+        db.prediction_save(
+            {
+                "run_id": run_id,
+                "horizon_days": horizon,
+                "model_id": model_id,
+                "probability_up": round(float(probability) * 100, 2),
+                "probability_down": round((1 - float(probability)) * 100, 2),
+                "is_shadow": True,
+                "is_oos": True,
+            }
+        )
+        written += 1
+    return written
+
+
 def train_horizon(
     db,
     horizon: int = 7,
@@ -332,6 +359,7 @@ def train_horizon(
     )
     if bins:
         db.calibration_bins_save(model_id, horizon, bins)
+    _write_oos_predictions(db, horizon, model_id, chosen, dataset)
     written = _write_predictions(db, horizon, model_id, params, status, n, source=source)
     return {
         "status": "trained",

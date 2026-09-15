@@ -85,11 +85,12 @@ def build_dataset(
 ) -> dict[str, Any]:
     """Etiketli satirlari X/y/dates/coins yapisina cevirir (tarihe gore sirali)."""
     extended = extended or {}
-    features, labels, dates, coins, run_ids, returns = [], [], [], [], [], []
+    features, labels, dates, coins, run_ids, returns, entry_ats = [], [], [], [], [], [], []
     for row in rows:
         features.append(vector_for(row, extended.get(str(row.get("run_id") or ""), {})))
         labels.append(1 if (row.get("return_pct") or 0) > 0 else 0)
         returns.append(float(row.get("return_pct") or 0.0))
+        entry_ats.append(float(row.get("entry_at") or 0.0))
         dates.append(str(row.get("target_date") or ""))
         coins.append(str(row.get("coin") or ""))
         run_ids.append(str(row.get("run_id") or ""))
@@ -97,6 +98,7 @@ def build_dataset(
         "X": features,
         "y": labels,
         "returns": returns,
+        "entry_ats": entry_ats,
         "dates": dates,
         "coins": coins,
         "run_ids": run_ids,

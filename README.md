@@ -102,6 +102,7 @@ uv run cdr ml-backfill-history --coin bitcoin --days 730         # geçmişten e
 uv run cdr ml-eval --horizon 7                                   # model durumu ve metrikleri
 uv run cdr ml-activate <model_id>                                # modeli aktifleştir (kapılı)
 uv run cdr ml-cross-section                                      # kesitsel özellikleri hesapla
+uv run cdr ml-portfolio --horizon 30 --top-k 3                   # kesitsel portföy backtest'i
 uv run cdr learning-drift                                        # drift metrikleri (PSI/ECE)
 uv run cdr archive --days 540 [--delete]                         # eski koşuları arşivle
 uv run cdr telegram                                              # Telegram botu (token gerekir)
@@ -185,6 +186,14 @@ Sistem "tahmin edip unutmaz": her koşu, sonraki getirilerle karşılaştırıla
   30g modeli ilk kez AUC≥0,55 kapısını geçti; backfill modelleri manuel inceleme gerektirdiği
   için **shadow** kaldı (`cdr ml-activate <model_id>` ile yayına alınabilir). 1g modeli kenar
   bulamadığı için otomatik reddedildi — sistem işlem yapmadığında bunu açıkça söylüyor.
+- **Kesitsel portföy backtest'i (`cdr ml-portfolio`):** yalnızca walk-forward OOS tahminleri
+  kullanılarak 10 coin arasından modelin en iyi k'sı seçilir; eşit ağırlık ve BTC al-tut ile
+  karşılaştırılır (maliyet düşülür). Örnek sonuç (30g, üst-3, aylık, 13 dönem, 10 bps):
+  **long-short 1,29x · net Sharpe 1,66 · isabet %77**; üst-3 0,98x; eşit ağırlık 0,61x;
+  BTC 0,93x. 7g/haftalıkta fark zayıf (0,32%/dönem). Dönem sayısı az olduğu için sonuç
+  **ihtiyatla** yorumlanmalı; asıl kenar 30 günlük sıralamada görünüyor.
+- **Kullanım önerisi:** model sıralaması tek başına yatırım kararı değildir; canlı koşular
+  biriktikçe (30g etiketi ~1 ay sonra) doğrulama yenilenmelidir.
 - **Uyarı:** Backfill örnekleri aynı piyasa günlerini paylaştığı için etkin örneklem daha küçüktür
   ve Sharpe iyimser olabilir; doğrulama canlı koşu birikimiyle yapılır.
 - **Drift izleme:** kapsam sapması, skor dağılımı (PSI) ve kalibrasyon hatası (ECE) günlük ölçülür;
