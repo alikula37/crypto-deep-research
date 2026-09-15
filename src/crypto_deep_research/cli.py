@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from datetime import datetime, timezone
 
 import typer
 from rich.console import Console
@@ -302,7 +303,7 @@ def cache_command(
         table.add_row(
             row["provider"],
             str(row["entries"]),
-            str(__import__("datetime").datetime.fromtimestamp(row["last_at"]).strftime("%Y-%m-%d %H:%M")),
+            str(datetime.fromtimestamp(row["last_at"]).strftime("%Y-%m-%d %H:%M")),
         )
     console.print(table)
 
@@ -539,6 +540,117 @@ def archive_command(
         f"{result['runs']} koşu, {result['reports']} rapor arşivlendi → {result['path']}"
         + (f" · silinen kayıt: {result['deleted']}" if delete else " (silme kapalı)")
     )
+
+
+@app.command("strategy-scan")
+def strategy_scan(
+    days: int = typer.Option(900, "--days", help="Test edilecek gun sayisi"),
+    cost_bps: float = typer.Option(6.0, "--cost-bps", help="Islem basi maliyet (bps)"),
+    top: int = typer.Option(12, "--top", help="Gosterilecek en iyi satir sayisi"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Kanitli strateji ailelerini (TSMOM/XSMOM/CARRY/BREAK) ayni maliyetle tarar."""
+    from crypto_deep_research.learning.strategies import load_daily, scan
+
+    settings, db, providers = _providers()
+    universe = Database.DEFAULT_WATCHLIST
+
+    async def _run() -> list[dict]:
+        try:
+            frames = {}
+            funding: dict[str, dict[str, float]] = {}
+            for coin, symbol, _name in universe:
+                frame = await load_daily(providers, symbol, days)
+                if len(frame) > 150:
+                    frames[coin] = frame
+                rows = await providers.exchange.funding_history(symbol, days=days)
+                daily: dict[str, list[float]] = {}
+                for timestamp, rate in rows:
+                    day = datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc).date().isoformat()
+                    daily.setdefault(day, []).append(rate)
+                if daily:
+                    funding[coin] = {day: sum(values) for day, values in daily.items()}
+            return scan(frames, funding, cost_bps=cost_bps)
+        finally:
+            await providers.aclose()
+
+    results = [row for row in asyncio.run(_run()) if row.get("sharpe") is not None]
+    results.sort(key=lambda row: -row["sharpe"])
+    if json_output:
+        console.print_json(json.dumps(results, default=str))
+        return
+    console.print(f"{len(results)} sonuc · maliyet {cost_bps} bps · {days} gun")
+    table = Table("Aile", "Parametre", "Yillik", "Sharpe", "MaxDD", "BTC kor")
+    for row in results[:top]:
+        table.add_row(
+            row["family"], row["params"],
+            f"%{row['annual_return']*100:.1f}" if row.get("annual_return") is not None else "—",
+            f"{row['sharpe']:.2f}", f"%{row['max_drawdown']*100:.1f}",
+            f"{row['corr_btc']:.2f}" if row.get("corr_btc") is not None else "—",
+        )
+    console.print(table)
+
+
+@app.command("carry-lab")
+def carry_lab(
+    days: int = typer.Option(2000, "--days", help="Fonlama gecmisi gunu"),
+    cost_bps: float = typer.Option(6.0, "--cost-bps"),
+) -> None:
+    """Fonlama carry varyantlarini uzun vadede karsilastirir."""
+    from crypto_deep_research.learning.strategies import (
+        carry_frame,
+        carry_xs,
+        metrics,
+    )
+
+    settings, db, providers = _providers()
+
+    async def _load() -> dict[str, dict[str, float]]:
+        try:
+            funding: dict[str, dict[str, float]] = {}
+            for coin, symbol, _name in Database.DEFAULT_WATCHLIST:
+                rows = await providers.exchange.funding_history(symbol, days=days)
+                daily: dict[str, list[float]] = {}
+                for timestamp, rate in rows:
+                    day = datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc).date().isoformat()
+                    daily.setdefault(day, []).append(rate)
+                if daily:
+                    funding[coin] = {day: sum(values) for day, values in daily.items()}
+            return funding
+        finally:
+            await providers.aclose()
+
+    funding = asyncio.run(_load())
+    if not funding:
+        console.print("Fonlama verisi alinamadi.")
+        raise typer.Exit(code=1)
+    frame = carry_frame(funding)
+    start, end = frame.index.min(), frame.index.max()
+
+    variants = {
+        "esit agir (10 coin)": _equal_carry(funding, cost_bps),
+        "kesitsel ust-4 (filtresiz)": carry_xs(funding, top_n=4, rebalance=7, cost_bps=cost_bps, target_vol=None, min_avg=-1.0),
+        "kesitsel + filtre (fk>0)": carry_xs(funding, top_n=4, rebalance=7, cost_bps=cost_bps, target_vol=None, min_avg=0.0),
+        "kesitsel + vol %10 (3x tavan)": carry_xs(funding, top_n=4, rebalance=7, cost_bps=cost_bps, target_vol=0.10, max_leverage=3.0),
+    }
+    console.print(f"Fonlama carry laboratuvari · {len(funding)} coin · {start.date()} → {end.date()}")
+    table = Table("Varyant", "Yillik", "Sharpe", "MaxDD", "Vol", "Gun")
+    for name, series in variants.items():
+        stats = metrics(series.tolist() if hasattr(series, "tolist") else series)
+        if not stats.get("sharpe"):
+            continue
+        table.add_row(
+            name, f"%{stats['annual_return']*100:.1f}", f"{stats['sharpe']:.2f}",
+            f"%{stats['max_drawdown']*100:.1f}", f"%{stats['vol_annual']*100:.1f}",
+            str(stats["days"]),
+        )
+    console.print(table)
+
+
+def _equal_carry(funding: dict[str, dict[str, float]], cost_bps: float):
+    from crypto_deep_research.learning.strategies import _portfolio, carry_series
+
+    return _portfolio({coin: carry_series(series, cost_bps=cost_bps) for coin, series in funding.items()})
 
 
 @app.command("ml-portfolio")
