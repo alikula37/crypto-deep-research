@@ -190,11 +190,67 @@ def carry_frame(funding: dict[str, dict[str, float]]) -> pd.DataFrame:
     return frame.sort_index().astype(float)
 
 
+def select_holdings(
+    history: dict[str, float],
+    *,
+    top_n: int = 8,
+    min_avg: float = 0.0,
+    max_avg: float | None = None,
+    incumbents: set[str] | None = None,
+    hysteresis: float = 0.0,
+    weighting: str = "equal",
+    max_weight: float = 0.25,
+) -> dict[str, float]:
+    """Fonlama gecmisinden pozisyon secimi ve agirliklandirma.
+
+    - `hysteresis`: mevcut pozisyonlara siralamada eklenen fonlama avantaji; gereksiz
+      turnover'i azaltir (ornek: 0.0002 = gunluk 2 bps).
+    - `weighting`: "equal" esit agirlik, "funding" fonlama ile orantili (ust sinirli).
+    """
+    incumbents = incumbents or set()
+    candidates = [
+        (symbol, float(value))
+        for symbol, value in history.items()
+        if value is not None and value == value and value > min_avg
+    ]
+    if max_avg is not None:
+        candidates = [(symbol, value) for symbol, value in candidates if value <= max_avg]
+    if not candidates:
+        return {}
+    candidates.sort(
+        key=lambda item: item[1] + (hysteresis if item[0] in incumbents else 0.0),
+        reverse=True,
+    )
+    chosen = candidates[:top_n]
+    if weighting == "funding":
+        positive = {symbol: value for symbol, value in chosen if value > 0}
+        if not positive:
+            return {symbol: 1 / len(chosen) for symbol, _ in chosen}
+        total = sum(positive.values())
+        weights = {symbol: value / total for symbol, value in positive.items()}
+        for _ in range(5):
+            over = {symbol for symbol, weight in weights.items() if weight > max_weight}
+            if not over:
+                break
+            excess = sum(weights[symbol] - max_weight for symbol in over)
+            for symbol in over:
+                weights[symbol] = max_weight
+            free = [symbol for symbol in weights if symbol not in over]
+            base = sum(weights[symbol] for symbol in free)
+            if base <= 0 or not free:
+                break
+            for symbol in free:
+                weights[symbol] += excess * weights[symbol] / base
+        return weights
+    return {symbol: 1 / len(chosen) for symbol, _ in chosen}
+
+
 def carry_xs(
     funding: dict[str, dict[str, float]],
     *, top_n: int = 4, rebalance: int = 7, lookback: int = 7,
     cost_bps: float = 6.0, min_avg: float = 0.0, max_avg: float | None = None,
-    target_vol: float | None = 0.10, max_leverage: float = 3.0,
+    weighting: str = "equal", hysteresis: float = 0.0, max_weight: float = 0.25,
+    target_vol: float | None = None, max_leverage: float = 3.0,
 ) -> pd.Series:
     """Kesitsel fonlama carry: her hafta fonlamasi en yuksek N coinde long spot + short perp.
 
@@ -204,18 +260,27 @@ def carry_xs(
     frame = carry_frame(funding).fillna(0.0)
     dates = frame.index
     position = pd.DataFrame(0.0, index=dates, columns=frame.columns)
+    current: set[str] = set()
     for index in range(len(dates)):
         if index % rebalance != 0 or index < lookback:
             continue
-        history = frame.iloc[max(0, index - lookback + 1): index + 1].mean()
-        eligible = history[history > min_avg]
-        if max_avg is not None:
-            eligible = eligible[eligible <= max_avg]
-        if eligible.empty:
+        history = frame.iloc[max(0, index - lookback + 1): index + 1].mean().to_dict()
+        weights = select_holdings(
+            history,
+            top_n=top_n,
+            min_avg=min_avg,
+            max_avg=max_avg,
+            incumbents=current,
+            hysteresis=hysteresis,
+            weighting=weighting,
+            max_weight=max_weight,
+        )
+        if not weights:
             continue
-        chosen = eligible.sort_values(ascending=False).head(top_n).index
         position.iloc[index:] = 0.0
-        position.loc[dates[index]:, chosen] = 1.0 / len(chosen)
+        for symbol, weight in weights.items():
+            position.loc[dates[index]:, symbol] = weight
+        current = set(weights)
     held = position.shift(1).fillna(0.0)
     turnover = position.diff().abs().sum(axis=1).fillna(0.0)
     gross = (held * frame).sum(axis=1)

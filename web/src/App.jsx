@@ -132,10 +132,10 @@ const TAB_INTROS = {
     summary:
       "Delta-nötr fonlama carry stratejisinin paper takibi: long spot + short perp ile fonlama toplama; fiyat yönü riski yok.",
     points: [
-      "Sinyal: 7 günlük ortalama fonlaması en yüksek 8 coin (yalnız pozitif fonlamalılar); haftalık yeniden dengeleme.",
+      "Sinyal: 7 günlük ortalama fonlaması en yüksek 8 coin (pozitif ve günlük %0,5 tavan altı); 3 günde bir yeniden dengeleme + 2 bps hysteresis.",
       "Getiri tamamen toplanan fonlamadan gelir; piyasa düşerken de pozitif kalabilir (BTC korelasyonu ~0).",
-      "5,5 yıllık testte %9,6/yıl, Sharpe 4,35, maksimum %-4 düşüş (kaldıraçsız, 6 bps/bacak maliyetle).",
-      "Maliyet duyarlıdır: 20 bps/bacak üzerinde kenar erir; maker emirler ve likit coin seçimi önemlidir.",
+      "5,5 yıllık testte %12,0/yıl, Sharpe 8,5, maksimum %-2,7 düşüş (kaldıraçsız, 10 bps/bacak maliyetle).",
+      "Maliyet duyarlıdır; hysteresis sayesinde 15 bps/bacakta bile Sharpe 6,5 korunur. Maker emirler ve likit coin seçimi önemlidir.",
       "Paper takip gerçek emir göndermez; canlı fonlama verisiyle sanal pozisyonları ve PnL'i izler.",
     ],
   },

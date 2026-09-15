@@ -132,6 +132,20 @@ export default function CarryPanel() {
             </b>
           </div>
           <div className="card portfolio-total">
+            <span className="muted">Edge (30g, yıllık)</span>
+            <b
+              className={
+                data?.edge_30d_annual == null
+                  ? "muted"
+                  : data.edge_30d_annual >= 0
+                    ? "up"
+                    : "down"
+              }
+            >
+              {data?.edge_30d_annual != null ? signedPct(data.edge_30d_annual) : "—"}
+            </b>
+          </div>
+          <div className="card portfolio-total">
             <span className="muted">Takip günü</span>
             <b>{series.length}</b>
           </div>

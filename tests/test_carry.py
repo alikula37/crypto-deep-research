@@ -7,6 +7,7 @@ from crypto_deep_research.learning.carry import (
     next_rebalance_date,
     rank_funding,
 )
+from crypto_deep_research.learning.strategies import select_holdings
 
 PARAMS = {
     "universe": 40,
@@ -93,3 +94,46 @@ def test_rank_funding_respects_max_avg_cap():
     selected = [row["symbol"] for row in ranked if row["selected"]]
     assert selected == ["BBBUSDT", "CCCUSDT"]
     assert ranked[0]["symbol"] == "AAAUSDT" and not ranked[0]["selected"]
+
+
+def test_select_holdings_equal_and_cap():
+    history = {"A": 0.002, "B": 0.001, "C": 0.0005, "D": 0.02}
+    weights = select_holdings(history, top_n=3, max_avg=0.005)
+    assert set(weights) == {"A", "B", "C"}
+    assert abs(sum(weights.values()) - 1.0) < 1e-9
+    assert all(abs(value - 1 / 3) < 1e-9 for value in weights.values())
+
+
+def test_select_holdings_hysteresis_keeps_incumbent():
+    history = {"OLD": 0.0010, "NEW": 0.0011}
+    without = select_holdings(history, top_n=1)
+    assert set(without) == {"NEW"}
+    with_hyst = select_holdings(history, top_n=1, incumbents={"OLD"}, hysteresis=0.0002)
+    assert set(with_hyst) == {"OLD"}
+
+
+def test_select_holdings_funding_weighting_is_capped():
+    history = {"A": 0.004, "B": 0.001, "C": 0.001}
+    weights = select_holdings(history, top_n=3, weighting="funding", max_weight=0.5)
+    assert abs(sum(weights.values()) - 1.0) < 1e-6
+    assert max(weights.values()) <= 0.5 + 1e-9
+    assert weights["A"] > weights["B"]
+
+
+def test_status_computes_edge_health():
+    class _Db:
+        def carry_state_latest(self):
+            return {"as_of": "2025-02-01"}
+
+        def carry_state_series(self, limit=365):
+            return [
+                {"as_of": f"2025-01-{day:02d}", "funding_income": 0.0004, "daily_return": 0.0003}
+                for day in range(1, 31)
+            ]
+
+    from crypto_deep_research.learning.carry import status
+
+    snapshot = status(_Db())
+    assert snapshot["state"]["as_of"] == "2025-02-01"
+    assert abs(snapshot["edge_30d_annual"] - 0.0004 * 365) < 1e-9
+    assert abs(snapshot["net_30d_annual"] - 0.0003 * 365) < 1e-9

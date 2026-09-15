@@ -209,15 +209,20 @@ Sistem "tahmin edip unutmaz": her koşu, sonraki getirilerle karşılaştırıla
 ## Fonlama Carry (delta-nötr, paper takip)
 
 Piyasa-nötr strateji: long spot + short perp ile fonlama toplanır; fiyat yönü riski yoktur.
-Her hafta 7 günlük ortalama fonlaması en yüksek 8 coin seçilir (yalnız pozitif ve günlük
-%0,5 tavanın altındakiler), eşit ağırlıkla tutulur.
+Her 3 günde bir, 7 günlük ortalama fonlaması en yüksek 8 coin seçilir (pozitif ve günlük %0,5
+tavanın altındakiler), eşit ağırlıkla tutulur. **Hysteresis** (2 bps/gün) mevcut pozisyonları
+küçük farklarda korur: turnover ve maliyet duyarlılığı belirgin şekilde azalır.
 
-- 5,5 yıllık test (2001 gün, 2021 boğası + 2022 ayısı dahil, 40 likit kripto perp, 6 bps/bacak):
-  **%9,4/yıl getiri, Sharpe 6,2, maksimum düşüş %-1,8**, BTC korelasyonu ~0. Aynı dönemde BTC
+- 5,5 yıllık test (2001 gün, 2021 boğası + 2022 ayısı dahil, 40 likit kripto perp, 10 bps/bacak):
+  **%12,0/yıl getiri, Sharpe 8,5, maksimum düşüş %-2,7**, BTC korelasyonu ~0. Aynı dönemde BTC
   al-tut: %-9,2/yıl, %-76,6 düşüş.
-- Uzun-vade doğrulama (`--days 2000`): 2022 dışında her yıl pozitif; aşırı fonlama tavanı
-  Sharpe'ı 4,4 → 6,2'ye çıkarır (uç fonlama rejimleri kararsızdır).
-- Maliyet kritiktir: 20 bps/bacak üzerinde kenar erir; maker emir ve likidite önemlidir.
+- Maliyet dayanıklılığı: hysteresis olmadan 15 bps/bacakta Sharpe 1,0'a çöker; hysteresis ile
+  15 bps'te bile **Sharpe 6,5 / %10,1** ve 10 bps'te Sharpe 8,5 kalır.
+- Aşırı fonlama tavanı (günlük %0,5) kuyruk rejimlerini dışlar; tavan olmadan Sharpe 4,4'te kalır.
+- Yıllık: 2021 +%18,8 · 2022 −%0,9 · 2023 +%9,1 · 2024 +%17,2 · 2025 +%6,6 · 2026 (kısmi) +%16,4.
+  Not: 2025'te fonlama rejimi sıkıştı; edge sağlığı panelde izlenir.
+- İsteğe bağlı vol hedefleme (hedef %10, max 3x): %36,1/yıl, Sharpe 8,9, DD %-8,0 (örneklem içi;
+  kaldıraç öncesi canlı doğrulama önerilir).
 - `cdr strategy-scan`: TSMOM/XSMOM/CARRY/BREAK ailelerini aynı maliyetle tarar.
   `cdr carry-lab`: carry varyantlarını uzun vadede karşılaştırır.
 - `cdr carry-paper --step`: günlük paper adımı (fonlama geliri, rebalance, PnL; SQLite'ta saklanır).

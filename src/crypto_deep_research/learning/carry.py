@@ -14,7 +14,7 @@ from typing import Any
 
 import pandas as pd
 
-from crypto_deep_research.learning.strategies import carry_frame
+from crypto_deep_research.learning.strategies import carry_frame, select_holdings
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +22,13 @@ CARRY_DEFAULTS: dict[str, Any] = {
     "universe": 40,
     "top_n": 8,
     "lookback": 7,
-    "rebalance_days": 7,
-    "cost_bps": 6.0,
+    "rebalance_days": 3,
+    "cost_bps": 10.0,
     "min_avg": 0.0,
     "max_avg": 0.005,
+    "hysteresis": 0.0002,
+    "weighting": "equal",
+    "max_weight": 0.25,
     "min_volume_usd": 50_000_000,
 }
 
@@ -122,17 +125,45 @@ def apply_step(
             max_avg=merged.get("max_avg"),
             as_of=today,
         )
-    chosen = [row for row in ranked if row.get("selected")]
     frame = carry_frame(funding_map) if funding_map else pd.DataFrame()
     today_date = date.fromisoformat(today)
     prev_day = pd.Timestamp(today_date - timedelta(days=1), tz="UTC")
 
+    def _history() -> dict[str, float]:
+        if frame.empty:
+            return {}
+        window = frame.loc[: pd.Timestamp(today, tz="UTC")].iloc[-lookback:]
+        means = window.mean()
+        return {
+            str(symbol): float(value)
+            for symbol, value in means.items()
+            if pd.notna(value)
+        }
+
+    def _pick(incumbents: set[str]) -> dict[str, float]:
+        return select_holdings(
+            _history(),
+            top_n=top_n,
+            min_avg=float(merged.get("min_avg", 0.0)),
+            max_avg=merged.get("max_avg"),
+            incumbents=incumbents,
+            hysteresis=float(merged.get("hysteresis", 0.0)),
+            weighting=str(merged.get("weighting", "equal")),
+            max_weight=float(merged.get("max_weight", 0.25)),
+        )
+
     if state is None:
+        weights = _pick(set())
+        history = _history()
         holdings = [
-            {"symbol": row["symbol"], "weight": round(1 / len(chosen), 6), "avg_funding": row["avg_funding"]}
-            for row in chosen
+            {
+                "symbol": symbol,
+                "weight": round(weight, 6),
+                "avg_funding": round(history.get(symbol, 0.0), 6),
+            }
+            for symbol, weight in weights.items()
         ]
-        costs = (1.0 if chosen else 0.0) * cost_bps * 2 / 10_000
+        costs = (sum(weights.values()) if weights else 0.0) * cost_bps * 2 / 10_000
         equity = 1.0 - costs
         return {
             "as_of": today,
@@ -143,8 +174,8 @@ def apply_step(
             "daily_return": -costs,
             "funding_income": 0.0,
             "costs": costs,
-            "rebalanced": bool(chosen),
-            "last_rebalance": today if chosen else None,
+            "rebalanced": bool(weights),
+            "last_rebalance": today if weights else None,
             "note": note or "acilis",
         }
 
@@ -163,22 +194,19 @@ def apply_step(
     holdings = state.get("holdings", [])
     rebalanced = False
     if last_rebalance and (today_date - date.fromisoformat(last_rebalance)).days >= rebalance_days:
-        new_weights: dict[str, float] = {}
-        if chosen:
-            weight = 1 / len(chosen)
-            new_weights = {row["symbol"]: weight for row in chosen}
         old_weights = {h["symbol"]: float(h.get("weight", 0.0)) for h in state.get("holdings", [])}
+        new_weights = _pick(set(old_weights))
         turnover = sum(
             abs(new_weights.get(symbol, 0.0) - old_weights.get(symbol, 0.0))
             for symbol in set(new_weights) | set(old_weights)
         )
         costs = turnover * cost_bps * 2 / 10_000
-        funding_by_symbol = {row["symbol"]: row["avg_funding"] for row in chosen}
+        history = _history()
         holdings = [
             {
                 "symbol": symbol,
                 "weight": round(weight, 6),
-                "avg_funding": funding_by_symbol.get(symbol),
+                "avg_funding": round(history.get(symbol, 0.0), 6),
             }
             for symbol, weight in new_weights.items()
         ]
@@ -245,12 +273,22 @@ async def paper_step(
 
 
 def status(db) -> dict[str, Any]:
-    """Paper durum ozeti: son state, gunluk seri ve sonraki rebalance tarihi."""
+    """Paper durum ozeti: son state, gunluk seri, sonraki rebalance ve edge sagligi."""
     state = db.carry_state_latest()
     series = db.carry_state_series(limit=365)
+    edge = None
+    net = None
+    recent = series[-30:]
+    if len(recent) >= 5:
+        gross_daily = sum(float(row.get("funding_income") or 0.0) for row in recent) / len(recent)
+        net_daily = sum(float(row.get("daily_return") or 0.0) for row in recent) / len(recent)
+        edge = round(gross_daily * 365, 4)
+        net = round(net_daily * 365, 4)
     return {
         "state": state,
         "series": series,
         "next_rebalance": next_rebalance_date(state),
+        "edge_30d_annual": edge,
+        "net_30d_annual": net,
         "defaults": CARRY_DEFAULTS,
     }

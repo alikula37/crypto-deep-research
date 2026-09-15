@@ -711,6 +711,7 @@ def carry_lab(
         f"kesitsel ust-{top_n} (filtresiz)": carry_xs(funding, top_n=top_n, rebalance=7, cost_bps=cost_bps, target_vol=None, min_avg=-1.0),
         f"kesitsel ust-{top_n} + filtre": carry_xs(funding, top_n=top_n, rebalance=7, cost_bps=cost_bps, target_vol=None, min_avg=0.0),
         f"kesitsel ust-{top_n} + tavan %0.5": carry_xs(funding, top_n=top_n, rebalance=7, cost_bps=cost_bps, target_vol=None, min_avg=0.0, max_avg=0.005),
+        "nihai (3g + hyst 2bp)": carry_xs(funding, top_n=top_n, rebalance=3, cost_bps=cost_bps, target_vol=None, min_avg=0.0, max_avg=0.005, hysteresis=0.0002),
         f"kesitsel ust-{top_n} + vol %10": carry_xs(funding, top_n=top_n, rebalance=7, cost_bps=cost_bps, target_vol=0.10, max_leverage=3.0),
     }
     console.print(f"Fonlama carry laboratuvari · {len(funding)} coin · {start.date()} → {end.date()}")
