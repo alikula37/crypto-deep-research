@@ -158,6 +158,18 @@ async def _learning_scheduler() -> None:
                         await carry_providers.aclose()
                     if result.get("status") == "ok":
                         logger.info("Carry paper adimi: %s", result["state"]["as_of"])
+                    snapshot = carry_snapshot(db)
+                    alert = snapshot.get("alert")
+                    if (
+                        alert
+                        and settings.telegram_token
+                        and settings.telegram_chat_id
+                        and db.scheduled_job_acquire("carry_alert", lease_seconds=20 * 3600)
+                    ):
+                        from crypto_deep_research.telegram_bot import send_text
+
+                        sent = await send_text(f"[{alert['severity'].upper()}] {alert['message']}")
+                        db.scheduled_job_finish("carry_alert", "ok" if sent.get("sent") else "skipped")
                     db.scheduled_job_finish("carry_paper", "ok")
                 except Exception as exc:
                     logger.exception("Carry paper hatasi")

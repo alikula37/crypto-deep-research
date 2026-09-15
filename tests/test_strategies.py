@@ -69,3 +69,21 @@ def test_portfolio_diversifies():
     portfolio = next(row for key, row in results.items() if key.startswith("BREAK esit"))
     single = next(row for key, row in results.items() if key.startswith("c0 20/10"))
     assert portfolio["sharpe"] >= single["sharpe"]
+
+
+def test_pit_mask_uses_trailing_volume():
+    from crypto_deep_research.learning.strategies import pit_mask_from_volumes
+
+    dates = pd.date_range("2025-01-01", periods=40, freq="D", tz="UTC")
+    volumes = pd.DataFrame(
+        {
+            "AAA": [100.0] * 40,
+            "BBB": [50.0] * 40,
+            "CCC": [10.0] * 40,
+        },
+        index=dates,
+    )
+    mask = pit_mask_from_volumes(volumes, top=2, lookback=10)
+    assert mask["AAA"].iloc[10:].all()
+    assert mask["BBB"].iloc[10:].all()
+    assert not mask["CCC"].any()

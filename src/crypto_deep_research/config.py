@@ -62,6 +62,7 @@ class Settings(BaseSettings):
 
     # Telegram botu (opsiyonel)
     telegram_token: str | None = None
+    telegram_chat_id: str | None = None
     telegram_autostart: bool = False
 
     # Ogrenme dongusu (ozellik kaydi + outcome etiketleme)

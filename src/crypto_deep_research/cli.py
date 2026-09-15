@@ -670,9 +670,11 @@ def carry_lab(
     cost_bps: float = typer.Option(6.0, "--cost-bps"),
     universe: int = typer.Option(0, "--universe", help="0=mevcut 10 coin; >0: en likit N perp"),
     top_n: int = typer.Option(4, "--top-n", help="Kesitsel secimde tutulacak coin sayisi"),
+    pit: bool = typer.Option(False, "--pit", help="Nokta-zamaninda evren (survivorship kontrolu)"),
 ) -> None:
     """Fonlama carry varyantlarini uzun vadede karsilastirir."""
     from crypto_deep_research.learning.strategies import (
+        build_pit_funding,
         carry_frame,
         carry_xs,
         metrics,
@@ -682,6 +684,12 @@ def carry_lab(
 
     async def _load() -> dict[str, dict[str, float]]:
         try:
+            if pit:
+                masked, coverage = await build_pit_funding(
+                    providers, days=days, top=40, candidates=60
+                )
+                console.print(f"PIT evren maske kapsami: %{coverage*100:.1f}")
+                return masked
             if universe > 0:
                 pairs = await providers.exchange.perp_universe(top=universe)
             else:

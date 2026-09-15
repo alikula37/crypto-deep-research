@@ -137,3 +137,16 @@ def test_status_computes_edge_health():
     assert snapshot["state"]["as_of"] == "2025-02-01"
     assert abs(snapshot["edge_30d_annual"] - 0.0004 * 365) < 1e-9
     assert abs(snapshot["net_30d_annual"] - 0.0003 * 365) < 1e-9
+
+
+def test_edge_alert_severities():
+    from crypto_deep_research.learning.carry import edge_alert
+
+    assert edge_alert({"net_30d_annual": 0.05}) is None
+    warning = edge_alert({"net_30d_annual": 0.02})
+    assert warning is not None and warning["severity"] == "warning"
+    critical = edge_alert({"net_30d_annual": 0.005})
+    assert critical is not None and critical["severity"] == "critical"
+    assert edge_alert({"net_30d_annual": None, "edge_30d_annual": None}) is None
+    fallback = edge_alert({"net_30d_annual": None, "edge_30d_annual": 0.02})
+    assert fallback is not None and fallback["severity"] == "warning"

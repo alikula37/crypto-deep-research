@@ -150,6 +150,24 @@ async def handle_message(text: str) -> str:
     return HELP_TEXT
 
 
+async def send_text(
+    text: str, *, token: str | None = None, chat_id: int | str | None = None
+) -> dict[str, Any]:
+    """Tek seferlik bildirim gonderir (alarm/uyari icin)."""
+    settings = get_settings()
+    token = token or settings.telegram_token
+    chat = chat_id if chat_id is not None else settings.telegram_chat_id
+    if not token or chat in (None, ""):
+        return {"sent": False, "reason": "Telegram token/chat_id tanimli degil"}
+    try:
+        numeric = int(str(chat))
+    except ValueError:
+        numeric = chat
+    async with httpx.AsyncClient(timeout=20) as client:
+        data = await _call(client, token, "sendMessage", chat_id=numeric, text=text[:MAX_MESSAGE])
+    return {"sent": bool(data.get("ok")), "detail": data.get("description")}
+
+
 async def run_bot(token: str | None = None, poll_timeout: int = 30) -> None:
     """Uzun yoklamali Telegram botu; ilk gelen mesajdan itibaren yanit verir."""
     settings = get_settings()

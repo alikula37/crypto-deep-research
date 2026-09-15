@@ -230,6 +230,32 @@ def apply_step(
     }
 
 
+EDGE_WARN_ANNUAL = 0.03
+EDGE_CRITICAL_ANNUAL = 0.01
+
+
+def edge_alert(snapshot: dict[str, Any]) -> dict[str, Any] | None:
+    """30 gunluk net carry yilliklandirmasina gore rejim uyarisi."""
+    value = snapshot.get("net_30d_annual")
+    if value is None:
+        value = snapshot.get("edge_30d_annual")
+    if value is None:
+        return None
+    if value < EDGE_CRITICAL_ANNUAL:
+        severity = "critical"
+    elif value < EDGE_WARN_ANNUAL:
+        severity = "warning"
+    else:
+        return None
+    return {
+        "severity": severity,
+        "net_30d_annual": snapshot.get("net_30d_annual"),
+        "edge_30d_annual": snapshot.get("edge_30d_annual"),
+        "message": f"Carry edge zayif: 30g net yillik %{value * 100:.1f}"
+        f" (uyari <%{EDGE_WARN_ANNUAL * 100:.0f}, kritik <%{EDGE_CRITICAL_ANNUAL * 100:.0f})",
+    }
+
+
 def next_rebalance_date(state: dict[str, Any] | None) -> str | None:
     if not state:
         return None
@@ -284,7 +310,7 @@ def status(db) -> dict[str, Any]:
         net_daily = sum(float(row.get("daily_return") or 0.0) for row in recent) / len(recent)
         edge = round(gross_daily * 365, 4)
         net = round(net_daily * 365, 4)
-    return {
+    snapshot = {
         "state": state,
         "series": series,
         "next_rebalance": next_rebalance_date(state),
@@ -292,3 +318,5 @@ def status(db) -> dict[str, Any]:
         "net_30d_annual": net,
         "defaults": CARRY_DEFAULTS,
     }
+    snapshot["alert"] = edge_alert(snapshot)
+    return snapshot

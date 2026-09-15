@@ -221,6 +221,13 @@ küçük farklarda korur: turnover ve maliyet duyarlılığı belirgin şekilde 
 - Aşırı fonlama tavanı (günlük %0,5) kuyruk rejimlerini dışlar; tavan olmadan Sharpe 4,4'te kalır.
 - Yıllık: 2021 +%18,8 · 2022 −%0,9 · 2023 +%9,1 · 2024 +%17,2 · 2025 +%6,6 · 2026 (kısmi) +%16,4.
   Not: 2025'te fonlama rejimi sıkıştı; edge sağlığı panelde izlenir.
+- **Seçim yanlılığı kontrolü (nokta-zamanında evren):** yukarıdaki sayılar bugünün top-40 listesini
+  geçmişe uygular. Her gün trailing 30g hacme göre yeniden seçilen PIT evrende sonuç
+  **%9,1/yıl, Sharpe 7,3, DD %-1,1**; yalnız köklü coinlerde (≥1300 gün) %5,9/yıl, Sharpe 5,7.
+  Canlı paper takip PIT davranışına yakındır; gerçekçi beklenti bu banttır.
+  `cdr carry-lab --pit` ile tekrarlanabilir.
+- **Edge alarmı:** 30 günlük net carry < %3 (uyarı) / < %1 (kritik) olduğunda arayüzde banner
+  gösterilir ve `CDR_TELEGRAM_CHAT_ID` tanımlıysa Telegram bildirimi gider (rejim sıkışması koruması).
 - İsteğe bağlı vol hedefleme (hedef %10, max 3x): %36,1/yıl, Sharpe 8,9, DD %-8,0 (örneklem içi;
   kaldıraç öncesi canlı doğrulama önerilir).
 - `cdr strategy-scan`: TSMOM/XSMOM/CARRY/BREAK ailelerini aynı maliyetle tarar.

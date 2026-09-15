@@ -1202,3 +1202,8 @@ code { font-family: var(--mono); font-size: 11.5px; background: var(--bg-soft); 
 .carry-note { max-width: 720px; line-height: 1.5; }
 .carry-spark { width: 100%; height: 72px; display: block; }
 .carry-spark polyline { fill: none; stroke: var(--accent); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+
+/* Carry edge alarmi */
+.carry-alert { border: 1px solid; border-radius: 8px; padding: 8px 12px; margin-bottom: var(--sp-3); font-size: 13px; line-height: 1.45; }
+.carry-alert.warning { color: var(--warn); border-color: color-mix(in oklab, var(--warn) 45%, var(--border)); background: var(--warn-soft); }
+.carry-alert.critical { color: var(--down); border-color: color-mix(in oklab, var(--down) 45%, var(--border)); background: var(--down-soft); }

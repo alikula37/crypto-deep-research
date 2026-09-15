@@ -1075,6 +1075,17 @@ class Database:
             (time.time(), status, error, job_key),
         )
 
+    def scheduled_job_cursor(self, job_key: str) -> str | None:
+        rows = self.query("SELECT cursor FROM scheduled_jobs WHERE job_key = ?", (job_key,))
+        return rows[0]["cursor"] if rows else None
+
+    def scheduled_job_set_cursor(self, job_key: str, cursor: str) -> None:
+        self.execute(
+            "INSERT INTO scheduled_jobs (job_key, cursor) VALUES (?, ?)"
+            " ON CONFLICT(job_key) DO UPDATE SET cursor = excluded.cursor",
+            (job_key, cursor),
+        )
+
     def feature_predictions(self, run_id: str) -> list[dict[str, Any]]:
         return self.query("SELECT * FROM predictions WHERE run_id = ?", (run_id,))
 

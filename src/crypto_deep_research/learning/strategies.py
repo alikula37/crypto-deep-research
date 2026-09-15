@@ -190,6 +190,66 @@ def carry_frame(funding: dict[str, dict[str, float]]) -> pd.DataFrame:
     return frame.sort_index().astype(float)
 
 
+def pit_mask_from_volumes(
+    volume_frame: pd.DataFrame, *, top: int = 40, lookback: int = 30
+) -> pd.DataFrame:
+    """Nokta-zamaninda evren maskesi: trailing ortalama dolar hacmine gore ilk `top` coin."""
+    trailing = volume_frame.rolling(lookback, min_periods=max(5, lookback // 3)).mean()
+    mask = pd.DataFrame(False, index=volume_frame.index, columns=volume_frame.columns)
+    for day in volume_frame.index:
+        row = trailing.loc[day].dropna().sort_values(ascending=False).head(top)
+        mask.loc[day, row.index] = True
+    return mask
+
+
+async def build_pit_funding(
+    providers, *, days: int = 1500, top: int = 40, candidates: int = 60
+) -> tuple[dict[str, dict[str, float]], float]:
+    """Nokta-zamaninda evrenle maskelenmis fonlama haritasi (survivorship bias kontrolu).
+
+    Aday evrenden (en likit `candidates` perp) her gun trailing 30g dolar hacmine gore ilk
+    `top` coin secilir; bu evrenin disindaki fonlamalar NaN'a cevrilir. Donen ikinci deger
+    maske kapsama oranidir (hucre yuzdesi).
+    """
+    symbols = await providers.exchange.perp_universe(top=candidates, min_volume_usd=5_000_000)
+    now_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
+    start_ms = now_ms - days * DAY_MS
+    funding: dict[str, dict[str, float]] = {}
+    volumes: dict[str, dict[str, float]] = {}
+    for symbol in symbols:
+        rows = await providers.exchange.funding_history(symbol, days=days)
+        daily: dict[str, list[float]] = {}
+        for timestamp, rate in rows:
+            day = datetime.fromtimestamp(timestamp / 1000, tz=timezone.utc).date().isoformat()
+            daily.setdefault(day, []).append(rate)
+        if daily:
+            funding[symbol] = {day: sum(values) for day, values in daily.items()}
+        klines = await providers.exchange.perp_klines_range(
+            symbol, "1d", start_ms=start_ms, end_ms=now_ms
+        )
+        if klines:
+            volumes[symbol] = {k.ts.date().isoformat(): k.volume * k.close for k in klines}
+
+    frame = carry_frame(funding)
+    volume_frame = pd.DataFrame(volumes).sort_index()
+    volume_frame.index = pd.to_datetime(volume_frame.index, utc=True)
+    volume_frame = volume_frame[~volume_frame.index.duplicated(keep="last")]
+    common = frame.index.intersection(volume_frame.index)
+    frame = frame.loc[common]
+    volume_frame = volume_frame.loc[common]
+    mask = pit_mask_from_volumes(volume_frame, top=top, lookback=30)
+    masked = frame.where(mask)
+    coverage = float(mask.values.mean())
+    masked_funding = {
+        str(column): {
+            day.isoformat(): float(value)
+            for day, value in masked[column].dropna().items()
+        }
+        for column in masked.columns
+    }
+    return masked_funding, coverage
+
+
 def select_holdings(
     history: dict[str, float],
     *,

@@ -80,6 +80,12 @@ export default function CarryPanel() {
     <div>
       {error && <div className="error">{error}</div>}
 
+      {data?.alert && (
+        <div className={`carry-alert ${data.alert.severity}`}>
+          <b>{data.alert.severity === "critical" ? "Kritik" : "Uyarı"}:</b> {data.alert.message}
+        </div>
+      )}
+
       <div className="card">
         <div className="card-head">
           <h3>Fonlama Carry · Paper Takip</h3>
