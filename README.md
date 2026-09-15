@@ -206,6 +206,27 @@ Sistem "tahmin edip unutmaz": her koşu, sonraki getirilerle karşılaştırıla
 
 ---
 
+## Fonlama Carry (delta-nötr, paper takip)
+
+Piyasa-nötr strateji: long spot + short perp ile fonlama toplanır; fiyat yönü riski yoktur.
+Her hafta 7 günlük ortalama fonlaması en yüksek 8 coin seçilir (yalnız pozitif ve günlük
+%0,5 tavanın altındakiler), eşit ağırlıkla tutulur.
+
+- 5,5 yıllık test (2001 gün, 2021 boğası + 2022 ayısı dahil, 40 likit kripto perp, 6 bps/bacak):
+  **%9,4/yıl getiri, Sharpe 6,2, maksimum düşüş %-1,8**, BTC korelasyonu ~0. Aynı dönemde BTC
+  al-tut: %-9,2/yıl, %-76,6 düşüş.
+- Uzun-vade doğrulama (`--days 2000`): 2022 dışında her yıl pozitif; aşırı fonlama tavanı
+  Sharpe'ı 4,4 → 6,2'ye çıkarır (uç fonlama rejimleri kararsızdır).
+- Maliyet kritiktir: 20 bps/bacak üzerinde kenar erir; maker emir ve likidite önemlidir.
+- `cdr strategy-scan`: TSMOM/XSMOM/CARRY/BREAK ailelerini aynı maliyetle tarar.
+  `cdr carry-lab`: carry varyantlarını uzun vadede karşılaştırır.
+- `cdr carry-paper --step`: günlük paper adımı (fonlama geliri, rebalance, PnL; SQLite'ta saklanır).
+  `--ranking` canlı fonlama sıralaması, `--reset` sıfırlama.
+- Arayüzde **Takip → Fonlama Carry**: equity eğrisi, pozisyonlar, fonlama sıralaması, günlük adım;
+  scheduler günde birkaç kez otomatik çalıştırır (aynı gün idempotent).
+- Paper takiptir; gerçek emir gönderilmez. Kaldıraçlı kullanım öncesi birkaç haftalık canlı
+  doğrulama önerilir.
+
 ## REST API
 
 `uv run cdr serve` ile birlikte gelir; Swagger: `http://127.0.0.1:8000/docs`
