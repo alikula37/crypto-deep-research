@@ -25,6 +25,18 @@ from crypto_deep_research.deep_research.engine import DeepResearchEngine, DeepRe
 from crypto_deep_research.deep_research.profiles import profile_summary
 from crypto_deep_research.deep_research.registry import registry_summary
 from crypto_deep_research.learning.calibration import calibration_table, heuristic_probability
+from crypto_deep_research.learning.carry import (
+    fetch_funding_map as carry_funding_map,
+)
+from crypto_deep_research.learning.carry import (
+    paper_step as carry_paper_step,
+)
+from crypto_deep_research.learning.carry import (
+    rank_funding as carry_rank_funding,
+)
+from crypto_deep_research.learning.carry import (
+    status as carry_snapshot,
+)
 from crypto_deep_research.learning.drift import compute_drift, drift_summary
 from crypto_deep_research.learning.outcomes import fill_due_outcomes
 from crypto_deep_research.learning.trainer import latest_model_prediction, train_all
@@ -137,6 +149,19 @@ async def _learning_scheduler() -> None:
                 except Exception as exc:
                     logger.exception("Drift hesaplama hatasi")
                     db.scheduled_job_finish("drift_daily", "error", str(exc))
+            if db.scheduled_job_acquire("carry_paper", lease_seconds=6 * 3600):
+                try:
+                    _, _, carry_providers = _services()
+                    try:
+                        result = await carry_paper_step(db, carry_providers)
+                    finally:
+                        await carry_providers.aclose()
+                    if result.get("status") == "ok":
+                        logger.info("Carry paper adimi: %s", result["state"]["as_of"])
+                    db.scheduled_job_finish("carry_paper", "ok")
+                except Exception as exc:
+                    logger.exception("Carry paper hatasi")
+                    db.scheduled_job_finish("carry_paper", "error", str(exc))
             if db.scheduled_job_acquire("cache_prune", lease_seconds=23 * 3600):
                 try:
                     removed = await asyncio.to_thread(
@@ -602,6 +627,52 @@ async def telegram_start(request: TelegramStartRequest) -> dict[str, Any]:
 @app.post("/api/telegram/stop")
 async def telegram_stop() -> dict[str, Any]:
     return await telegram_bot.stop()
+
+
+@app.get("/api/carry/status")
+async def carry_status() -> dict[str, Any]:
+    """Carry paper durumu: son state, gunluk seri, sonraki rebalance."""
+    settings = get_settings()
+    return carry_snapshot(Database(settings.db_path))
+
+
+@app.get("/api/carry/ranking")
+async def carry_ranking(
+    top_n: int = 8, universe: int = 40, lookback: int = 7
+) -> list[dict[str, Any]]:
+    """Canli fonlama siralamasi (paper takibe bagimsiz)."""
+    settings, _, providers = _services()
+    try:
+        symbols = await providers.exchange.perp_universe(top=max(5, min(universe, 60)))
+        funding = await carry_funding_map(providers, symbols, days=30)
+        return carry_rank_funding(
+            funding, top_n=max(1, min(top_n, 20)), lookback=max(1, min(lookback, 30))
+        )
+    finally:
+        await providers.aclose()
+
+
+@app.post("/api/carry/step")
+async def carry_step() -> dict[str, Any]:
+    """Bugunun paper adimini simdi calistirir (gunluk fonlama gelirini isler)."""
+    settings, db, providers = _services()
+    try:
+        result = await carry_paper_step(db, providers)
+    finally:
+        await providers.aclose()
+    if result.get("status") == "no_data":
+        raise HTTPException(status_code=503, detail="Fonlama verisi alinamadi")
+    snapshot = carry_snapshot(db)
+    return {"status": result.get("status"), **snapshot}
+
+
+@app.post("/api/carry/reset")
+async def carry_reset() -> dict[str, Any]:
+    """Paper takip durumunu sifirlar."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    db.carry_state_clear()
+    return {"cleared": True}
 
 
 @app.post("/api/watchlist/{coin}/run")

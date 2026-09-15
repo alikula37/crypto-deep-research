@@ -96,6 +96,10 @@ export const api = {
     request(`/api/watchlist/${encodeURIComponent(coin)}`, { method: "DELETE" }),
   watchlistRun: (coin) =>
     request(`/api/watchlist/${encodeURIComponent(coin)}/run`, { method: "POST", timeoutMs: 60000 }),
+  carry: () => request("/api/carry/status", { timeoutMs: 60000 }),
+  carryRanking: () => request("/api/carry/ranking", { timeoutMs: 300000 }),
+  carryStep: () => request("/api/carry/step", { method: "POST", timeoutMs: 300000 }),
+  carryReset: () => request("/api/carry/reset", { method: "POST" }),
   portfolio: () => request("/api/portfolio", { timeoutMs: 120000 }),
   portfolioAdd: (payload) =>
     request("/api/portfolio", { method: "POST", body: JSON.stringify(payload), timeoutMs: 60000 }),

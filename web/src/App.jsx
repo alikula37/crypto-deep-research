@@ -33,6 +33,7 @@ import {
   IconWand,
   IconX,
 } from "./icons.jsx";
+import CarryPanel from "./CarryPanel.jsx";
 import { DASH, formatDateTime, formatDuration, money, pct, price, priceRange, score } from "./format.js";
 
 const TIMEFRAMES = ["15m", "30m", "1h", "4h", "1d", "1w"];
@@ -43,6 +44,7 @@ const TABS = [
   { id: "compare", label: "Karşılaştır", icon: IconCoins },
   { id: "watchlist", label: "Takip", icon: IconBell },
   { id: "portfolio", label: "Portföy", icon: IconWallet },
+  { id: "carry", label: "Fonlama Carry", icon: IconCoins },
   { id: "report", label: "Rapor", icon: IconDoc },
   { id: "prompt", label: "Prompt Çıktısı", icon: IconWand },
   { id: "rag", label: "Kaynak Arama", icon: IconSearch },
@@ -123,6 +125,18 @@ const TAB_INTROS = {
       "Değer ve kâr/zarar her açılışta güncel fiyatlarla hesaplanır; fiyat alınamazsa '—' görünür.",
       "Pay sütunu, pozisyonun toplam portföy değerine oranıdır; konsantrasyon riskini gösterir.",
       "Yatırım tavsiyesi değildir; veriler yalnızca takip amaçlıdır.",
+    ],
+  },
+  carry: {
+    title: "Fonlama Carry",
+    summary:
+      "Delta-nötr fonlama carry stratejisinin paper takibi: long spot + short perp ile fonlama toplama; fiyat yönü riski yok.",
+    points: [
+      "Sinyal: 7 günlük ortalama fonlaması en yüksek 8 coin (yalnız pozitif fonlamalılar); haftalık yeniden dengeleme.",
+      "Getiri tamamen toplanan fonlamadan gelir; piyasa düşerken de pozitif kalabilir (BTC korelasyonu ~0).",
+      "5,5 yıllık testte %9,6/yıl, Sharpe 4,35, maksimum %-4 düşüş (kaldıraçsız, 6 bps/bacak maliyetle).",
+      "Maliyet duyarlıdır: 20 bps/bacak üzerinde kenar erir; maker emirler ve likit coin seçimi önemlidir.",
+      "Paper takip gerçek emir göndermez; canlı fonlama verisiyle sanal pozisyonları ve PnL'i izler.",
     ],
   },
   report: {
@@ -1422,6 +1436,13 @@ export default function App() {
             <>
               <PageIntro id="portfolio" />
               <PortfolioPanel initialCoin={coin} />
+            </>
+          )}
+
+          {tab === "carry" && (
+            <>
+              <PageIntro id="carry" />
+              <CarryPanel />
             </>
           )}
 

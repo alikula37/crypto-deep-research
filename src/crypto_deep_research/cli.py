@@ -591,6 +591,79 @@ def strategy_scan(
     console.print(table)
 
 
+@app.command("carry-paper")
+def carry_paper(
+    step: bool = typer.Option(False, "--step", help="Bugunun paper adimini calistir"),
+    ranking: bool = typer.Option(False, "--ranking", help="Canli fonlama siralamasini goster"),
+    reset: bool = typer.Option(False, "--reset", help="Paper durumunu sifirla"),
+    universe: int = typer.Option(40, "--universe", help="Taranacak likit perp sayisi"),
+    top_n: int = typer.Option(8, "--top-n", help="Tutulacak coin sayisi"),
+) -> None:
+    """Carry stratejisi paper takibi (gunluk fonlama toplama simulasyonu)."""
+    from crypto_deep_research.learning.carry import (
+        fetch_funding_map,
+        next_rebalance_date,
+        paper_step,
+        rank_funding,
+        status,
+    )
+
+    settings, db, providers = _providers()
+
+    async def _run() -> None:
+        try:
+            if reset:
+                db.carry_state_clear()
+                console.print("Paper durumu sifirlandi.")
+                return
+            if ranking:
+                symbols = await providers.exchange.perp_universe(top=universe)
+                funding = await fetch_funding_map(providers, symbols, days=30)
+                ranked = rank_funding(funding, top_n=top_n, lookback=7)
+                table = Table("Coin", "7g ort. fonlama (gunluk)", "Gun", "Secili")
+                for row in ranked[:20]:
+                    table.add_row(
+                        row["symbol"], f"%{row['avg_funding']*100:.4f}", str(row["days"]),
+                        "✓" if row["selected"] else "",
+                    )
+                console.print(table)
+                return
+            if step:
+                result = await paper_step(db, providers, {"universe": universe, "top_n": top_n})
+                state = result.get("state")
+                if result["status"] != "ok" or not state:
+                    console.print(f"Adim calistirilamadi: {result.get('status')} {result.get('reason', '')}")
+                    return
+                console.print(
+                    f"Paper adim: {state['as_of']} · equity {state['equity']:.4f} · "
+                    f"gunluk %{state['daily_return']*100:.4f}"
+                    + (" · YENIDEN DENGELENDI" if state.get("rebalanced") else "")
+                )
+                for holding in state["holdings"]:
+                    console.print(
+                        f"  {holding['symbol']:12s} agirlik %{holding['weight']*100:5.2f} · "
+                        f"7g fonlama %{(holding.get('avg_funding') or 0)*100:.4f}"
+                    )
+                return
+            snapshot = status(db)
+            state = snapshot.get("state")
+            if not state:
+                console.print("Paper takip henuz baslamadi: cdr carry-paper --step")
+                return
+            console.print(
+                f"Equity {state['equity']:.4f} · gunluk %{state['daily_return']*100:.4f} · "
+                f"sonraki rebalance {next_rebalance_date(state)} · {state.get('note') or ''}"
+            )
+            for holding in state["holdings"]:
+                console.print(
+                    f"  {holding['symbol']:12s} agirlik %{holding['weight']*100:5.2f}"
+                )
+        finally:
+            await providers.aclose()
+
+    asyncio.run(_run())
+
+
 @app.command("carry-lab")
 def carry_lab(
     days: int = typer.Option(2000, "--days", help="Fonlama gecmisi gunu"),
@@ -637,6 +710,7 @@ def carry_lab(
         f"esit agir ({len(funding)} coin)": _equal_carry(funding, cost_bps),
         f"kesitsel ust-{top_n} (filtresiz)": carry_xs(funding, top_n=top_n, rebalance=7, cost_bps=cost_bps, target_vol=None, min_avg=-1.0),
         f"kesitsel ust-{top_n} + filtre": carry_xs(funding, top_n=top_n, rebalance=7, cost_bps=cost_bps, target_vol=None, min_avg=0.0),
+        f"kesitsel ust-{top_n} + tavan %0.5": carry_xs(funding, top_n=top_n, rebalance=7, cost_bps=cost_bps, target_vol=None, min_avg=0.0, max_avg=0.005),
         f"kesitsel ust-{top_n} + vol %10": carry_xs(funding, top_n=top_n, rebalance=7, cost_bps=cost_bps, target_vol=0.10, max_leverage=3.0),
     }
     console.print(f"Fonlama carry laboratuvari · {len(funding)} coin · {start.date()} → {end.date()}")

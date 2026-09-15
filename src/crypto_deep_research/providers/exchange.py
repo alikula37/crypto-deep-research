@@ -139,14 +139,29 @@ class ExchangeProvider:
         return klines
 
     async def perp_universe(self, top: int = 40, min_volume_usd: float = 50_000_000) -> list[str]:
-        """24 saatlik hacme gore en likit USDT perpetual sembolleri."""
+        """24 saatlik hacme gore en likit kripto USDT perpetual sembolleri.
+
+        Yalnizca contractType=PERPETUAL, underlyingType=COIN ve TRADING durumundaki
+        semboller alinir; emtia/hisse/premarket perp'leri (TRADIFI_*) haric tutulur.
+        """
+        info = await self.http.get_json(
+            "binance", f"{BINANCE_FUTURES}/fapi/v1/exchangeInfo", ttl=86400
+        )
+        crypto = {
+            str(item.get("symbol"))
+            for item in (info or {}).get("symbols", [])
+            if item.get("contractType") == "PERPETUAL"
+            and item.get("underlyingType") == "COIN"
+            and item.get("status") == "TRADING"
+            and item.get("quoteAsset") == "USDT"
+        }
         tickers = await self.http.get_json(
             "binance", f"{BINANCE_FUTURES}/fapi/v1/ticker/24hr", ttl=3600
         )
         rows: list[tuple[float, str]] = []
         for item in tickers or []:
             symbol = str(item.get("symbol", ""))
-            if not symbol.endswith("USDT"):
+            if symbol not in crypto:
                 continue
             try:
                 volume = float(item.get("quoteVolume", 0) or 0)

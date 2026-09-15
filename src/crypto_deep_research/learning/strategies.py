@@ -193,7 +193,7 @@ def carry_frame(funding: dict[str, dict[str, float]]) -> pd.DataFrame:
 def carry_xs(
     funding: dict[str, dict[str, float]],
     *, top_n: int = 4, rebalance: int = 7, lookback: int = 7,
-    cost_bps: float = 6.0, min_avg: float = 0.0,
+    cost_bps: float = 6.0, min_avg: float = 0.0, max_avg: float | None = None,
     target_vol: float | None = 0.10, max_leverage: float = 3.0,
 ) -> pd.Series:
     """Kesitsel fonlama carry: her hafta fonlamasi en yuksek N coinde long spot + short perp.
@@ -209,6 +209,8 @@ def carry_xs(
             continue
         history = frame.iloc[max(0, index - lookback + 1): index + 1].mean()
         eligible = history[history > min_avg]
+        if max_avg is not None:
+            eligible = eligible[eligible <= max_avg]
         if eligible.empty:
             continue
         chosen = eligible.sort_values(ascending=False).head(top_n).index

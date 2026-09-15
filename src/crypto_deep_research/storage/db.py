@@ -285,6 +285,21 @@ CREATE TABLE IF NOT EXISTS scheduled_jobs (
   run_count INTEGER NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS carry_state (
+  as_of TEXT PRIMARY KEY,
+  created_at REAL NOT NULL,
+  params TEXT NOT NULL,
+  holdings TEXT NOT NULL,
+  ranking TEXT NOT NULL,
+  equity REAL NOT NULL,
+  daily_return REAL NOT NULL,
+  funding_income REAL NOT NULL,
+  costs REAL NOT NULL,
+  rebalanced INTEGER NOT NULL DEFAULT 0,
+  last_rebalance TEXT,
+  note TEXT
+);
+
 CREATE VIRTUAL TABLE IF NOT EXISTS documents_fts USING fts5(
   doc_id UNINDEXED, coin UNINDEXED, source UNINDEXED, text
 );
@@ -666,6 +681,53 @@ class Database:
         self.execute(
             "UPDATE watchlist SET last_run_at = ? WHERE coin = ?", (ts or time.time(), coin)
         )
+
+    # ------------------------------------------------------------------ carry (paper)
+    def carry_state_save(self, payload: dict[str, Any]) -> None:
+        self.execute(
+            """
+            INSERT OR REPLACE INTO carry_state
+              (as_of, created_at, params, holdings, ranking, equity, daily_return,
+               funding_income, costs, rebalanced, last_rebalance, note)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                payload["as_of"],
+                payload.get("created_at") or time.time(),
+                _dumps(payload.get("params") or {}),
+                _dumps(payload.get("holdings") or []),
+                _dumps(payload.get("ranking") or []),
+                float(payload.get("equity", 1.0)),
+                float(payload.get("daily_return", 0.0)),
+                float(payload.get("funding_income", 0.0)),
+                float(payload.get("costs", 0.0)),
+                1 if payload.get("rebalanced") else 0,
+                payload.get("last_rebalance"),
+                payload.get("note"),
+            ),
+        )
+
+    def carry_state_latest(self) -> dict[str, Any] | None:
+        rows = self.query("SELECT * FROM carry_state ORDER BY as_of DESC LIMIT 1")
+        if not rows:
+            return None
+        row = rows[0]
+        row["params"] = _loads(row["params"]) or {}
+        row["holdings"] = _loads(row["holdings"]) or []
+        row["ranking"] = _loads(row["ranking"]) or []
+        row["rebalanced"] = bool(row["rebalanced"])
+        return row
+
+    def carry_state_series(self, limit: int = 180) -> list[dict[str, Any]]:
+        rows = self.query(
+            "SELECT as_of, equity, daily_return, funding_income, costs, rebalanced"
+            " FROM carry_state ORDER BY as_of DESC LIMIT ?",
+            (int(limit),),
+        )
+        return list(reversed(rows))
+
+    def carry_state_clear(self) -> None:
+        self.execute("DELETE FROM carry_state")
 
     # ------------------------------------------------------------------ portfoy
     def portfolio_add(
