@@ -1600,8 +1600,18 @@ export default function App() {
                 {ragResults.map((result, index) => (
                   <div className="card" key={`${result.key}-${index}`}>
                     <div className="card-head">
-                      <h4>{result.source || "kaynak"}</h4>
-                      <span className="muted">{result.score?.toFixed(3)}</span>
+                      <h4>
+                        {result.url ? (
+                          <a href={result.url} target="_blank" rel="noreferrer">
+                            {result.source || "kaynak"}
+                          </a>
+                        ) : (
+                          result.source || "kaynak"
+                        )}
+                      </h4>
+                      <span className="muted">
+                        {result.score_type === "cross_encoder" ? "Cross-encoder" : "RRF"} · {result.score?.toFixed(3)}
+                      </span>
                     </div>
                     <p className="summary break-anywhere">{result.content}</p>
                   </div>

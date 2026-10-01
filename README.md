@@ -11,13 +11,14 @@ Kripto varlıklar için **tamamen yerel** derin araştırma sistemi. Ücretsiz v
 - **10 analiz modülü + 66 kriter** paralel çalışır; her kriter ne araştırdığını, bulgusunu,
   skorunu, güvenini ve kaynağını raporlar.
 - Sonuçları tek bir **ağırlıklı skora** ve **yükseliş/düşüş olasılığına** indirger.
-- **Yerel RAG** ile haber, analiz ve geçmiş raporlarda anlamsal arama yapar.
+- **Yerel hibrit RAG** ile haber, analiz ve geçmiş raporlarda vektör + BM25 aramasını RRF ile birleştirir; isteğe bağlı cross-encoder ile yeniden sıralar.
 - **Web arayüzü, CLI, REST API ve MCP** olarak kullanılabilir.
 
 ## Öne çıkanlar
 
 - **Şeffaf kriterler:** her kartta "Ne araştırılır?", bulgu, durum (Tam / Kısmi / Veri Yok),
   skor, güven ve kaynak bilgisi.
+- **Hibrit RAG araması:** LanceDB vektör sonuçları ile SQLite BM25 sonuçları Reciprocal Rank Fusion (RRF) ile birleştirilir; isteğe bağlı yerel FastEmbed cross-encoder ilk adayları yeniden sıralar.
 - **Çift sayım koruması:** aynı sinyali paylaşan kriterler skorda bir kez sayılır; kısmi veri
   yarım ağırlıkla katkı verir. Böylece aynı teknik skor 7 kez tartılmaz.
 - **Dürüst veri:** veri bulunamayan kriter "veri yok" işaretlenir ve ortalamaya katılmaz.
@@ -52,7 +53,7 @@ docker compose build && docker compose up -d
 
 - Arayüz: http://127.0.0.1:8000 · API dokümantasyonu: http://127.0.0.1:8000/docs
 - Docker yoksa: `brew install colima docker && colima start`
-- Veriler `./data` altında kalıcıdır; ilk RAG kullanımında embedding modeli (~2 GB) bir kez indirilir.
+- Veriler `./data` altında kalıcıdır; ilk RAG kullanımında embedding modeli (~2 GB) bir kez indirilir. Cross-encoder, `CDR_RAG_RERANKER_MODEL` ile seçildiğinde ayrıca indirilir.
 
 ### Yerel kurulum (Docker'sız)
 
@@ -269,6 +270,7 @@ Tüm ayarlar `.env` üzerinden yönetilir; hiçbiri zorunlu değildir:
 | `CDR_FRED_API_KEY` | Faiz, enflasyon, getiri eğrisi |
 | `CDR_OPENROUTER_API_KEY` | RAG yanıtı ve rapor üretimini LLM'e devreder |
 | `CDR_EMBEDDING_MODEL` | Daha küçük embedding modeli (hız/disk kazancı) |
+| `CDR_RAG_RERANKER_MODEL` | Hibrit adayları yerel cross-encoder ile yeniden sıralar (opsiyonel; İngilizce Apache-2.0 örneği: `Xenova/ms-marco-MiniLM-L-6-v2`; çok dilli Jina modeli ticari olmayan lisanslıdır) |
 | `CDR_WATCHLIST_ENABLED` | Takip listesi otomatik koşuları (varsayılan: açık) |
 | `CDR_WATCHLIST_INTERVAL_MINUTES` | Zamanlayıcı kontrol aralığı (varsayılan: 60) |
 | `CDR_WATCHLIST_AUTO_RUN_HOURS` | Aynı coin için otomatik koşu sıklığı (varsayılan: 24 saat) |

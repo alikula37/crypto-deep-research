@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     embedding_model: str = "intfloat/multilingual-e5-large"
     embedding_dim: int = 1024
     embeddings_enabled: bool = True
+    rag_reranker_model: str | None = None
 
     # Ag
     http_timeout: float = 30.0

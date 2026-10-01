@@ -221,7 +221,9 @@ class RetrievedContext(BaseModel):
     key: str
     content: str
     score: float
+    score_type: str = "rrf"
     source: str | None = None
+    url: str | None = None
     coin: str | None = None
     kind: str | None = None
     timestamp: datetime | None = None

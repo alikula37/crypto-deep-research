@@ -63,7 +63,8 @@ class VectorStore:
         try:
             query = table.search(vector).limit(k)
             if coin:
-                query = query.where(f"coin = '{coin}'")
+                escaped_coin = coin.replace("'", "''")
+                query = query.where(f"coin = '{escaped_coin}'")
             rows = query.to_list()
             for row in rows:
                 distance = float(row.pop("_distance", 0.0) or 0.0)
