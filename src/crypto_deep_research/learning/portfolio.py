@@ -13,6 +13,8 @@ import statistics
 from datetime import date, datetime, timezone
 from typing import Any
 
+from crypto_deep_research.learning.models import EVALUATION_PROTOCOL
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,10 +22,11 @@ def _load_rows(db, horizon: int, source: str | None) -> list[dict[str, Any]]:
     conditions = [
         "p.is_oos = 1",
         "p.horizon_days = ?",
+        "m.evaluation_protocol = ?",
         "o.status = 'filled'",
         "o.return_pct IS NOT NULL",
     ]
-    params: list[Any] = [horizon]
+    params: list[Any] = [horizon, EVALUATION_PROTOCOL]
     if source:
         conditions.append("COALESCE(f.source, 'live') = ?")
         params.append(source)
@@ -31,6 +34,7 @@ def _load_rows(db, horizon: int, source: str | None) -> list[dict[str, Any]]:
         f"""
         SELECT p.run_id, p.probability_up, o.coin, o.entry_at, o.target_date, o.return_pct
         FROM predictions p
+        JOIN model_registry m ON m.model_id = p.model_id
         JOIN outcomes o ON o.run_id = p.run_id AND o.horizon_days = p.horizon_days
         JOIN feature_snapshots f ON f.run_id = o.run_id
         WHERE {' AND '.join(conditions)}

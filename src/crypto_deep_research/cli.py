@@ -459,11 +459,11 @@ def ml_train(
     features: str = typer.Option(
         "base",
         "--features",
-        help="base (varsayilan, ablasyonda en iyi) | base+extended | all",
+        help="base (varsayilan) | base+extended | all",
     ),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
-    """Ozniteliklerden yon modeli egitir (purged walk-forward + Platt kalibrasyon)."""
+    """Yon modeli egitir; model secimi, kalibrasyon ve final holdout donemlerini ayirir."""
     from crypto_deep_research.learning.trainer import train_all, train_horizon
 
     settings = get_settings()
@@ -501,9 +501,17 @@ def ml_train(
         console.print_json(json.dumps(results, default=str))
         return
     for result in results:
-        if result["status"] == "insufficient":
+        if result["status"] != "trained":
+            details = [f"n={result.get('n', 0)}"]
+            if "n_calibration" in result:
+                details.append(
+                    f"cal={result['n_calibration']}/{result.get('min_calibration', '?')}"
+                )
+            if "n_holdout" in result:
+                details.append(f"holdout={result['n_holdout']}/{result.get('min_holdout', '?')}")
             console.print(
-                f"  {result['horizon_days']}g: yetersiz örnek ({result['n']}/{result['min_samples']})"
+                f"  {result['horizon_days']}g [{result.get('source', source)}]: "
+                f"{result['status']} · {' · '.join(details)}"
             )
             continue
         metrics = result.get("metrics", {})
@@ -531,7 +539,8 @@ def ml_eval(
         return
     for model in models:
         console.print(
-            f"  {model['model_id']} · {model['status']} · n={model['train_rows']} · {model['metrics']}"
+            f"  {model['model_id']} · {model['status']} · n={model['train_rows']} · "
+            f"protocol={model.get('evaluation_protocol') or 'legacy'} · {model['metrics']}"
         )
 
 

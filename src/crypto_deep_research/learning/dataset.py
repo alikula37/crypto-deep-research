@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+from datetime import datetime, timezone
 from typing import Any
 
 from crypto_deep_research.learning.history import EXTENDED_FEATURE_NAMES, EXTENDED_ORDER
@@ -83,15 +84,22 @@ def build_dataset(
     rows: list[dict[str, Any]],
     extended: dict[str, dict[int, float]] | None = None,
 ) -> dict[str, Any]:
-    """Etiketli satirlari X/y/dates/coins yapisina cevirir (tarihe gore sirali)."""
+    """Etiketli satirlari ozelliklere ve entry-date/label-date dizilerine cevirir."""
     extended = extended or {}
-    features, labels, dates, coins, run_ids, returns, entry_ats = [], [], [], [], [], [], []
+    features, labels, dates, target_dates, coins, run_ids, returns, entry_ats = (
+        [], [], [], [], [], [], [], []
+    )
     for row in rows:
         features.append(vector_for(row, extended.get(str(row.get("run_id") or ""), {})))
         labels.append(1 if (row.get("return_pct") or 0) > 0 else 0)
         returns.append(float(row.get("return_pct") or 0.0))
-        entry_ats.append(float(row.get("entry_at") or 0.0))
-        dates.append(str(row.get("target_date") or ""))
+        entry_at = float(row.get("entry_at") or 0.0)
+        entry_ats.append(entry_at)
+        if entry_at > 0:
+            dates.append(datetime.fromtimestamp(entry_at, tz=timezone.utc).date().isoformat())
+        else:
+            dates.append(str(row.get("target_date") or ""))
+        target_dates.append(str(row.get("target_date") or ""))
         coins.append(str(row.get("coin") or ""))
         run_ids.append(str(row.get("run_id") or ""))
     return {
@@ -100,6 +108,7 @@ def build_dataset(
         "returns": returns,
         "entry_ats": entry_ats,
         "dates": dates,
+        "target_dates": target_dates,
         "coins": coins,
         "run_ids": run_ids,
         "feature_names": list(FULL_FEATURE_NAMES),

@@ -223,6 +223,7 @@ CREATE TABLE IF NOT EXISTS model_registry (
   kind TEXT NOT NULL,
   horizon_days INTEGER NOT NULL,
   status TEXT NOT NULL DEFAULT 'shadow',
+  evaluation_protocol TEXT,
   trained_at REAL,
   train_rows INTEGER,
   feature_schema_version INTEGER NOT NULL DEFAULT 1,
@@ -342,6 +343,7 @@ class Database:
         self._ensure_column("feature_snapshots", "source", "TEXT DEFAULT 'live'")
         self._ensure_column("outcomes", "source", "TEXT DEFAULT 'live'")
         self._ensure_column("predictions", "is_oos", "INTEGER NOT NULL DEFAULT 0")
+        self._ensure_column("model_registry", "evaluation_protocol", "TEXT")
         self._ensure_column("documents", "parent_id", "TEXT")
         self._ensure_column("documents", "chunk_index", "INTEGER NOT NULL DEFAULT 0")
         self._ensure_column("documents", "token_start", "INTEGER NOT NULL DEFAULT 0")
@@ -1153,15 +1155,25 @@ class Database:
     def model_list(self) -> list[dict[str, Any]]:
         return self.query("SELECT * FROM model_registry ORDER BY trained_at DESC")
 
-    def model_get(self, horizon_days: int, *, statuses: tuple[str, ...] = ("active", "shadow")) -> dict[str, Any] | None:
+    def model_get(
+        self,
+        horizon_days: int,
+        *,
+        statuses: tuple[str, ...] = ("active", "shadow"),
+        evaluation_protocol: str | None = None,
+    ) -> dict[str, Any] | None:
         placeholders = ",".join("?" for _ in statuses)
+        protocol_clause = " AND evaluation_protocol = ?" if evaluation_protocol else ""
+        params = (horizon_days, *statuses)
+        if evaluation_protocol:
+            params += (evaluation_protocol,)
         rows = self.query(
             f"""
             SELECT * FROM model_registry
-            WHERE horizon_days = ? AND status IN ({placeholders})
+            WHERE horizon_days = ? AND status IN ({placeholders}){protocol_clause}
             ORDER BY CASE status WHEN 'active' THEN 0 ELSE 1 END, trained_at DESC LIMIT 1
             """,
-            (horizon_days, *statuses),
+            params,
         )
         return rows[0] if rows else None
 
@@ -1169,13 +1181,13 @@ class Database:
         self.execute(
             """
             INSERT OR REPLACE INTO model_registry
-              (model_id, kind, horizon_days, status, trained_at, train_rows,
+              (model_id, kind, horizon_days, status, evaluation_protocol, trained_at, train_rows,
                feature_schema_version, params, metrics, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 payload["model_id"], payload["kind"], payload["horizon_days"], payload["status"],
-                payload.get("trained_at"), payload.get("train_rows"),
+                payload.get("evaluation_protocol"), payload.get("trained_at"), payload.get("train_rows"),
                 payload.get("feature_schema_version", 1),
                 payload.get("params"), payload.get("metrics"), payload.get("notes"),
             ),

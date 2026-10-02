@@ -117,7 +117,8 @@ Docker içinde çalıştırmak için: `docker compose run --rm app cdr snapshot 
 
 `rag-eval`, elle etiketlenmiş JSONL sorgularında kaynak-belge düzeyinde macro Precision@k,
 Recall@k, Hit Rate@k, MRR ve nDCG ölçer. `cdr search ... --json` çıktısındaki `parent_id`
-değerlerini sorgunun ilgili kaynakları olarak `relevant_parent_ids` alanına yazın:
+değerlerini sorgunun ilgili kaynakları olarak `data/rag-evaluation.jsonl` dosyasındaki
+`relevant_parent_ids` alanına yazın:
 
 ```jsonl
 {"id":"btc-etf-akis","query":"Bitcoin ETF akışları nasıl değişti?","coin":"bitcoin","relevant_parent_ids":["news-..."]}
@@ -177,38 +178,36 @@ Sistem "tahmin edip unutmaz": her koşu, sonraki getirilerle karşılaştırıla
   kalibre olasılık iddiası için Brier'in temel orandan iyi olması şartı aranır.
 - **Dürüst sınır:** 1 günlük kripto yönünde gerçekçi bant %48–55'tir; %50'ye yakın değerler düşük
   bilgi içeriğinin yansımasıdır. Amaç sayıyı şişirmek değil, ölçülebilir ve kalibre edilmiş hale getirmektir.
-- **Model katmanı (shadow):** yeterli etiket birikince (≥30) L2 lojistik + Platt kalibrasyonu
-  purged walk-forward ile eğitilir; **n<200 veya OOS metrikleri geçene kadar asla "aktif" olmaz**.
-  Aktif model Brier'in temel orandan iyi ve AUC≥0,55 olması şartına bağlıdır.
+- **Model katmanı (shadow):** tarihler bazında gruplanmış purged walk-forward yalnız erken dönem
+  model seçimi için kullanılır. Sonraki kalibrasyon aralığı Platt/izotonik kalibratörü fit eder;
+  model/kalibrasyon sınırlarında etiket ufku kadar purge uygulanır, en son kronolojik holdout ise
+  yalnız final metriklerine ayrılır. Kalibratör kendi fit edildiği tahmin/etiket çiftlerinde
+  değerlendirilmez. **Final holdout n<200 veya metrik
+  kapıları geçilmedikçe model aktif olmaz**; eski protokolle eğitilmiş modeller yeni tahminlerde
+  ve portföy backtest'inde kullanılmaz.
 - **Tarihsel replay (backfill_v1):** 13 fiyat-türevli kriter her gün için nokta-zamanında yeniden
   hesaplanır (sızıntısız); BTC+ETH 2 yılda ~1.480 örnek dakikalar içinde üretilir. Haber/sosyal
   kriterler geçmişte dürüstçe kurulamadığı için kapsam dışıdır ve `source=backfill` etiketiyle ayrılır.
 - **Genişletilmiş replay (backfill_v2):** funding + perp/spot basis + makro (DXY/altın/SPX/10Y/VIX)
   + Fear&Greed + stablecoin arzı da nokta-zamanında eklenir (25 özellik); 10 major coin × 2 yıl =
   **7.400 örnek** ~2 dakikada üretilir.
-- **Ablasyon (7g, 7.400 örnek):** taban özellikler (10) AUC 0,5495 · +makro/funding/F&G 0,5289 ·
-  +kesitsel (35 özellik) 0,5345. Bu örneklemde ek özellikler sıralama kalitesini düşürdüğü için
-  **varsayılan eğitim taban özelliklerle** yapılır (`--features base|base+extended|all`).
-- **Algoritma seçimi:** L2 lojistik ve gradyan artırma purged walk-forward OOS'ta yarışır; önce
-  sağlık kontrolü (Brier≤temel, ECE≤0,10, net Sharpe>0), sonra AUC üstünlüğü. Kalibrasyon
-  n_oos≥300 ise izotonik, değilse Platt. Sağlığı geçmeyen model `rejected` olur ve tahminlerde
-  kullanılmaz.
-- **Nihai tarihsel tablo (10 coin, 7.400 örnek, OOS):**
-  | Ufuk | Durum | AUC | Brier (temel) | ECE | Net Sharpe | Aktif oran |
-  | --- | --- | --- | --- | --- | --- | --- |
-  | 1g | **rejected** | 0,490 | 0,2493 (0,2492) | 0,004 | 0,26 | %0,5 |
-  | 7g | shadow | 0,5495 | 0,2445 (0,2467) | 0,006 | 0,69 | %17 |
-  | **30g** | shadow | **0,5777** | 0,2378 (0,2439) | 0,011 | 0,64 | %27 |
-
-  30g modeli ilk kez AUC≥0,55 kapısını geçti; backfill modelleri manuel inceleme gerektirdiği
-  için **shadow** kaldı (`cdr ml-activate <model_id>` ile yayına alınabilir). 1g modeli kenar
-  bulamadığı için otomatik reddedildi — sistem işlem yapmadığında bunu açıkça söylüyor.
-- **Kesitsel portföy backtest'i (`cdr ml-portfolio`):** yalnızca walk-forward OOS tahminleri
-  kullanılarak 10 coin arasından modelin en iyi k'sı seçilir; eşit ağırlık ve BTC al-tut ile
-  karşılaştırılır (maliyet düşülür). Örnek sonuç (30g, üst-3, aylık, 13 dönem, 10 bps):
-  **long-short 1,29x · net Sharpe 1,66 · isabet %77**; üst-3 0,98x; eşit ağırlık 0,61x;
-  BTC 0,93x. 7g/haftalıkta fark zayıf (0,32%/dönem). Dönem sayısı az olduğu için sonuç
-  **ihtiyatla** yorumlanmalı; asıl kenar 30 günlük sıralamada görünüyor.
+- `--features base` varsayılandır; önceki özellik ablasyonu keşifsel olduğu için final holdout kanıtı
+  sayılmaz. Birden çok özellik grubunu aynı holdout üzerinde kıyaslamak holdout'u model seçimine
+  dönüştürür; son karşılaştırma için yeni bir dönem ayırın.
+- **Algoritma seçimi:** L2 lojistik ve (örneklem yeterliyse) gradyan artırma erken dönem purged
+  walk-forward tahminlerinde karşılaştırılır. Seçilen algoritma model döneminde yeniden eğitilir,
+  ayrı kalibrasyon döneminde Platt/izotonik kalibrasyon fit edilir (n≥300 ise izotonik), AUC,
+  Brier, ECE ve ekonomik metrikler final holdout'ta hesaplanır. Sağlığı geçmeyen model `rejected`
+  olur. Her model kaydında protokol ve dönem sınırları saklanır.
+- **Önceki backfill sonuçları:** README'deki eski AUC/Brier/Sharpe ve portföy rakamları ortak
+  walk-forward tahminlerinin hem kalibrasyonunda hem değerlendirmesinde kullanıldığı eski
+  protokolden üretilmişti. Karşılaştırılabilir final holdout ölçümü değiller; bu nedenle yeni
+  protokolden `cdr ml-train --source backfill` sonuçları üretilene kadar performans iddiası olarak
+  kullanılmamalıdır. Eski OOS tahminleri protokol kimliği olmadığı için yeni portföy backtest'ine
+  alınmaz.
+- **Kesitsel portföy backtest'i (`cdr ml-portfolio`):** yalnız yeni protokolün final holdout
+  tahminlerini kullanır; eski protokolden kalan OOS satırları dışarıda bırakılır. On coin arasından
+  en iyi k seçilir ve sonuçlar eşit ağırlık/BTC ile maliyet sonrası karşılaştırılır.
 - **Kullanım önerisi:** model sıralaması tek başına yatırım kararı değildir; canlı koşular
   biriktikçe (30g etiketi ~1 ay sonra) doğrulama yenilenmelidir.
 - **Uyarı:** Backfill örnekleri aynı piyasa günlerini paylaştığı için etkin örneklem daha küçüktür
