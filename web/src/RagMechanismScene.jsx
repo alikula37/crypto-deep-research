@@ -51,7 +51,7 @@ export default function RagMechanismScene({ phase = 0, chunks = [], rankings: ra
   const sourceQuantity = safePhase === 0
     ? sourceInfo.tokenCount != null ? `${sourceInfo.tokenCount} token · sıra ve metin sınırları korunur` : `Gösterilen token aralığı: [${shownStart}, ${shownEnd})`
     : safePhase === 1
-      ? `İlk ${Math.min(limits.sources, safeChunks.length)} pencere · ${Math.max(0, ...safeChunks.map((chunk) => chunk.tokenCount))} token boyut · ${Math.max(0, ...safeChunks.map((chunk) => chunk.overlapCount))} token ortak alan`
+      ? `Gösterilen ${Math.min(limits.sources, safeChunks.length)} pencere · ${Math.max(0, ...safeChunks.map((chunk) => chunk.tokenCount))} token boyut · ${Math.max(0, ...safeChunks.map((chunk) => chunk.overlapCount))} token ortak alan`
       : `${safeChunks.length} chunk → ${safeChunks.length} kaydedilmiş vektör${embeddingDimensions != null ? ` · d=${embeddingDimensions}` : ""}`;
 
   useEffect(() => {
