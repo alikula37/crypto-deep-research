@@ -83,8 +83,11 @@ Gereksinimler: Python 3.10+ ve [uv](https://docs.astral.sh/uv/). Web geliştirme
 | Prompt Çıktısı | Hazır prompt + MCP entegrasyon panosu + OpenRouter ile çalıştırma |
 | Kaynak Arama | Yerel RAG araması ve (anahtar varsa) AI yanıtı |
 | Rapor Arşivi | Geçmiş koşular, rapor arama filtresi ve Markdown görüntüleme |
+| Nasıl Çalışır? | Three.js ile etkileşimli akış, ürün turu, temsili RRF karşılaştırması ve mülakat modu |
 
 Klavye kısayolları: `/` arama alanına git · `?` yardım · `⌘/Ctrl + Enter` derin araştırmayı başlat · `Esc` kapat.
+
+**Rehber:** sol menüde **Rehber** üzerinden veya `http://127.0.0.1:8000/?tab=how` adresinden açılır. **Mülakat modu** (`?tab=how&mode=interview`), ayrı araştırma ve RAG hatlarını, ölçüm protokollerini ve güncel deneylerin sınırlarını anlatır. Aşamalara tıklanabilir; 60 saniyelik otomatik tur, duraklatma ve destekleyen tarayıcılarda sunum ekranı vardır. Animasyonlar hareket azaltma tercihini izler; WebGL kullanılamadığında sabit, etkileşimli şemaya geçilir. Arama örnekleri temsildir; gerçek kaynaklara geçiş düğmesi soruyu Kaynak Arama’ya taşır.
 
 ### CLI
 
