@@ -72,7 +72,7 @@ def test_build_sample_uses_only_past_and_labels_forward():
     assert sample["current_price"] == closes[index]
 
 
-def test_backfill_batch_and_training(tmp_path):
+def test_backfill_batch_requires_separate_calibration_and_holdout(tmp_path):
     db = Database(tmp_path / "t.db")
     specs = load_registry()
     factors = compute_group_factors(specs)
@@ -96,9 +96,6 @@ def test_backfill_batch_and_training(tmp_path):
     assert db.learning_rows(7, source="live") == []
 
     result = train_horizon(db, 7, min_samples=30, source="backfill")
-    assert result["status"] == "trained"
-    assert result["model_status"] == "shadow", "backfill modeli otomatik aktiflesmemeli"
-    assert result["model_id"].startswith("logreg_platt_bf")
-    assert result["metrics"]["n_oos"] > 0
-    model = db.model_get(7)
-    assert model is not None and model["kind"] == "logreg_platt_bf"
+    assert result["status"] == "insufficient_calibration_or_holdout_data"
+    assert result["n_calibration"] < result["min_calibration"]
+    assert db.model_get(7) is None

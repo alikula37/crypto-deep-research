@@ -9,6 +9,7 @@ from crypto_deep_research.deep_research.registry import load_registry
 from crypto_deep_research.learning.dataset import build_dataset, row_features
 from crypto_deep_research.learning.features import persist_run
 from crypto_deep_research.learning.models import (
+    EVALUATION_PROTOCOL,
     LogisticModel,
     auc_score,
     brier_score,
@@ -19,7 +20,7 @@ from crypto_deep_research.learning.models import (
     platt_fit,
     purged_walk_forward,
 )
-from crypto_deep_research.learning.trainer import train_horizon
+from crypto_deep_research.learning.trainer import _temporal_split, train_horizon
 from crypto_deep_research.models import CoinRef, ItemResult, ResearchRun
 from crypto_deep_research.storage.db import Database
 
@@ -57,15 +58,45 @@ def test_metrics_bounds():
 
 def test_purged_walk_forward_excludes_overlap():
     base = datetime(2026, 1, 1, tzinfo=timezone.utc)
-    dates = [(base + timedelta(days=index)).date().isoformat() for index in range(60)]
+    daily_dates = [(base + timedelta(days=index)).date().isoformat() for index in range(60)]
+    dates = [day for day in daily_dates for _ in range(3)]
     windows = purged_walk_forward(dates, horizon_days=7, folds=3, min_train=8)
     assert windows, "pencereler uretilmeli"
     for train_idx, test_idx in windows:
-        test_start = dates[test_idx[0]]
+        test_start = min(dates[index] for index in test_idx)
         for index in train_idx:
             assert dates[index] < test_start
-        # purge: hedef tarihi test baslangicini asan egitim ornegi kalmamali
-        assert len(train_idx) < test_idx[0]
+            assert (
+                datetime.fromisoformat(dates[index]).date() + timedelta(days=7)
+                < datetime.fromisoformat(test_start).date()
+            )
+        assert not set(train_idx) & set(test_idx)
+        test_indices = set(test_idx)
+        for day in {dates[index] for index in test_idx}:
+            assert {index for index, value in enumerate(dates) if value == day} <= test_indices
+
+
+def test_temporal_split_purges_calibration_before_holdout():
+    base = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    dates = [(base + timedelta(days=index)).date().isoformat() for index in range(300)]
+    dataset = {"dates": [day for day in dates for _ in range(2)]}
+    split = _temporal_split(dataset, horizon_days=7)
+    assert split is not None
+    train_dates = {dataset["dates"][index] for index in split["train"]}
+    calibration_dates = {dataset["dates"][index] for index in split["calibration"]}
+    holdout_dates = {dataset["dates"][index] for index in split["holdout"]}
+    assert train_dates.isdisjoint(calibration_dates | holdout_dates)
+    assert calibration_dates.isdisjoint(holdout_dates)
+    calibration_start = datetime.fromisoformat(split["calibration_start"]).date()
+    holdout_start = datetime.fromisoformat(split["holdout_start"]).date()
+    assert all(
+        datetime.fromisoformat(day).date() + timedelta(days=7) < calibration_start
+        for day in train_dates
+    )
+    assert all(
+        datetime.fromisoformat(day).date() + timedelta(days=7) < holdout_start
+        for day in calibration_dates
+    )
 
 
 def test_row_features_from_snapshot():
@@ -127,7 +158,7 @@ def test_trainer_smoke_on_synthetic_data(tmp_path):
     db = Database(tmp_path / "t.db")
     specs = load_registry()
     factors = compute_group_factors(specs)
-    for index in range(48):
+    for index in range(280):
         score = 0.35 if index % 2 == 0 else -0.35
         run = _synthetic_run(index, score)
         assert persist_run(db, run, specs, group_factors=factors) is True
@@ -145,5 +176,21 @@ def test_trainer_smoke_on_synthetic_data(tmp_path):
     assert result["model_status"] == "shadow"  # n<200 -> asla aktif olmaz
     assert result["metrics"]["auc"] is not None and result["metrics"]["auc"] > 0.8
     assert result["metrics"]["brier"] < result["metrics"]["baseline_brier"]
-    assert result["predictions_written"] == 48
-    assert db.model_get(7) is not None
+    assert result["metrics"]["evaluation_protocol"] == EVALUATION_PROTOCOL
+    assert result["metrics"]["n_oos"] == result["metrics"]["n_holdout"]
+    assert result["metrics"]["n_calibration"] >= 30
+    assert result["predictions_written"] == 280
+    model = db.model_get(7, evaluation_protocol=EVALUATION_PROTOCOL)
+    assert model is not None
+    oos = db.query(
+        "SELECT o.entry_at FROM predictions p JOIN outcomes o "
+        "ON o.run_id = p.run_id AND o.horizon_days = p.horizon_days "
+        "WHERE p.model_id = ? AND p.is_oos = 1",
+        (result["model_id"],),
+    )
+    holdout_start = datetime.fromisoformat(result["metrics"]["temporal_split"]["holdout_start"])
+    assert len(oos) == result["metrics"]["n_holdout"]
+    assert all(
+        datetime.fromtimestamp(row["entry_at"], tz=timezone.utc).date() >= holdout_start.date()
+        for row in oos
+    )

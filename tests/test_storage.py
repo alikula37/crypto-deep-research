@@ -1,7 +1,9 @@
 """Onbellek ve depolama testleri."""
 
+import sqlite3
 import time
 
+from crypto_deep_research.learning.models import EVALUATION_PROTOCOL
 from crypto_deep_research.models import NewsArticle
 from crypto_deep_research.storage.db import Database, stable_key
 
@@ -59,3 +61,35 @@ def test_metric_history(tmp_path):
     history = db.metric_history("bitcoin", "rank")
     assert len(history) == 2
     assert history[0]["value"] == 2.0
+
+
+def test_model_registry_migrates_legacy_rows_without_protocol(tmp_path):
+    path = tmp_path / "legacy.db"
+    with sqlite3.connect(path) as connection:
+        connection.execute(
+            """CREATE TABLE model_registry (
+                 model_id TEXT PRIMARY KEY, kind TEXT NOT NULL, horizon_days INTEGER NOT NULL,
+                 status TEXT NOT NULL DEFAULT 'shadow', trained_at REAL, train_rows INTEGER,
+                 feature_schema_version INTEGER NOT NULL DEFAULT 1, params TEXT, metrics TEXT, notes TEXT
+               )"""
+        )
+        connection.execute(
+            "INSERT INTO model_registry (model_id, kind, horizon_days, status) "
+            "VALUES ('legacy', 'logreg_platt', 7, 'active')"
+        )
+
+    db = Database(path)
+    legacy = db.model_get(7)
+    assert legacy is not None and legacy["evaluation_protocol"] is None
+    assert db.model_get(7, evaluation_protocol=EVALUATION_PROTOCOL) is None
+    db.model_save(
+        {
+            "model_id": "holdout",
+            "kind": "logreg_platt",
+            "horizon_days": 7,
+            "status": "shadow",
+            "evaluation_protocol": EVALUATION_PROTOCOL,
+        }
+    )
+    selected = db.model_get(7, evaluation_protocol=EVALUATION_PROTOCOL)
+    assert selected is not None and selected["model_id"] == "holdout"

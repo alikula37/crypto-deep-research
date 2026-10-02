@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta, timezone
 
+from crypto_deep_research.learning.models import EVALUATION_PROTOCOL
 from crypto_deep_research.learning.portfolio import run_backtest, select_rebalance_dates
 from crypto_deep_research.storage.db import Database
 
@@ -14,7 +15,16 @@ def test_select_rebalance_dates():
     assert chosen[1] == "2026-01-31"
 
 
-def _seed(db, coins, days, noise_scale=0.0):
+def _seed(db, coins, days, noise_scale=0.0, evaluation_protocol=EVALUATION_PROTOCOL):
+    db.model_save(
+        {
+            "model_id": "test",
+            "kind": "test",
+            "horizon_days": 30,
+            "status": "shadow",
+            "evaluation_protocol": evaluation_protocol,
+        }
+    )
     base = datetime(2025, 1, 1, tzinfo=timezone.utc)
     for day_index in range(days):
         created = base + timedelta(days=day_index * 30)
@@ -58,6 +68,14 @@ def test_backtest_selects_winners(tmp_path):
     assert result["avg_spread_pct"] > 0
     assert result["hit_rate"] == 1.0
     assert result["net_sharpe"]["top_k"] is not None
+
+
+def test_backtest_excludes_legacy_oos_predictions(tmp_path):
+    db = Database(tmp_path / "t.db")
+    coins = ["bitcoin", "ethereum", "solana", "cardano", "polkadot", "chainlink"]
+    _seed(db, coins, 6, evaluation_protocol=None)
+    result = run_backtest(db, horizon=30, top_k=2, source="backfill")
+    assert result["status"] == "no_data"
 
 
 def test_backtest_cost_reduces_equity(tmp_path):
