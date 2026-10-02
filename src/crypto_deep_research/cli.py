@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 from datetime import datetime, timezone
+from pathlib import Path
 
 import typer
 from rich.console import Console
@@ -29,6 +30,7 @@ from crypto_deep_research.formatting import (
 from crypto_deep_research.llm import OpenRouterClient
 from crypto_deep_research.providers.registry import build_providers
 from crypto_deep_research.rag.engine import RAGEngine
+from crypto_deep_research.rag.evaluation import evaluate_retrieval, load_cases
 from crypto_deep_research.storage.db import Database
 
 app = typer.Typer(
@@ -219,6 +221,7 @@ def search(
     coin: str | None = typer.Option(None, "--coin", "-c"),
     k: int = typer.Option(8, "--k"),
     prompt: bool = typer.Option(False, "--prompt", help="LLM için RAG prompt'u üret"),
+    json_output: bool = typer.Option(False, "--json", help="Kaynak kimlikleriyle JSON çıktı"),
 ):
     """Yerel RAG deposunda arama yapar."""
     settings = get_settings()
@@ -231,10 +234,79 @@ def search(
     if not results:
         console.print("[yellow]Sonuç bulunamadı. Once deep-research çalıştırin.[/yellow]")
         return
+    if json_output:
+        console.print_json(
+            json.dumps(
+                [
+                    {
+                        "id": result.key,
+                        "parent_id": result.parent_id or result.key,
+                        "chunk_index": result.chunk_index,
+                        "score": result.score,
+                        "score_type": result.score_type,
+                        "source": result.source,
+                        "url": result.url,
+                        "coin": result.coin,
+                        "kind": result.kind,
+                        "content": result.content,
+                    }
+                    for result in results
+                ],
+                ensure_ascii=False,
+            )
+        )
+        return
     for index, result in enumerate(results, 1):
         when = result.timestamp.strftime("%Y-%m-%d %H:%M") if result.timestamp else "?"
         console.print(f"[bold]{index}. {result.source or '?'}[/bold] ({when}) skor={result.score:.3f}")
         console.print(f"   {result.content[:300]}")
+
+
+@app.command("rag-eval")
+def rag_eval(
+    dataset: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
+    ks: str = typer.Option("1,3,5,10", "--ks", help="Virgülle ayrılmış Recall/Precision cut-off'ları"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Etiketli JSONL sorgularıyla hibrit RAG retrieval kalitesini ölçer."""
+    try:
+        cutoffs = [int(value.strip()) for value in ks.split(",") if value.strip()]
+        if not cutoffs or any(k < 1 for k in cutoffs):
+            raise ValueError("--ks pozitif tamsayılardan oluşmalı")
+        cases = load_cases(dataset)
+    except (ValueError, OSError) as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+    settings = get_settings()
+    db = Database(settings.db_path)
+    engine = RAGEngine(db, settings)
+    result = evaluate_retrieval(
+        lambda query, coin, k: engine.search(query, coin=coin, k=k), cases, ks=cutoffs
+    )
+    output = {
+        **result,
+        "retrieval": {
+            "fusion": "reciprocal_rank_fusion",
+            "dense_enabled": settings.embeddings_enabled,
+            "reranker_model": settings.rag_reranker_model,
+        },
+    }
+    if json_output:
+        console.print_json(json.dumps(output, ensure_ascii=False))
+        return
+
+    table = Table(title=f"RAG Retrieval Evaluation · {result['n_queries']} sorgu")
+    table.add_column("k", justify="right")
+    for metric in ("precision", "recall", "hit_rate", "mrr", "ndcg"):
+        table.add_column(metric)
+    for k, metrics in result["metrics"].items():
+        values = (f"{metrics[name]:.3f}" for name in ("precision", "recall", "hit_rate", "mrr", "ndcg"))
+        table.add_row(str(k), *values)
+    console.print(table)
+    console.print(
+        f"Fusion: RRF · dense={'açık' if settings.embeddings_enabled else 'kapalı'} · "
+        f"reranker={settings.rag_reranker_model or 'kapalı'} · etiketler: {dataset}"
+    )
 
 
 @app.command()
