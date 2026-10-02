@@ -46,9 +46,12 @@
 .rag-preset-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
 .rag-preset-buttons button { font-size: 11px; padding: 8px 10px; background: #18271d; }
 .rag-preset-buttons button[aria-pressed=true], .rag-chunk-picker button[aria-pressed=true] { border-color: #b7ac68; background: #393723; color: #f1dfa1; }
-.rag-chunk-controls > label { min-width: 170px; font-size: 12px; color: #9eb7a7; }
-.rag-chunk-controls strong { float: right; font-weight: 500; color: #e0bb55; }
-.rag-chunk-controls input { display: block; width: 100%; margin: 12px 0 0; accent-color: #e0bb55; }
+.rag-overlap-control { display: flex; align-items: center; gap: 25px; flex-wrap: wrap; padding: 13px 16px; margin-bottom: 14px; border: 1px solid #605636; border-radius: 7px; background: #242a1b; }
+.rag-overlap-control label { flex: 1; min-width: 220px; max-width: 430px; font-size: 12px; color: #c7d3b7; }
+.rag-overlap-control label > span { display: flex; justify-content: space-between; gap: 15px; }
+.rag-overlap-control strong { font-weight: 500; color: #e0bb55; }
+.rag-overlap-control input { display: block; width: 100%; margin: 12px 0 0; accent-color: #e0bb55; }
+.rag-overlap-control p { flex: 1; min-width: 180px; margin: 0; font-size: 11px; line-height: 1.7; color: #adbc9e; }
 .rag-strategy-control { border: 1px solid #3f614a; border-radius: 8px; padding: 15px 17px; background: #192c20; margin-bottom: 22px; }
 .rag-strategy-control [role=group] { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
 .rag-strategy-control button { display: flex; flex-direction: column; gap: 6px; text-align: left; min-width: 180px; padding: 10px 13px; background: #12221a; }
@@ -78,7 +81,7 @@
 .rag-chunk-stats { display: flex; flex-wrap: wrap; gap: 22px; border-block: 1px solid #304638; padding: 13px 0; margin: 21px 0; font-size: 11px; color: #99b2a2; }
 .rag-chunk-stats b { font: 17px var(--mono); color: #cbe3d3; margin-right: 4px; }
 .rag-token-ruler { display: flex; justify-content: space-between; color: #8ba997; font: 10px var(--mono); margin-bottom: 7px; }
-.rag-window-strip { border: 1px solid #304638; padding: 6px 12px; border-radius: 7px; background: repeating-linear-gradient(90deg, transparent, transparent calc(10% - 1px), #233d2d calc(10% - 1px), #233d2d 10%); }
+.rag-window-strip { min-height: 206px; border: 1px solid #304638; padding: 6px 12px; border-radius: 7px; background: repeating-linear-gradient(90deg, transparent, transparent calc(10% - 1px), #233d2d calc(10% - 1px), #233d2d 10%); }
 .rag-window-strip > button { display: block; position: relative; width: 100%; height: 32px; padding: 0; border: 0; border-radius: 0; background: transparent; }
 .rag-window-range { position: absolute; top: 4px; height: 23px; background: #275b4b; border: 1px solid #4d9b84; border-radius: 3px; text-align: center; font: 10px/21px var(--mono); transition: left .35s ease, width .35s ease; min-width: 15px; }
 .rag-window-strip button[aria-pressed=true] .rag-window-range { border-color: #c9daa8; background: #377c64; box-shadow: 0 0 0 1px #94bea4; }
@@ -211,7 +214,6 @@
 .how-page[data-mode=interview] .how-facts { gap: 20px; }
 .how-page[data-mode=interview] .how-facts b { font-size: 21px; }
 .how-page[data-mode=interview] .how-facts { display: none; }
-.how-interview-present { margin: 9px 0 0 auto; padding: 7px 12px; font-size: 11px; background: #243d2d; }
 .how-page[data-mode=interview] .how-hero .how-hero-aside > p { margin-block: 9px; }
 @media(max-width:1000px) { .rag-phase-explanation { grid-template-columns: 1fr; } .rag-phase-tabs button { padding-inline: 11px; } .rag-embedding-flow { grid-template-columns: 1fr 125px 1fr; } .rag-chunk-controls { flex-wrap: wrap; } }
 @media(max-width:700px) { .rag-strategy-comparison > div { grid-template-columns: 1fr; } .rag-strategy-comparison article[data-method=token] { border-right: 0; border-bottom: 1px solid #405443; } .rag-strategy-control [role=group] { display: grid; grid-template-columns: 1fr; } .rag-strategy-control button { min-width: 0; } .rag-preview-controls button { width: 100%; } .rag-overlap-result b { font-size: 10px; } }

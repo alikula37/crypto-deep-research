@@ -12,6 +12,9 @@ function Arrow({ back = false }) {
 function Pause() {
   return <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h3v12H3zM10 2h3v12h-3z" /></svg>;
 }
+function PresentationIcon({ expanded }) {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={expanded ? "M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5" : "M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"} /></svg>;
+}
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -141,9 +144,10 @@ export default function HowItWorks({ onNavigate, onSearch, health }) {
 
   return (
     <div className="how-page" ref={pageRef} data-mode={mode}>
+      {document.fullscreenEnabled && <div className="how-presentation-tools" role="group" aria-label="Sunum kontrolleri"><span className="how-presentation-label">Nasıl Çalışır?</span><button className="how-presentation-toggle" aria-pressed={fullscreen} onClick={toggleFullscreen}><PresentationIcon expanded={fullscreen} />{fullscreen ? "Sunumdan çık" : "Sunum ekranı"}{fullscreen && <kbd aria-hidden="true">Esc</kbd>}</button></div>}
       <header className="how-hero">
         <div><span className="how-eyebrow"><span className="how-status-dot" /> NASIL ÇALIŞIR?</span><h1>{interview ? <>Sistem, <em>içeriden.</em></> : <>Veriyi gör.<br /><em>Mantığı anla.</em></>}</h1><p>{interview ? "Metnin parçalanmasını, iki aramanın birleşmesini ve iddianın kanıta bağlanmasını gör. Her adımda girdiyi, dönüşümü ve çıktıyı incele." : "Bir araştırmanın nasıl oluştuğunu ve bir sorunun doğru kaynağa nasıl ulaştığını adım adım keşfet."}</p></div>
-        <div className="how-hero-aside"><div className="how-mode-switch" role="group" aria-label="Anlatım modu"><button aria-pressed={!interview} onClick={() => setMode("guide")}><IconDoc width={15} height={15} />Ürün turu</button><button aria-pressed={interview} onClick={() => setMode("interview")}><IconSparkles width={15} height={15} />Mülakat modu</button></div><p>{interview ? "Mimari kararlar, deney tasarımı ve savunulabilir sonuçlar." : "İlk araştırmandan kaynaklı sorulara, kullanım rehberin."}</p><div className="how-facts"><span><b>10</b> analiz modülü</span><span><b>66</b> kriter</span><span><b>2</b> arama yöntemi</span></div>{interview && document.fullscreenEnabled && <button className="how-interview-present" onClick={toggleFullscreen}>{fullscreen ? "Sunumdan çık" : "Sunum ekranı"}</button>}</div>
+        <div className="how-hero-aside"><div className="how-mode-switch" role="group" aria-label="Anlatım modu"><button aria-pressed={!interview} onClick={() => setMode("guide")}><IconDoc width={15} height={15} />Ürün turu</button><button aria-pressed={interview} onClick={() => setMode("interview")}><IconSparkles width={15} height={15} />Mülakat modu</button></div><p>{interview ? "Mimari kararlar, deney tasarımı ve savunulabilir sonuçlar." : "İlk araştırmandan kaynaklı sorulara, kullanım rehberin."}</p><div className="how-facts"><span><b>10</b> analiz modülü</span><span><b>66</b> kriter</span><span><b>2</b> arama yöntemi</span></div></div>
       </header>
 
       {interview ? <RagWalkthrough reducedMotion={reducedMotion} visible={visible} onNavigate={onNavigate} onSearch={onSearch} /> : <>
@@ -152,7 +156,7 @@ export default function HowItWorks({ onNavigate, onSearch, health }) {
           <PipelineScene activeStep={activeStep} onSelectStep={selectStep} playing={playing} reducedMotion={reducedMotion} mode={mode} />
           <p className="how-scene-caption">Araştırma ve soru-cevap ayrı çalışır. Her araştırma bir RAG sorgusu başlatmaz.</p>
           <ol className="how-stage-list" aria-label="Sistem aşamaları">{STAGES.map((item, index) => <li key={item.label}><button aria-pressed={activeStep === index} onClick={() => selectStep(index)} style={{ "--stage-color": item.color }}><span className="how-stage-no">0{index + 1}</span><b>{item.label}</b><span>{item.short}</span></button></li>)}</ol>
-          <div className="how-playback"><span><i className={playing && !reducedMotion ? "how-motion-dot is-playing" : "how-motion-dot"} />{reducedMotion ? "Hareket azaltma tercihi açık" : touring ? playing ? "60 saniyelik tur sürüyor" : "Tur duraklatıldı" : playing ? "Noktalara tıkla, akışı keşfet" : "Animasyon duraklatıldı"}</span><div><button onClick={() => setPlaying(!playing)} disabled={reducedMotion} aria-label={playing ? "Animasyonu duraklat" : "Animasyonu oynat"}>{playing ? <Pause /> : <IconPlay width={12} height={12} />}{playing ? "Duraklat" : "Oynat"}</button><button onClick={startTour} disabled={reducedMotion || touring}><IconPlay width={10} height={10} />60 sn tur</button>{document.fullscreenEnabled && <button onClick={toggleFullscreen}>{fullscreen ? "Sunumdan çık" : "Sunum ekranı"}</button>}</div></div>
+          <div className="how-playback"><span><i className={playing && !reducedMotion ? "how-motion-dot is-playing" : "how-motion-dot"} />{reducedMotion ? "Hareket azaltma tercihi açık" : touring ? playing ? "60 saniyelik tur sürüyor" : "Tur duraklatıldı" : playing ? "Noktalara tıkla, akışı keşfet" : "Animasyon duraklatıldı"}</span><div><button onClick={() => setPlaying(!playing)} disabled={reducedMotion} aria-label={playing ? "Animasyonu duraklat" : "Animasyonu oynat"}>{playing ? <Pause /> : <IconPlay width={12} height={12} />}{playing ? "Duraklat" : "Oynat"}</button><button onClick={startTour} disabled={reducedMotion || touring}><IconPlay width={10} height={10} />60 sn tur</button></div></div>
         </div>
         <div className="how-stage-detail" style={{ "--stage-color": stage.color }}>
           <div className="how-detail-top"><span className="how-small-label">{stage.noun}</span><span className="how-detail-index">0{activeStep + 1}<span> / 05</span></span></div>

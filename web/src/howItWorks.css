@@ -1,5 +1,10 @@
 .how-page { max-width: 1380px; margin: 0 auto; --how-line: #34433a; --how-soft: #101914; }
 .how-page:fullscreen { max-width: none; background: var(--bg); overflow-y: auto; padding: 36px max(24px, calc((100vw - 1380px) / 2)); }
+.how-presentation-tools { position: sticky; top: 0; z-index: 15; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; margin-bottom: 12px; border: 1px solid var(--how-line); border-radius: 8px; background: #142119; box-shadow: 0 4px 16px #0004; }
+.how-presentation-label { font: 10px var(--mono); letter-spacing: .04em; color: #a9c0b1; }
+.how-presentation-toggle { display: inline-flex; align-items: center; gap: 9px; min-height: 40px; padding: 9px 14px; background: #20382b; border-color: #5c7d66; color: #e0eee3; font-size: 12px; }
+.how-presentation-toggle[aria-pressed=true] { background: #283d2e; border-color: #9ab28a; }
+.how-presentation-toggle kbd { font: 9px var(--mono); padding: 3px 5px; border: 1px solid #617461; border-radius: 4px; color: #b7c9b7; }
 .how-eyebrow { display: inline-flex; align-items: center; gap: 9px; color: var(--text-faint); font: 10px var(--mono); letter-spacing: 0.12em; }
 .how-status-dot { display: inline-block; flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 .how-small-label { font: 10px var(--mono); color: var(--text-faint); letter-spacing: 0.08em; }
