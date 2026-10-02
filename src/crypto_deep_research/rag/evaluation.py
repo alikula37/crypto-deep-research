@@ -51,7 +51,9 @@ def load_cases(path: Path, split: str = "all") -> list[EvaluationCase]:
             raise ValueError(f"{path}:{line_number}: coin metin olmalı")
         if case_id is not None and not isinstance(case_id, str):
             raise ValueError(f"{path}:{line_number}: id metin olmalı")
-        if case_split is not None and case_split not in {"dev", "test"}:
+        if case_split is not None and (
+            not isinstance(case_split, str) or case_split not in {"dev", "test"}
+        ):
             raise ValueError(f"{path}:{line_number}: split 'dev' veya 'test' olmalı")
         if split != "all" and case_split is None:
             raise ValueError(

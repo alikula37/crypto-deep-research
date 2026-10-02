@@ -178,7 +178,7 @@ def evaluate_answers(cases: Sequence[AnswerEvaluationCase]) -> dict[str, Any]:
 
     per_query: list[dict[str, Any]] = []
     claim_count = supported_count = citation_count = 0
-    covered_claim_count = grounded_citation_count = relevance_total = 0
+    covered_claim_count = grounded_citation_count = 0
     query_values = {name: [] for name in (
         "faithfulness", "citation_coverage", "citation_precision", "answer_relevance"
     )}
@@ -189,7 +189,6 @@ def evaluate_answers(cases: Sequence[AnswerEvaluationCase]) -> dict[str, Any]:
         citation_count += metrics["n_citations"]
         covered_claim_count += metrics["n_claims_with_grounded_citation"]
         grounded_citation_count += metrics["n_grounded_citations"]
-        relevance_total += case.answer_relevance
         for name, value in metrics.items():
             if name in query_values and value is not None:
                 query_values[name].append(float(value))
@@ -214,7 +213,6 @@ def evaluate_answers(cases: Sequence[AnswerEvaluationCase]) -> dict[str, Any]:
         "citation_precision": round(grounded_citation_count / citation_count, 6)
         if citation_count
         else None,
-        "answer_relevance": round(relevance_total / len(cases), 6),
     }
     return {
         "n_answers": len(cases),

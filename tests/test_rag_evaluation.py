@@ -94,3 +94,10 @@ def test_load_cases_rejects_unknown_split_values(tmp_path):
 
     with pytest.raises(ValueError, match="split 'dev' veya 'test'"):
         load_cases(dataset)
+
+    dataset.write_text(
+        '{"split":[],"query":"query","relevant_parent_ids":["doc"]}\n',
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="split 'dev' veya 'test'"):
+        load_cases(dataset)

@@ -341,8 +341,8 @@ def rag_answer_eval(
 
     table = Table(title=f"RAG Answer Evaluation · {result['n_answers']} yanıt · {split}")
     table.add_column("Metrik")
-    table.add_column("Sorgu ort.", justify="right")
-    table.add_column("Toplam ort.", justify="right")
+    table.add_column("Cevap makro", justify="right")
+    table.add_column("İddia/atıf mikro", justify="right")
     macro = result["metrics"]["macro_by_answer"]
     micro = result["metrics"]["micro_by_claim_or_citation"]
     for name in ("faithfulness", "citation_coverage", "citation_precision"):
@@ -356,7 +356,7 @@ def rag_answer_eval(
     table.add_row(
         "answer_relevance (1–5)",
         f"{macro['answer_relevance']:.2f}",
-        f"{micro['answer_relevance']:.2f}",
+        "—",
     )
     console.print(table)
     console.print(f"Etiketler: {dataset} · iddialar={result['n_claims']} · atıflar={result['n_citations']}")

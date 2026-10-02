@@ -59,6 +59,7 @@ def test_answer_metrics_measure_claim_support_and_citation_quality(tmp_path):
     assert macro["citation_coverage"] == 0.25
     assert macro["citation_precision"] == 0.5
     assert macro["answer_relevance"] == 4.5
+    assert "answer_relevance" not in micro
     assert micro["faithfulness"] == pytest.approx(2 / 3)
     assert micro["citation_coverage"] == pytest.approx(1 / 3)
     assert micro["citation_precision"] == 0.5
