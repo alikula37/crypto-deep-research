@@ -19,6 +19,7 @@ Kripto varlıklar için **tamamen yerel** derin araştırma sistemi. Ücretsiz v
 - **Şeffaf kriterler:** her kartta "Ne araştırılır?", bulgu, durum (Tam / Kısmi / Veri Yok),
   skor, güven ve kaynak bilgisi.
 - **Hibrit RAG araması:** LanceDB vektör sonuçları ile SQLite BM25 sonuçları Reciprocal Rank Fusion (RRF) ile birleştirilir; isteğe bağlı yerel FastEmbed cross-encoder ilk adayları yeniden sıralar.
+- **Belge kapsamı:** haber, analiz ve raporlar embedding modelinin tokenizer'ıyla 240 tokenlık parçalara ayrılır; 40 token overlap bağlamı korur. Raporların önceki karakter sınırları kaldırıldı ve tekrar indekslemede eski parçalar değiştirilir.
 - **Çift sayım koruması:** aynı sinyali paylaşan kriterler skorda bir kez sayılır; kısmi veri
   yarım ağırlıkla katkı verir. Böylece aynı teknik skor 7 kez tartılmaz.
 - **Dürüst veri:** veri bulunamayan kriter "veri yok" işaretlenir ve ortalamaya katılmaz.
@@ -271,6 +272,7 @@ Tüm ayarlar `.env` üzerinden yönetilir; hiçbiri zorunlu değildir:
 | `CDR_OPENROUTER_API_KEY` | RAG yanıtı ve rapor üretimini LLM'e devreder |
 | `CDR_EMBEDDING_MODEL` | Daha küçük embedding modeli (hız/disk kazancı) |
 | `CDR_RAG_RERANKER_MODEL` | Hibrit adayları yerel cross-encoder ile yeniden sıralar (opsiyonel; İngilizce Apache-2.0 örneği: `Xenova/ms-marco-MiniLM-L-6-v2`; çok dilli Jina modeli ticari olmayan lisanslıdır) |
+| `CDR_RAG_CHUNK_TOKENS` / `CDR_RAG_CHUNK_OVERLAP_TOKENS` | Belge parça boyutu / örtüşmesi (varsayılan: 240/40) |
 | `CDR_WATCHLIST_ENABLED` | Takip listesi otomatik koşuları (varsayılan: açık) |
 | `CDR_WATCHLIST_INTERVAL_MINUTES` | Zamanlayıcı kontrol aralığı (varsayılan: 60) |
 | `CDR_WATCHLIST_AUTO_RUN_HOURS` | Aynı coin için otomatik koşu sıklığı (varsayılan: 24 saat) |

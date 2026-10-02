@@ -135,6 +135,10 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 CREATE TABLE IF NOT EXISTS documents (
   id TEXT PRIMARY KEY,
+  parent_id TEXT,
+  chunk_index INTEGER NOT NULL DEFAULT 0,
+  token_start INTEGER NOT NULL DEFAULT 0,
+  token_count INTEGER NOT NULL DEFAULT 0,
   coin TEXT,
   kind TEXT,
   source TEXT,
@@ -338,7 +342,15 @@ class Database:
         self._ensure_column("feature_snapshots", "source", "TEXT DEFAULT 'live'")
         self._ensure_column("outcomes", "source", "TEXT DEFAULT 'live'")
         self._ensure_column("predictions", "is_oos", "INTEGER NOT NULL DEFAULT 0")
+        self._ensure_column("documents", "parent_id", "TEXT")
+        self._ensure_column("documents", "chunk_index", "INTEGER NOT NULL DEFAULT 0")
+        self._ensure_column("documents", "token_start", "INTEGER NOT NULL DEFAULT 0")
+        self._ensure_column("documents", "token_count", "INTEGER NOT NULL DEFAULT 0")
         with self._lock, self._conn:
+            self._conn.execute("UPDATE documents SET parent_id = id WHERE parent_id IS NULL")
+            self._conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_documents_parent ON documents(parent_id)"
+            )
             self._conn.execute(
                 "UPDATE outcomes SET source = 'backfill' "
                 "WHERE (source IS NULL OR source = 'live') AND run_id LIKE 'bf_%'"
@@ -1397,16 +1409,41 @@ class Database:
         url: str | None,
         text: str,
         ts: float | None = None,
+        *,
+        parent_id: str | None = None,
+        chunk_index: int = 0,
+        token_start: int = 0,
+        token_count: int = 0,
     ) -> None:
         self.execute(
-            "INSERT OR REPLACE INTO documents (id, coin, kind, source, url, text, ts) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (doc_id, coin, kind, source, url, text, ts or time.time()),
+            """INSERT OR REPLACE INTO documents
+               (id, parent_id, chunk_index, token_start, token_count, coin, kind, source, url, text, ts)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                doc_id, parent_id or doc_id, chunk_index, token_start, token_count,
+                coin, kind, source, url, text, ts or time.time(),
+            ),
         )
         self.execute("DELETE FROM documents_fts WHERE doc_id = ?", (doc_id,))
         self.execute(
             "INSERT INTO documents_fts (doc_id, coin, source, text) VALUES (?, ?, ?, ?)",
             (doc_id, coin, source, text),
         )
+
+    def delete_documents(self, parent_id: str) -> int:
+        """Remove a source document and its chunks from SQLite and the FTS index."""
+        with self._lock, self._conn:
+            rows = self._conn.execute(
+                "SELECT id FROM documents WHERE parent_id = ? OR id = ?",
+                (parent_id, parent_id),
+            ).fetchall()
+            ids = [(row["id"],) for row in rows]
+            self._conn.executemany("DELETE FROM documents_fts WHERE doc_id = ?", ids)
+            cursor = self._conn.execute(
+                "DELETE FROM documents WHERE parent_id = ? OR id = ?",
+                (parent_id, parent_id),
+            )
+            return cursor.rowcount
 
     def search_documents(
         self, query: str, coin: str | None = None, limit: int = 8

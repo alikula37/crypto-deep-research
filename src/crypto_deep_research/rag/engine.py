@@ -14,6 +14,7 @@ from crypto_deep_research.models import (
     RetrievedContext,
     utcnow,
 )
+from crypto_deep_research.rag.chunking import split_text, whitespace_offsets
 from crypto_deep_research.rag.embeddings import Embedder
 from crypto_deep_research.rag.store import VectorStore, make_doc_id, now_ts
 from crypto_deep_research.storage.db import Database
@@ -41,7 +42,21 @@ def reciprocal_rank_fusion(
             seen.add(item.key)
             rank += 1
             scores[item.key] = scores.get(item.key, 0.0) + 1.0 / (rank_constant + rank)
-            contexts.setdefault(item.key, item)
+            current = contexts.get(item.key)
+            if current is None:
+                contexts[item.key] = item
+            else:
+                metadata = (
+                    "source", "url", "coin", "kind", "parent_id", "chunk_index",
+                    "token_start", "token_count", "timestamp",
+                )
+                contexts[item.key] = current.model_copy(
+                    update={
+                        field: getattr(item, field)
+                        for field in metadata
+                        if getattr(current, field) in (None, 0) and getattr(item, field) not in (None, 0)
+                    }
+                )
     ordered = sorted(scores, key=lambda key: (-scores[key], key))[:limit]
     return [
         contexts[key].model_copy(update={"score": scores[key], "score_type": "rrf"})
@@ -87,15 +102,47 @@ class RAGEngine:
             row["vector"] = vector
         self.store.add(rows)
 
+    def _ingest_rows(self, rows: list[dict]) -> int:
+        chunked_rows: list[dict] = []
+        for row in rows:
+            parent_id = row["id"]
+            offsets = self.embedder.token_offsets(row["text"])
+            chunks = split_text(
+                row["text"],
+                offsets if offsets is not None else whitespace_offsets(row["text"]),
+                chunk_tokens=self.settings.rag_chunk_tokens,
+                overlap_tokens=self.settings.rag_chunk_overlap_tokens,
+            )
+            self.db.delete_documents(parent_id)
+            self.store.delete_document(parent_id)
+            for index, chunk in enumerate(chunks):
+                chunk_id = (
+                    parent_id if len(chunks) == 1 else f"{parent_id}#chunk-{index:06d}"
+                )
+                self.db.save_document(
+                    chunk_id,
+                    row["coin"],
+                    row["kind"],
+                    row["source"],
+                    row["url"],
+                    chunk.text,
+                    row["ts"],
+                    parent_id=parent_id,
+                    chunk_index=index,
+                    token_start=chunk.token_start,
+                    token_count=chunk.token_count,
+                )
+                chunked_rows.append({**row, "id": chunk_id, "text": chunk.text})
+
+        self._embed_and_store(chunked_rows)
+        return len(chunked_rows)
+
     def ingest_articles(self, coin_id: str, articles: list[NewsArticle]) -> int:
         rows: list[dict] = []
         for article in articles:
             text = article.text_for_embedding()
             doc_id = make_doc_id("news", article.url or article.title)
             ts = article.published_at.timestamp() if article.published_at else now_ts()
-            self.db.save_document(
-                doc_id, coin_id, "news", article.source, article.url, text, ts
-            )
             rows.append(
                 {
                     "id": doc_id,
@@ -107,8 +154,7 @@ class RAGEngine:
                     "ts": ts,
                 }
             )
-        self._embed_and_store(rows)
-        return len(rows)
+        return self._ingest_rows(rows)
 
     def ingest_analysis(self, coin_id: str, results: list[AnalysisResult]) -> int:
         rows: list[dict] = []
@@ -117,7 +163,6 @@ class RAGEngine:
             if result.data.get("reasons"):
                 text += "\nNedenler: " + "; ".join(str(r) for r in result.data["reasons"][:8])
             doc_id = make_doc_id("analysis", f"{coin_id}:{result.key}")
-            self.db.save_document(doc_id, coin_id, "analysis", "pipeline", None, text, now_ts())
             rows.append(
                 {
                     "id": doc_id,
@@ -129,13 +174,11 @@ class RAGEngine:
                     "ts": now_ts(),
                 }
             )
-        self._embed_and_store(rows)
-        return len(rows)
+        return self._ingest_rows(rows)
 
     def ingest_report(self, coin_id: str, name: str, markdown: str) -> int:
         doc_id = make_doc_id("report", name)
-        self.db.save_document(doc_id, coin_id, "report", "report", None, markdown[:20000], now_ts())
-        self._embed_and_store(
+        return self._ingest_rows(
             [
                 {
                     "id": doc_id,
@@ -143,12 +186,11 @@ class RAGEngine:
                     "kind": "report",
                     "source": "report",
                     "url": None,
-                    "text": markdown[:8000],
+                    "text": markdown,
                     "ts": now_ts(),
                 }
             ]
         )
-        return 1
 
     # ------------------------------------------------------------------ arama
     def search(self, query: str, coin: str | None = None, k: int = 8) -> list[RetrievedContext]:
@@ -162,24 +204,32 @@ class RAGEngine:
                 vector_results.append(
                     RetrievedContext(
                         key=row.get("id", ""),
-                        content=row.get("text", "")[:1200],
+                        content=row.get("text", ""),
                         score=float(row.get("score", 0.0)),
                         source=row.get("source"),
                         url=row.get("url"),
                         coin=row.get("coin"),
                         kind=row.get("kind"),
+                        parent_id=row.get("id", "").partition("#chunk-")[0],
+                        chunk_index=int(row.get("id", "").rsplit("#chunk-", 1)[-1])
+                        if "#chunk-" in row.get("id", "")
+                        else 0,
                         timestamp=datetime.fromtimestamp(row["ts"]) if row.get("ts") else None,
                     )
                 )
         lexical_results = [
             RetrievedContext(
                 key=row.get("id", ""),
-                content=(row.get("text") or "")[:1200],
+                content=row.get("text") or "",
                 score=0.0,
                 source=row.get("source"),
                 url=row.get("url"),
                 coin=row.get("coin"),
                 kind=row.get("kind"),
+                parent_id=row.get("parent_id"),
+                chunk_index=int(row.get("chunk_index") or 0),
+                token_start=int(row.get("token_start") or 0),
+                token_count=int(row.get("token_count") or 0),
                 timestamp=datetime.fromtimestamp(row["ts"]) if row.get("ts") else None,
             )
             for row in self.db.search_documents(query, coin=coin, limit=candidate_count)
@@ -212,7 +262,7 @@ class RAGEngine:
         for index, item in enumerate(results, 1):
             when = item.timestamp.strftime("%Y-%m-%d %H:%M") if item.timestamp else "tarih yok"
             url = f", {item.url}" if item.url else ""
-            lines.append(f"[{index}] ({item.source or 'kaynak'}, {when}{url}) {item.content[:500]}")
+            lines.append(f"[{index}] ({item.source or 'kaynak'}, {when}{url}) {item.content}")
         return "\n".join(lines)
 
     def answer_prompt(self, query: str, coin: str | None = None) -> str:

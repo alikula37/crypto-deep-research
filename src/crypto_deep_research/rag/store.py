@@ -54,6 +54,19 @@ class VectorStore:
             self.available = False
             return False
 
+    def delete_document(self, doc_id: str) -> bool:
+        """Delete an older document-level vector and any previously indexed chunks."""
+        table = self._table()
+        if table is None:
+            return False
+        try:
+            escaped_id = doc_id.replace("'", "''")
+            table.delete(f"id = '{escaped_id}' OR id LIKE '{escaped_id}#chunk-%'")
+            return True
+        except Exception as exc:
+            logger.warning("LanceDB eski belge vektörleri silinemedi (%s): %s", doc_id, exc)
+            return False
+
     def search(
         self, vector: list[float], k: int = 8, coin: str | None = None
     ) -> list[dict[str, Any]]:

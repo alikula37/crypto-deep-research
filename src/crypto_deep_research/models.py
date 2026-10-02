@@ -226,4 +226,8 @@ class RetrievedContext(BaseModel):
     url: str | None = None
     coin: str | None = None
     kind: str | None = None
+    parent_id: str | None = None
+    chunk_index: int = 0
+    token_start: int = 0
+    token_count: int = 0
     timestamp: datetime | None = None
