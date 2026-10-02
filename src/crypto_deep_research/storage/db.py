@@ -135,6 +135,10 @@ CREATE TABLE IF NOT EXISTS jobs (
 
 CREATE TABLE IF NOT EXISTS documents (
   id TEXT PRIMARY KEY,
+  parent_id TEXT,
+  chunk_index INTEGER NOT NULL DEFAULT 0,
+  token_start INTEGER NOT NULL DEFAULT 0,
+  token_count INTEGER NOT NULL DEFAULT 0,
   coin TEXT,
   kind TEXT,
   source TEXT,
@@ -143,6 +147,16 @@ CREATE TABLE IF NOT EXISTS documents (
   ts REAL
 );
 CREATE INDEX IF NOT EXISTS idx_documents_coin ON documents(coin, kind);
+
+CREATE TABLE IF NOT EXISTS rag_source_documents (
+  id TEXT PRIMARY KEY,
+  coin TEXT,
+  kind TEXT,
+  source TEXT,
+  url TEXT,
+  text TEXT NOT NULL,
+  ts REAL
+);
 
 CREATE TABLE IF NOT EXISTS feature_snapshots (
   run_id TEXT PRIMARY KEY,
@@ -219,6 +233,7 @@ CREATE TABLE IF NOT EXISTS model_registry (
   kind TEXT NOT NULL,
   horizon_days INTEGER NOT NULL,
   status TEXT NOT NULL DEFAULT 'shadow',
+  evaluation_protocol TEXT,
   trained_at REAL,
   train_rows INTEGER,
   feature_schema_version INTEGER NOT NULL DEFAULT 1,
@@ -338,7 +353,16 @@ class Database:
         self._ensure_column("feature_snapshots", "source", "TEXT DEFAULT 'live'")
         self._ensure_column("outcomes", "source", "TEXT DEFAULT 'live'")
         self._ensure_column("predictions", "is_oos", "INTEGER NOT NULL DEFAULT 0")
+        self._ensure_column("model_registry", "evaluation_protocol", "TEXT")
+        self._ensure_column("documents", "parent_id", "TEXT")
+        self._ensure_column("documents", "chunk_index", "INTEGER NOT NULL DEFAULT 0")
+        self._ensure_column("documents", "token_start", "INTEGER NOT NULL DEFAULT 0")
+        self._ensure_column("documents", "token_count", "INTEGER NOT NULL DEFAULT 0")
         with self._lock, self._conn:
+            self._conn.execute("UPDATE documents SET parent_id = id WHERE parent_id IS NULL")
+            self._conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_documents_parent ON documents(parent_id)"
+            )
             self._conn.execute(
                 "UPDATE outcomes SET source = 'backfill' "
                 "WHERE (source IS NULL OR source = 'live') AND run_id LIKE 'bf_%'"
@@ -1141,15 +1165,25 @@ class Database:
     def model_list(self) -> list[dict[str, Any]]:
         return self.query("SELECT * FROM model_registry ORDER BY trained_at DESC")
 
-    def model_get(self, horizon_days: int, *, statuses: tuple[str, ...] = ("active", "shadow")) -> dict[str, Any] | None:
+    def model_get(
+        self,
+        horizon_days: int,
+        *,
+        statuses: tuple[str, ...] = ("active", "shadow"),
+        evaluation_protocol: str | None = None,
+    ) -> dict[str, Any] | None:
         placeholders = ",".join("?" for _ in statuses)
+        protocol_clause = " AND evaluation_protocol = ?" if evaluation_protocol else ""
+        params = (horizon_days, *statuses)
+        if evaluation_protocol:
+            params += (evaluation_protocol,)
         rows = self.query(
             f"""
             SELECT * FROM model_registry
-            WHERE horizon_days = ? AND status IN ({placeholders})
+            WHERE horizon_days = ? AND status IN ({placeholders}){protocol_clause}
             ORDER BY CASE status WHEN 'active' THEN 0 ELSE 1 END, trained_at DESC LIMIT 1
             """,
-            (horizon_days, *statuses),
+            params,
         )
         return rows[0] if rows else None
 
@@ -1157,13 +1191,13 @@ class Database:
         self.execute(
             """
             INSERT OR REPLACE INTO model_registry
-              (model_id, kind, horizon_days, status, trained_at, train_rows,
+              (model_id, kind, horizon_days, status, evaluation_protocol, trained_at, train_rows,
                feature_schema_version, params, metrics, notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 payload["model_id"], payload["kind"], payload["horizon_days"], payload["status"],
-                payload.get("trained_at"), payload.get("train_rows"),
+                payload.get("evaluation_protocol"), payload.get("trained_at"), payload.get("train_rows"),
                 payload.get("feature_schema_version", 1),
                 payload.get("params"), payload.get("metrics"), payload.get("notes"),
             ),
@@ -1397,16 +1431,66 @@ class Database:
         url: str | None,
         text: str,
         ts: float | None = None,
+        *,
+        parent_id: str | None = None,
+        chunk_index: int = 0,
+        token_start: int = 0,
+        token_count: int = 0,
     ) -> None:
         self.execute(
-            "INSERT OR REPLACE INTO documents (id, coin, kind, source, url, text, ts) VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (doc_id, coin, kind, source, url, text, ts or time.time()),
+            """INSERT OR REPLACE INTO documents
+               (id, parent_id, chunk_index, token_start, token_count, coin, kind, source, url, text, ts)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            (
+                doc_id, parent_id or doc_id, chunk_index, token_start, token_count,
+                coin, kind, source, url, text, ts or time.time(),
+            ),
         )
         self.execute("DELETE FROM documents_fts WHERE doc_id = ?", (doc_id,))
         self.execute(
             "INSERT INTO documents_fts (doc_id, coin, source, text) VALUES (?, ?, ?, ?)",
             (doc_id, coin, source, text),
         )
+
+    def delete_documents(self, parent_id: str) -> int:
+        """Remove a source document and its chunks from SQLite and the FTS index."""
+        with self._lock, self._conn:
+            rows = self._conn.execute(
+                "SELECT id FROM documents WHERE parent_id = ? OR id = ?",
+                (parent_id, parent_id),
+            ).fetchall()
+            ids = [(row["id"],) for row in rows]
+            self._conn.executemany("DELETE FROM documents_fts WHERE doc_id = ?", ids)
+            cursor = self._conn.execute(
+                "DELETE FROM documents WHERE parent_id = ? OR id = ?",
+                (parent_id, parent_id),
+            )
+            self._conn.execute("DELETE FROM rag_source_documents WHERE id = ?", (parent_id,))
+            return cursor.rowcount
+
+    def save_rag_source_document(
+        self,
+        doc_id: str,
+        coin: str | None,
+        kind: str,
+        source: str | None,
+        url: str | None,
+        text: str,
+        ts: float | None = None,
+    ) -> None:
+        """Keep the complete source so its chunks can be rebuilt with new settings."""
+        self.execute(
+            """INSERT OR REPLACE INTO rag_source_documents
+               (id, coin, kind, source, url, text, ts) VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (doc_id, coin, kind, source, url, text, ts or time.time()),
+        )
+
+    def list_rag_source_documents(self) -> list[dict[str, Any]]:
+        return self.query("SELECT * FROM rag_source_documents ORDER BY id")
+
+    def list_documents(self) -> list[dict[str, Any]]:
+        """Return indexed chunks for one-time recovery of sources from older databases."""
+        return self.query("SELECT * FROM documents ORDER BY parent_id, chunk_index, id")
 
     def search_documents(
         self, query: str, coin: str | None = None, limit: int = 8

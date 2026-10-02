@@ -5,7 +5,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -38,6 +38,15 @@ class Settings(BaseSettings):
     embedding_model: str = "intfloat/multilingual-e5-large"
     embedding_dim: int = 1024
     embeddings_enabled: bool = True
+    rag_reranker_model: str | None = None
+    rag_chunk_tokens: int = Field(default=240, gt=0)
+    rag_chunk_overlap_tokens: int = Field(default=40, ge=0)
+
+    @model_validator(mode="after")
+    def validate_rag_chunk_overlap(self) -> Settings:
+        if self.rag_chunk_overlap_tokens >= self.rag_chunk_tokens:
+            raise ValueError("CDR_RAG_CHUNK_OVERLAP_TOKENS must be smaller than CDR_RAG_CHUNK_TOKENS")
+        return self
 
     # Ag
     http_timeout: float = 30.0

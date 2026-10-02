@@ -11,13 +11,15 @@ Kripto varlıklar için **tamamen yerel** derin araştırma sistemi. Ücretsiz v
 - **10 analiz modülü + 66 kriter** paralel çalışır; her kriter ne araştırdığını, bulgusunu,
   skorunu, güvenini ve kaynağını raporlar.
 - Sonuçları tek bir **ağırlıklı skora** ve **yükseliş/düşüş olasılığına** indirger.
-- **Yerel RAG** ile haber, analiz ve geçmiş raporlarda anlamsal arama yapar.
+- **Yerel hibrit RAG** ile haber, analiz ve geçmiş raporlarda vektör + BM25 aramasını RRF ile birleştirir; isteğe bağlı cross-encoder ile yeniden sıralar.
 - **Web arayüzü, CLI, REST API ve MCP** olarak kullanılabilir.
 
 ## Öne çıkanlar
 
 - **Şeffaf kriterler:** her kartta "Ne araştırılır?", bulgu, durum (Tam / Kısmi / Veri Yok),
   skor, güven ve kaynak bilgisi.
+- **Hibrit RAG araması:** LanceDB vektör sonuçları ile SQLite BM25 sonuçları Reciprocal Rank Fusion (RRF) ile birleştirilir; isteğe bağlı yerel FastEmbed cross-encoder ilk adayları yeniden sıralar.
+- **Belge kapsamı:** haber, analiz ve raporlar embedding modelinin tokenizer'ıyla 240 tokenlık parçalara ayrılır; 40 token overlap bağlamı korur. Raporların önceki karakter sınırları kaldırıldı ve tekrar indekslemede eski parçalar değiştirilir.
 - **Çift sayım koruması:** aynı sinyali paylaşan kriterler skorda bir kez sayılır; kısmi veri
   yarım ağırlıkla katkı verir. Böylece aynı teknik skor 7 kez tartılmaz.
 - **Dürüst veri:** veri bulunamayan kriter "veri yok" işaretlenir ve ortalamaya katılmaz.
@@ -52,7 +54,7 @@ docker compose build && docker compose up -d
 
 - Arayüz: http://127.0.0.1:8000 · API dokümantasyonu: http://127.0.0.1:8000/docs
 - Docker yoksa: `brew install colima docker && colima start`
-- Veriler `./data` altında kalıcıdır; ilk RAG kullanımında embedding modeli (~2 GB) bir kez indirilir.
+- Veriler `./data` altında kalıcıdır; ilk RAG kullanımında embedding modeli (~2 GB) bir kez indirilir. Cross-encoder, `CDR_RAG_RERANKER_MODEL` ile seçildiğinde ayrıca indirilir.
 
 ### Yerel kurulum (Docker'sız)
 
@@ -92,7 +94,13 @@ uv run cdr analyze bitcoin --types technical,news,liquidations   # seçili modü
 uv run cdr deep-research bitcoin --platform claude --json        # 66 kriter + rapor + prompt
 uv run cdr deep-research bitcoin --profile conservative --lang en  # profil ve prompt dili
 uv run cdr search "ETF akışları" --coin bitcoin                  # yerel RAG araması
-uv run cdr ask "BTC likidasyon riski nedir?" --coin bitcoin      # RAG + isteğe bağlı LLM
+uv run cdr search "ETF akışları" --coin bitcoin --json           # etiketleme için kaynak ID'leri
+uv run cdr rag-eval data/rag-evaluation.jsonl                    # tüm etiketli RAG sorguları
+uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval dense  # dense-only ablation
+uv run cdr rag-eval data/rag-evaluation.jsonl --split test --retrieval hybrid # final hibrit ölçüm
+uv run cdr rag-reindex --chunk-tokens 160 --overlap-tokens 32  # chunk ayarını uygula
+uv run cdr ask "BTC likidasyon riski nedir?" --coin bitcoin --json # yanıt + kaynakları dışa aktar
+uv run cdr rag-answer-eval data/rag-answers.jsonl --split test   # yanıt/atıf kalitesi
 uv run cdr items                                                 # 66 kriter ve açıklamaları
 uv run cdr prompt bitcoin --raw                                  # son promptu yazdır (pipe için)
 uv run cdr learning-backfill                                     # geçmiş koşulardan özellik çıkar
@@ -110,6 +118,28 @@ uv run cdr mcp                                                   # MCP server (s
 ```
 
 Docker içinde çalıştırmak için: `docker compose run --rm app cdr snapshot bitcoin`
+
+`rag-eval`, elle etiketlenmiş JSONL sorgularında kaynak-belge düzeyinde macro Precision@k,
+Recall@k, Hit Rate@k, MRR ve nDCG ölçer. `cdr search ... --json` çıktısındaki `parent_id`
+değerlerini sorgunun ilgili kaynakları olarak `data/rag-evaluation.jsonl` dosyasındaki
+`relevant_parent_ids` alanına yazın. Ayar seçimi ve son değerlendirme sorgularını ayırmak için
+her satıra `split: "dev"` veya `split: "test"` ekleyin:
+
+```jsonl
+{"id":"btc-etf-akis-01","split":"dev","query":"Bitcoin ETF akışları nasıl değişti?","coin":"bitcoin","relevant_parent_ids":["news-..."]}
+```
+
+Bu değerlendirme retrieval sıralamasını ölçer; üretilen yanıtın olgusal doğruluğunu ölçtüğünü
+iddia etmez. Kendi korpusunuz için etiketli örnekler gerekir. Model/reranker ayarlarını kıyaslarken
+aynı sorgu etiketlerini koruyun, yalnız `dev` üzerinde ayar seçin ve final metriklerini `test`
+üzerinde raporlayın. Etiketleme ve deney protokolü için [`docs/rag-benchmark.md`](docs/rag-benchmark.md)
+rehberine bakın. Dense-only, BM25-only ve hibrit arama karşılaştırmaları `--retrieval` ile
+seçilebilir; chunk ayarlarını değiştirdikten sonra `rag-reindex` çalıştırın.
+
+`cdr ask --json`, üretilen yanıtı ve kaynak kimliklerini claim/citation etiketi eklemeye uygun JSON
+olarak verir. `cdr rag-answer-eval`, insan etiketleriyle faithfulness, citation coverage, citation
+precision ve 1–5 cevap ilgililiğini ölçer. Bu ölçüm retrieval değerlendirmesinden ayrıdır ve rehberdeki
+claim etiketleme protokolünü gerektirir.
 
 ### MCP (Claude Desktop / Code, Codex, Cursor)
 
@@ -160,38 +190,36 @@ Sistem "tahmin edip unutmaz": her koşu, sonraki getirilerle karşılaştırıla
   kalibre olasılık iddiası için Brier'in temel orandan iyi olması şartı aranır.
 - **Dürüst sınır:** 1 günlük kripto yönünde gerçekçi bant %48–55'tir; %50'ye yakın değerler düşük
   bilgi içeriğinin yansımasıdır. Amaç sayıyı şişirmek değil, ölçülebilir ve kalibre edilmiş hale getirmektir.
-- **Model katmanı (shadow):** yeterli etiket birikince (≥30) L2 lojistik + Platt kalibrasyonu
-  purged walk-forward ile eğitilir; **n<200 veya OOS metrikleri geçene kadar asla "aktif" olmaz**.
-  Aktif model Brier'in temel orandan iyi ve AUC≥0,55 olması şartına bağlıdır.
+- **Model katmanı (shadow):** tarihler bazında gruplanmış purged walk-forward yalnız erken dönem
+  model seçimi için kullanılır. Sonraki kalibrasyon aralığı Platt/izotonik kalibratörü fit eder;
+  model/kalibrasyon sınırlarında etiket ufku kadar purge uygulanır, en son kronolojik holdout ise
+  yalnız final metriklerine ayrılır. Kalibratör kendi fit edildiği tahmin/etiket çiftlerinde
+  değerlendirilmez. **Final holdout n<200 veya metrik
+  kapıları geçilmedikçe model aktif olmaz**; eski protokolle eğitilmiş modeller yeni tahminlerde
+  ve portföy backtest'inde kullanılmaz.
 - **Tarihsel replay (backfill_v1):** 13 fiyat-türevli kriter her gün için nokta-zamanında yeniden
   hesaplanır (sızıntısız); BTC+ETH 2 yılda ~1.480 örnek dakikalar içinde üretilir. Haber/sosyal
   kriterler geçmişte dürüstçe kurulamadığı için kapsam dışıdır ve `source=backfill` etiketiyle ayrılır.
 - **Genişletilmiş replay (backfill_v2):** funding + perp/spot basis + makro (DXY/altın/SPX/10Y/VIX)
   + Fear&Greed + stablecoin arzı da nokta-zamanında eklenir (25 özellik); 10 major coin × 2 yıl =
   **7.400 örnek** ~2 dakikada üretilir.
-- **Ablasyon (7g, 7.400 örnek):** taban özellikler (10) AUC 0,5495 · +makro/funding/F&G 0,5289 ·
-  +kesitsel (35 özellik) 0,5345. Bu örneklemde ek özellikler sıralama kalitesini düşürdüğü için
-  **varsayılan eğitim taban özelliklerle** yapılır (`--features base|base+extended|all`).
-- **Algoritma seçimi:** L2 lojistik ve gradyan artırma purged walk-forward OOS'ta yarışır; önce
-  sağlık kontrolü (Brier≤temel, ECE≤0,10, net Sharpe>0), sonra AUC üstünlüğü. Kalibrasyon
-  n_oos≥300 ise izotonik, değilse Platt. Sağlığı geçmeyen model `rejected` olur ve tahminlerde
-  kullanılmaz.
-- **Nihai tarihsel tablo (10 coin, 7.400 örnek, OOS):**
-  | Ufuk | Durum | AUC | Brier (temel) | ECE | Net Sharpe | Aktif oran |
-  | --- | --- | --- | --- | --- | --- | --- |
-  | 1g | **rejected** | 0,490 | 0,2493 (0,2492) | 0,004 | 0,26 | %0,5 |
-  | 7g | shadow | 0,5495 | 0,2445 (0,2467) | 0,006 | 0,69 | %17 |
-  | **30g** | shadow | **0,5777** | 0,2378 (0,2439) | 0,011 | 0,64 | %27 |
-
-  30g modeli ilk kez AUC≥0,55 kapısını geçti; backfill modelleri manuel inceleme gerektirdiği
-  için **shadow** kaldı (`cdr ml-activate <model_id>` ile yayına alınabilir). 1g modeli kenar
-  bulamadığı için otomatik reddedildi — sistem işlem yapmadığında bunu açıkça söylüyor.
-- **Kesitsel portföy backtest'i (`cdr ml-portfolio`):** yalnızca walk-forward OOS tahminleri
-  kullanılarak 10 coin arasından modelin en iyi k'sı seçilir; eşit ağırlık ve BTC al-tut ile
-  karşılaştırılır (maliyet düşülür). Örnek sonuç (30g, üst-3, aylık, 13 dönem, 10 bps):
-  **long-short 1,29x · net Sharpe 1,66 · isabet %77**; üst-3 0,98x; eşit ağırlık 0,61x;
-  BTC 0,93x. 7g/haftalıkta fark zayıf (0,32%/dönem). Dönem sayısı az olduğu için sonuç
-  **ihtiyatla** yorumlanmalı; asıl kenar 30 günlük sıralamada görünüyor.
+- `--features base` varsayılandır; önceki özellik ablasyonu keşifsel olduğu için final holdout kanıtı
+  sayılmaz. Birden çok özellik grubunu aynı holdout üzerinde kıyaslamak holdout'u model seçimine
+  dönüştürür; son karşılaştırma için yeni bir dönem ayırın.
+- **Algoritma seçimi:** L2 lojistik ve (örneklem yeterliyse) gradyan artırma erken dönem purged
+  walk-forward tahminlerinde karşılaştırılır. Seçilen algoritma model döneminde yeniden eğitilir,
+  ayrı kalibrasyon döneminde Platt/izotonik kalibrasyon fit edilir (n≥300 ise izotonik), AUC,
+  Brier, ECE ve ekonomik metrikler final holdout'ta hesaplanır. Sağlığı geçmeyen model `rejected`
+  olur. Her model kaydında protokol ve dönem sınırları saklanır.
+- **Önceki backfill sonuçları:** README'deki eski AUC/Brier/Sharpe ve portföy rakamları ortak
+  walk-forward tahminlerinin hem kalibrasyonunda hem değerlendirmesinde kullanıldığı eski
+  protokolden üretilmişti. Karşılaştırılabilir final holdout ölçümü değiller; bu nedenle yeni
+  protokolden `cdr ml-train --source backfill` sonuçları üretilene kadar performans iddiası olarak
+  kullanılmamalıdır. Eski OOS tahminleri protokol kimliği olmadığı için yeni portföy backtest'ine
+  alınmaz.
+- **Kesitsel portföy backtest'i (`cdr ml-portfolio`):** yalnız yeni protokolün final holdout
+  tahminlerini kullanır; eski protokolden kalan OOS satırları dışarıda bırakılır. On coin arasından
+  en iyi k seçilir ve sonuçlar eşit ağırlık/BTC ile maliyet sonrası karşılaştırılır.
 - **Kullanım önerisi:** model sıralaması tek başına yatırım kararı değildir; canlı koşular
   biriktikçe (30g etiketi ~1 ay sonra) doğrulama yenilenmelidir.
 - **Uyarı:** Backfill örnekleri aynı piyasa günlerini paylaştığı için etkin örneklem daha küçüktür
@@ -269,6 +297,8 @@ Tüm ayarlar `.env` üzerinden yönetilir; hiçbiri zorunlu değildir:
 | `CDR_FRED_API_KEY` | Faiz, enflasyon, getiri eğrisi |
 | `CDR_OPENROUTER_API_KEY` | RAG yanıtı ve rapor üretimini LLM'e devreder |
 | `CDR_EMBEDDING_MODEL` | Daha küçük embedding modeli (hız/disk kazancı) |
+| `CDR_RAG_RERANKER_MODEL` | Hibrit adayları yerel cross-encoder ile yeniden sıralar (opsiyonel; İngilizce Apache-2.0 örneği: `Xenova/ms-marco-MiniLM-L-6-v2`; çok dilli Jina modeli ticari olmayan lisanslıdır) |
+| `CDR_RAG_CHUNK_TOKENS` / `CDR_RAG_CHUNK_OVERLAP_TOKENS` | Belge parça boyutu / örtüşmesi (varsayılan: 240/40) |
 | `CDR_WATCHLIST_ENABLED` | Takip listesi otomatik koşuları (varsayılan: açık) |
 | `CDR_WATCHLIST_INTERVAL_MINUTES` | Zamanlayıcı kontrol aralığı (varsayılan: 60) |
 | `CDR_WATCHLIST_AUTO_RUN_HOURS` | Aynı coin için otomatik koşu sıklığı (varsayılan: 24 saat) |

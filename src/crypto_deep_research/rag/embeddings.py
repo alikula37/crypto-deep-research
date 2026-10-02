@@ -71,3 +71,23 @@ class Embedder:
     def embed_one(self, text: str) -> list[float] | None:
         vectors = self.embed([text])
         return vectors[0] if vectors else None
+
+    def token_offsets(self, text: str) -> list[tuple[int, int]] | None:
+        """Return character offsets from the active embedding model tokenizer."""
+        model = self._load()
+        if model is None:
+            return None
+        try:
+            underlying = getattr(model, "model", None)
+            tokenizer = getattr(underlying, "tokenizer", None)
+            if tokenizer is None:
+                model.token_count([text])
+                tokenizer = getattr(underlying, "tokenizer", None)
+            if tokenizer is None:
+                return None
+            encoding = tokenizer.encode(text)
+            offsets = [(int(start), int(end)) for start, end in encoding.offsets]
+            return [(start, end) for start, end in offsets if start < end]
+        except Exception as exc:
+            logger.warning("Tokenizer offsetları alınamadı; kelime tabanlı parçalara düşülüyor: %s", exc)
+            return None

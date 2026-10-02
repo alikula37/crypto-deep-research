@@ -1,8 +1,8 @@
-"""Model egitimi: purged walk-forward, kalibrasyon, algoritma secimi ve kayit.
+"""Model egitimi: purged walk-forward, ayri kalibrasyon/test donemleri ve kayit.
 
 Iki algoritma yarisa girer (n yeterliyse): L2 lojistik ve gradyan artirma.
-Secim OOS Brier'e gore yapilir (esitlikte basit model tercih edilir); kalibrasyon
-n_oos>=300 ise izotonik, degilse Platt.
+Secim erken donemdeki purged walk-forward tahminleriyle yapilir. Kalibrator sonraki
+ayri bir donemde fit edilir ve raporlanan metrikler son kronolojik holdout'tan gelir.
 """
 
 from __future__ import annotations
@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import logging
 import time
+from datetime import date, timedelta
 from typing import Any
 
 from crypto_deep_research.learning.boosting import BoostedTrees
@@ -20,6 +21,7 @@ from crypto_deep_research.learning.dataset import (
     vector_for,
 )
 from crypto_deep_research.learning.models import (
+    EVALUATION_PROTOCOL,
     LogisticModel,
     auc_score,
     brier_score,
@@ -42,11 +44,15 @@ ACTIVATE_MIN_SAMPLES = 200
 ACTIVATE_MIN_AUC = 0.55
 ACTIVATE_MIN_SHARPE = 0.3
 BOOST_MIN_SAMPLES = 1500
-# Ablasyon (7g, backfill): taban ozellikler en iyi AUC'yi verdi; makro/kesitsel
-# ekler bu orneklemde siralama kalitesini dusuruyor -> varsayilan taban.
+# Onceki kesifsel ablasyon taban ozellikleri tercih etti; yeni final holdout'ta
+# ozellik gruplari yeniden karsilastirilmalidir.
 DEFAULT_FEATURE_GROUPS = ["base"]
 ISOTONIC_MIN_SAMPLES = 300
-BOOST_BRIER_MARGIN = 0.0005
+CALIBRATION_START_FRACTION = 0.65
+HOLDOUT_START_FRACTION = 0.80
+MIN_CALIBRATION_ROWS = 30
+MIN_HOLDOUT_ROWS = 30
+MIN_UNIQUE_DATES = 12
 
 
 def _status_gate(metrics: dict[str, Any], n: int, activate_min: int) -> str:
@@ -82,6 +88,74 @@ def _calibrate(probabilities: list[float], labels: list[int]) -> tuple[list[floa
     return calibrated, {"type": "platt", "a": a, "b": b}
 
 
+def _apply_calibration(calibration: dict[str, Any], probabilities: list[float]) -> list[float]:
+    if calibration.get("type") == "isotonic":
+        points = [tuple(point) for point in calibration.get("points") or []]
+        return isotonic_apply(points, probabilities) if points else probabilities
+    if calibration.get("type") == "platt":
+        return platt_apply(
+            calibration["a"], calibration["b"], [logit(value) for value in probabilities]
+        )
+    return probabilities
+
+
+def _temporal_split(dataset: dict[str, Any], horizon_days: int) -> dict[str, Any] | None:
+    """Make date-grouped train/calibration/final-holdout splits with label purges."""
+    parsed: list[date | None] = []
+    for value in dataset["dates"]:
+        try:
+            parsed.append(date.fromisoformat(value))
+        except (TypeError, ValueError):
+            parsed.append(None)
+    unique_dates = sorted({value for value in parsed if value is not None})
+    if len(unique_dates) < MIN_UNIQUE_DATES:
+        return None
+
+    calibration_index = int(len(unique_dates) * CALIBRATION_START_FRACTION)
+    holdout_index = int(len(unique_dates) * HOLDOUT_START_FRACTION)
+    calibration_index = min(max(calibration_index, 1), len(unique_dates) - 2)
+    holdout_index = min(max(holdout_index, calibration_index + 1), len(unique_dates) - 1)
+    calibration_start = unique_dates[calibration_index]
+    holdout_start = unique_dates[holdout_index]
+    horizon = timedelta(days=horizon_days)
+
+    train_indices: list[int] = []
+    calibration_indices: list[int] = []
+    holdout_indices: list[int] = []
+    for index, sample_date in enumerate(parsed):
+        if sample_date is None:
+            continue
+        if sample_date < calibration_start and sample_date + horizon < calibration_start:
+            train_indices.append(index)
+        elif (
+            calibration_start <= sample_date < holdout_start
+            and sample_date + horizon < holdout_start
+        ):
+            calibration_indices.append(index)
+        elif sample_date >= holdout_start:
+            holdout_indices.append(index)
+
+    return {
+        "train": train_indices,
+        "calibration": calibration_indices,
+        "holdout": holdout_indices,
+        "unique_dates": len(unique_dates),
+        "calibration_start": calibration_start.isoformat(),
+        "holdout_start": holdout_start.isoformat(),
+        "train_end": max((parsed[index] for index in train_indices), default=None),
+        "calibration_end": max((parsed[index] for index in calibration_indices), default=None),
+        "holdout_end": max((parsed[index] for index in holdout_indices), default=None),
+    }
+
+
+def _subset_dataset(dataset: dict[str, Any], indices: list[int]) -> dict[str, Any]:
+    subset = dict(dataset)
+    for key in ("X", "y", "returns", "dates", "target_dates", "coins", "run_ids", "entry_ats"):
+        if key in dataset:
+            subset[key] = [dataset[key][index] for index in indices]
+    return subset
+
+
 def _evaluate(
     algorithm: str,
     dataset: dict[str, Any],
@@ -102,23 +176,21 @@ def _evaluate(
         oos_indices.extend(test_idx)
     if not oos_probability:
         return None
-    calibrated, calibration = _calibrate(oos_probability, oos_labels)
     base_rate = sum(oos_labels) / len(oos_labels)
     metrics: dict[str, Any] = {
-        "auc": auc_score(oos_labels, calibrated),
-        "brier": brier_score(oos_labels, calibrated),
+        "auc": auc_score(oos_labels, oos_probability),
+        "brier": brier_score(oos_labels, oos_probability),
         "baseline_brier": brier_score(oos_labels, [base_rate] * len(oos_labels)),
-        "log_loss": log_loss_score(oos_labels, calibrated),
-        "ece": expected_calibration_error(oos_labels, calibrated),
+        "log_loss": log_loss_score(oos_labels, oos_probability),
+        "ece": expected_calibration_error(oos_labels, oos_probability),
         "base_rate": round(base_rate, 4),
         "n_oos": len(oos_labels),
     }
-    metrics.update(economic_metrics(calibrated, oos_returns, horizon_days=dataset.get("horizon", 1)))
+    metrics.update(economic_metrics(oos_probability, oos_returns, horizon_days=dataset.get("horizon", 1)))
     return {
         "algorithm": algorithm,
         "metrics": metrics,
-        "calibration": calibration,
-        "probabilities": calibrated,
+        "probabilities": oos_probability,
         "labels": oos_labels,
         "indices": oos_indices,
     }
@@ -234,7 +306,7 @@ def _write_predictions(
 def _write_oos_predictions(
     db, horizon: int, model_id: str, chosen: dict[str, Any], dataset: dict[str, Any]
 ) -> int:
-    """Backtest icin sizintisiz (walk-forward) OOS tahminlerini kaydeder."""
+    """Backtest icin yalnizca dokunulmamis final holdout tahminlerini kaydeder."""
     written = 0
     for probability, index in zip(chosen["probabilities"], chosen["indices"], strict=False):
         run_id = dataset["run_ids"][index]
@@ -280,15 +352,49 @@ def train_horizon(
             "min_samples": min_samples,
         }
 
+    split = _temporal_split(dataset, horizon)
+    if split is None:
+        return {
+            "status": "insufficient_temporal_dates",
+            "horizon_days": horizon,
+            "n": n,
+            "n_unique_dates": len(set(dataset["dates"])),
+            "min_unique_dates": MIN_UNIQUE_DATES,
+        }
+    train_indices = split["train"]
+    calibration_indices = split["calibration"]
+    holdout_indices = split["holdout"]
+    if len(train_indices) < max(8, min_samples // 3):
+        return {
+            "status": "insufficient_model_train_data",
+            "horizon_days": horizon,
+            "n": n,
+            "n_model_train": len(train_indices),
+        }
+    if len(calibration_indices) < MIN_CALIBRATION_ROWS or len(holdout_indices) < MIN_HOLDOUT_ROWS:
+        return {
+            "status": "insufficient_calibration_or_holdout_data",
+            "horizon_days": horizon,
+            "n": n,
+            "n_calibration": len(calibration_indices),
+            "min_calibration": MIN_CALIBRATION_ROWS,
+            "n_holdout": len(holdout_indices),
+            "min_holdout": MIN_HOLDOUT_ROWS,
+        }
+
+    train_dataset = _subset_dataset(dataset, train_indices)
     windows = purged_walk_forward(
-        dataset["dates"], horizon_days=horizon, folds=4, min_train=max(8, min_samples // 3)
+        train_dataset["dates"],
+        horizon_days=horizon,
+        folds=4,
+        min_train=max(8, min_samples // 3),
     )
     algorithms = ["logreg"]
     if n >= BOOST_MIN_SAMPLES:
         algorithms.append("boost")
     results: dict[str, dict[str, Any]] = {}
     for algorithm in algorithms:
-        evaluated = _evaluate(algorithm, dataset, windows)
+        evaluated = _evaluate(algorithm, train_dataset, windows)
         if evaluated:
             results[algorithm] = evaluated
 
@@ -296,11 +402,48 @@ def train_horizon(
         return {"status": "no_windows", "horizon_days": horizon, "n": n}
 
     best = _choose(results)
-    chosen = results[best]
-    metrics = dict(chosen["metrics"])
+    selection = results[best]
+    final_model = _algorithm_model(best).fit(train_dataset["X"], train_dataset["y"])
+
+    calibration_X = [dataset["X"][index] for index in calibration_indices]
+    calibration_y = [dataset["y"][index] for index in calibration_indices]
+    if len(set(calibration_y)) < 2:
+        return {
+            "status": "insufficient_calibration_classes",
+            "horizon_days": horizon,
+            "n": n,
+            "n_calibration": len(calibration_indices),
+        }
+    calibration_raw = final_model.predict_proba(calibration_X)
+    _, calibration = _calibrate(calibration_raw, calibration_y)
+
+    holdout_X = [dataset["X"][index] for index in holdout_indices]
+    holdout_y = [dataset["y"][index] for index in holdout_indices]
+    holdout_returns = [dataset["returns"][index] for index in holdout_indices]
+    holdout_raw = final_model.predict_proba(holdout_X)
+    holdout_probability = _apply_calibration(calibration, holdout_raw)
+    calibration_base_rate = sum(calibration_y) / len(calibration_y)
+    metrics: dict[str, Any] = {
+        "evaluation_protocol": EVALUATION_PROTOCOL,
+        "auc": auc_score(holdout_y, holdout_probability),
+        "brier": brier_score(holdout_y, holdout_probability),
+        "baseline_brier": brier_score(holdout_y, [calibration_base_rate] * len(holdout_y)),
+        "log_loss": log_loss_score(holdout_y, holdout_probability),
+        "ece": expected_calibration_error(holdout_y, holdout_probability),
+        "base_rate": round(sum(holdout_y) / len(holdout_y), 4),
+        "calibration_base_rate": round(calibration_base_rate, 4),
+    }
+    metrics.update(
+        economic_metrics(holdout_probability, holdout_returns, horizon_days=horizon)
+    )
     metrics.update(
         {
             "n": n,
+            "data_source": source or "all",
+            "n_model_train": len(train_indices),
+            "n_calibration": len(calibration_indices),
+            "n_holdout": len(holdout_indices),
+            "n_oos": len(holdout_indices),
             "folds": len(windows),
             "algorithms": list(results),
             "candidates": {
@@ -311,25 +454,35 @@ def train_horizon(
                 }
                 for name, item in results.items()
             },
+            "model_selection_metrics": selection["metrics"],
+            "calibration_type": calibration["type"],
+            "temporal_split": {
+                key: value.isoformat() if isinstance(value, date) else value
+                for key, value in split.items()
+                if key not in {"train", "calibration", "holdout", "unique_dates"}
+            },
             "feature_count": len(dataset["feature_names"]),
             "feature_groups": groups,
         }
     )
-    calibrated_algorithm = chosen["algorithm"]
-    calibration = chosen["calibration"]
-    bins = probability_bins(chosen["labels"], chosen["probabilities"])
+    chosen = {
+        "probabilities": holdout_probability,
+        "labels": holdout_y,
+        "indices": holdout_indices,
+    }
+    bins = probability_bins(holdout_y, holdout_probability)
 
-    final_model = _algorithm_model(best).fit(dataset["X"], dataset["y"])
     kind_base = f"{best}_{'iso' if calibration.get('type') == 'isotonic' else 'platt'}"
     kind = f"{kind_base}_bf" if source == "backfill" else kind_base
     model_id = f"{kind}_h{horizon}_{int(time.time())}"
     eligible = _eligible(metrics)
-    status = _status_gate(metrics, n, activate_min) if eligible else "rejected"
+    status = _status_gate(metrics, len(holdout_indices), activate_min) if eligible else "rejected"
     if source == "backfill" and status != "rejected":
         status = "shadow"  # tarihsel replay modelleri manuel inceleme ister
 
     params = {
         "algorithm": best,
+        "evaluation_protocol": EVALUATION_PROTOCOL,
         "feature_names": dataset["feature_names"],
         "calibration": calibration,
     }
@@ -338,19 +491,27 @@ def train_horizon(
     else:
         params["logistic"] = final_model.to_params()
 
+    training_note = (
+        "Egitim: tarihsel replay (backfill)."
+        if source == "backfill"
+        else "Egitim: canli kosular."
+        if source == "live"
+        else "Egitim: tum kaynaklar."
+    )
     notes = (
-        f"Purged walk-forward OOS; algoritma={calibrated_algorithm} "
-        f"(adaylar: {', '.join(results)}); kalibrasyon={calibration.get('type')}. "
-        + ("Egitim: tarihsel replay (backfill)." if source == "backfill" else "Egitim: canli kosular.")
+        f"Model secimi: purged walk-forward ({', '.join(results)}); "
+        f"ayri kalibrasyon donemi={calibration.get('type')}; final holdout metrikleri. "
+        + training_note
     )
     db.model_save(
         {
             "model_id": model_id,
             "kind": kind,
             "horizon_days": horizon,
+            "evaluation_protocol": EVALUATION_PROTOCOL,
             "status": status,
             "trained_at": time.time(),
-            "train_rows": n,
+            "train_rows": len(train_indices),
             "feature_schema_version": 2,
             "params": json.dumps(params),
             "metrics": json.dumps(metrics),
@@ -359,8 +520,10 @@ def train_horizon(
     )
     if bins:
         db.calibration_bins_save(model_id, horizon, bins)
+    written = _write_predictions(
+        db, horizon, model_id, params, status, len(train_indices), source=source
+    )
     _write_oos_predictions(db, horizon, model_id, chosen, dataset)
-    written = _write_predictions(db, horizon, model_id, params, status, n, source=source)
     return {
         "status": "trained",
         "model_id": model_id,
@@ -368,7 +531,7 @@ def train_horizon(
         "n": n,
         "model_status": status,
         "activated": status == "active",
-        "source": source or "live",
+        "source": source or "all",
         "algorithm": best,
         "predictions_written": written,
         "metrics": metrics,
@@ -392,7 +555,7 @@ def train_all(
 
 def latest_model_prediction(db, coin: str, horizon: int = 7) -> dict[str, Any] | None:
     """Aktif/shadow model varsa bu coin icin tahmin uretir."""
-    model = db.model_get(horizon)
+    model = db.model_get(horizon, evaluation_protocol=EVALUATION_PROTOCOL)
     snapshot = db.latest_feature_snapshot(coin)
     if not model or not snapshot:
         return None

@@ -12,6 +12,8 @@ from typing import Any
 
 import numpy as np
 
+EVALUATION_PROTOCOL = "separate_calibration_final_holdout_v1"
+
 
 def _sigmoid(values: np.ndarray) -> np.ndarray:
     clipped = np.clip(values, -30.0, 30.0)
@@ -220,39 +222,44 @@ def purged_walk_forward(
     folds: int = 4,
     min_train: int = 10,
 ) -> list[tuple[list[int], list[int]]]:
-    """Tarih sirali orneklerde purge'lu ileri yuruyuslu CV pencereleri uretir.
+    """Tarihler bazinda gruplu, purge'lu ileri yuruyuslu CV pencereleri uretir.
 
-    Egitim kumesinden, hedef tarihi test penceresinin baslangicindan sonra biten
-    (ufukla ortusen) ornekler cikarilir; boylece etiket sizintisi engellenir.
+    Ayni tarihteki ornekler ayni fold'da kalir. Her etiketin ileri ufuk penceresi
+    sonraki test araligi ile ortusebileceginden, yeterince eski olmayan egitim
+    ornekleri purge edilir.
     """
-    n = len(dates)
-    if n < (folds + 1) * max(1, min_train // 4):
-        return []
     parsed: list[date | None] = []
     for value in dates:
         try:
             parsed.append(date.fromisoformat(value))
         except (TypeError, ValueError):
             parsed.append(None)
-    fold_size = max(1, n // (folds + 1))
+    unique_dates = sorted({value for value in parsed if value is not None})
+    if len(unique_dates) < folds + 1:
+        return []
+    fold_size = max(1, len(unique_dates) // (folds + 1))
     windows: list[tuple[list[int], list[int]]] = []
     for fold in range(1, folds + 1):
         test_start = fold * fold_size
-        test_end = min(n, test_start + fold_size) if fold < folds else n
-        if test_start >= n or test_end <= test_start:
+        test_end = min(len(unique_dates), test_start + fold_size) if fold < folds else len(unique_dates)
+        if test_start >= len(unique_dates) or test_end <= test_start:
             continue
-        test_start_date = parsed[test_start]
+        test_start_date = unique_dates[test_start]
+        test_dates = set(unique_dates[test_start:test_end])
         train_indices: list[int] = []
-        for index in range(test_start):
-            target = parsed[index]
-            if target is None or test_start_date is None:
-                train_indices.append(index)
+        test_indices: list[int] = []
+        for index, sample_date in enumerate(parsed):
+            if sample_date in test_dates:
+                test_indices.append(index)
                 continue
-            if target + timedelta(days=horizon_days) < test_start_date:
+            if sample_date is None or sample_date >= test_start_date:
+                continue
+            if sample_date + timedelta(days=horizon_days) < test_start_date:
                 train_indices.append(index)
         if len(train_indices) < min_train:
             continue
-        windows.append((train_indices, list(range(test_start, test_end))))
+        if test_indices:
+            windows.append((train_indices, test_indices))
     return windows
 
 

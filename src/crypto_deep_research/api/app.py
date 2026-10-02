@@ -767,7 +767,9 @@ async def rag_search(request: RagSearchRequest) -> dict[str, Any]:
     settings = get_settings()
     db = Database(settings.db_path)
     engine = RAGEngine(db, settings)
-    results = engine.search(request.query, coin=request.coin, k=request.k)
+    results = await asyncio.to_thread(
+        engine.search, request.query, coin=request.coin, k=request.k
+    )
     return {"results": [result.model_dump(mode="json") for result in results]}
 
 
@@ -776,7 +778,7 @@ async def rag_ask(request: RagAskRequest) -> dict[str, Any]:
     settings = get_settings()
     db = Database(settings.db_path)
     engine = RAGEngine(db, settings)
-    prompt = engine.answer_prompt(request.query, coin=request.coin)
+    prompt = await asyncio.to_thread(engine.answer_prompt, request.query, coin=request.coin)
     client = OpenRouterClient(settings)
     if not client.enabled:
         return {"answer": None, "prompt": prompt, "note": "OpenRouter anahtari tanımli değil."}

@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 from datetime import datetime, timezone
+from pathlib import Path
 
 import typer
 from rich.console import Console
@@ -28,7 +29,9 @@ from crypto_deep_research.formatting import (
 )
 from crypto_deep_research.llm import OpenRouterClient
 from crypto_deep_research.providers.registry import build_providers
+from crypto_deep_research.rag.answer_evaluation import evaluate_answers, load_answer_cases
 from crypto_deep_research.rag.engine import RAGEngine
+from crypto_deep_research.rag.evaluation import evaluate_retrieval, load_cases
 from crypto_deep_research.storage.db import Database
 
 app = typer.Typer(
@@ -219,6 +222,7 @@ def search(
     coin: str | None = typer.Option(None, "--coin", "-c"),
     k: int = typer.Option(8, "--k"),
     prompt: bool = typer.Option(False, "--prompt", help="LLM için RAG prompt'u üret"),
+    json_output: bool = typer.Option(False, "--json", help="Kaynak kimlikleriyle JSON çıktı"),
 ):
     """Yerel RAG deposunda arama yapar."""
     settings = get_settings()
@@ -231,10 +235,131 @@ def search(
     if not results:
         console.print("[yellow]Sonuç bulunamadı. Once deep-research çalıştırin.[/yellow]")
         return
+    if json_output:
+        console.print_json(
+            json.dumps(
+                [
+                    {
+                        "id": result.key,
+                        "parent_id": result.parent_id or result.key,
+                        "chunk_index": result.chunk_index,
+                        "score": result.score,
+                        "score_type": result.score_type,
+                        "source": result.source,
+                        "url": result.url,
+                        "coin": result.coin,
+                        "kind": result.kind,
+                        "content": result.content,
+                    }
+                    for result in results
+                ],
+                ensure_ascii=False,
+            )
+        )
+        return
     for index, result in enumerate(results, 1):
         when = result.timestamp.strftime("%Y-%m-%d %H:%M") if result.timestamp else "?"
         console.print(f"[bold]{index}. {result.source or '?'}[/bold] ({when}) skor={result.score:.3f}")
         console.print(f"   {result.content[:300]}")
+
+
+@app.command("rag-eval")
+def rag_eval(
+    dataset: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
+    ks: str = typer.Option("1,3,5,10", "--ks", help="Virgülle ayrılmış Recall/Precision cut-off'ları"),
+    split: str = typer.Option("all", "--split", help="Değerlendirme kümesi: all, dev veya test"),
+    retrieval_mode: str = typer.Option(
+        "hybrid", "--retrieval", help="Karşılaştırma modu: hybrid, dense veya bm25"
+    ),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """Etiketli JSONL sorgularıyla hibrit RAG retrieval kalitesini ölçer."""
+    try:
+        cutoffs = [int(value.strip()) for value in ks.split(",") if value.strip()]
+        if not cutoffs or any(k < 1 for k in cutoffs):
+            raise ValueError("--ks pozitif tamsayılardan oluşmalı")
+        if retrieval_mode not in {"hybrid", "dense", "bm25"}:
+            raise ValueError("--retrieval hybrid, dense veya bm25 olmalı")
+        cases = load_cases(dataset, split=split)
+    except (ValueError, OSError) as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+    settings = get_settings()
+    db = Database(settings.db_path)
+    engine = RAGEngine(db, settings)
+    result = evaluate_retrieval(
+        lambda query, coin, k: engine.search(
+            query, coin=coin, k=k, mode=retrieval_mode
+        ),
+        cases,
+        ks=cutoffs,
+    )
+    output = {
+        **result,
+        "split": split,
+        "retrieval": {
+            "mode": retrieval_mode,
+            "fusion": "reciprocal_rank_fusion" if retrieval_mode == "hybrid" else None,
+            "dense_enabled": settings.embeddings_enabled,
+            "reranker_model": settings.rag_reranker_model,
+        },
+    }
+    if json_output:
+        console.print_json(json.dumps(output, ensure_ascii=False))
+        return
+
+    table = Table(title=f"RAG Retrieval Evaluation · {result['n_queries']} sorgu")
+    table.add_column("k", justify="right")
+    for metric in ("precision", "recall", "hit_rate", "mrr", "ndcg"):
+        table.add_column(metric)
+    for k, metrics in result["metrics"].items():
+        values = (f"{metrics[name]:.3f}" for name in ("precision", "recall", "hit_rate", "mrr", "ndcg"))
+        table.add_row(str(k), *values)
+    console.print(table)
+    console.print(
+        f"Mod: {retrieval_mode} · dense={'açık' if settings.embeddings_enabled else 'kapalı'} · "
+        f"reranker={settings.rag_reranker_model or 'kapalı'} · split={split} · etiketler: {dataset}"
+    )
+
+
+@app.command("rag-answer-eval")
+def rag_answer_eval(
+    dataset: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
+    split: str = typer.Option("all", "--split", help="Değerlendirme kümesi: all, dev veya test"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """İnsan etiketleriyle RAG cevaplarının dayanağını ve atıflarını ölçer."""
+    try:
+        cases = load_answer_cases(dataset, split=split)
+        result = evaluate_answers(cases)
+    except (ValueError, OSError) as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    output = {**result, "split": split}
+    if json_output:
+        console.print_json(json.dumps(output, ensure_ascii=False))
+        return
+
+    table = Table(title=f"RAG Answer Evaluation · {result['n_answers']} yanıt · {split}")
+    table.add_column("Metrik")
+    table.add_column("Cevap makro", justify="right")
+    table.add_column("İddia/atıf mikro", justify="right")
+    macro = result["metrics"]["macro_by_answer"]
+    micro = result["metrics"]["micro_by_claim_or_citation"]
+    for name in ("faithfulness", "citation_coverage", "citation_precision"):
+        macro_value = macro[name]
+        micro_value = micro[name]
+        table.add_row(
+            name,
+            f"{macro_value:.3f}" if macro_value is not None else "n/a",
+            f"{micro_value:.3f}" if micro_value is not None else "n/a",
+        )
+    table.add_row(
+        "answer_relevance (1–5)",
+        f"{macro['answer_relevance']:.2f}",
+        "—",
+    )
+    console.print(table)
+    console.print(f"Etiketler: {dataset} · iddialar={result['n_claims']} · atıflar={result['n_citations']}")
 
 
 @app.command()
@@ -242,19 +367,56 @@ def ask(
     question: str = typer.Argument(...),
     coin: str | None = typer.Option(None, "--coin", "-c"),
     model: str | None = typer.Option(None, "--model"),
+    json_output: bool = typer.Option(False, "--json", help="Yanıtı ve kaynakları etiketleme için yazdır"),
 ):
     """RAG bağlamıyla OpenRouter üzerinden soru sorar (anahtar yoksa prompt yazdırir)."""
     settings = get_settings()
     db = Database(settings.db_path)
     rag = RAGEngine(db, settings)
-    prompt = rag.answer_prompt(question, coin=coin)
+    results = rag.search(question, coin=coin)
+    prompt = rag.answer_prompt(question, coin=coin, results=results)
     client = OpenRouterClient(settings)
+    answer = None
     if not client.enabled:
-        console.print("[yellow]OpenRouter anahtari yok; üretilen prompt:[/yellow]\n")
-        console.print(prompt)
-        return
-    answer = asyncio.run(client.complete(prompt, model=model))
-    console.print(Panel(answer, title="OpenRouter yaniti", border_style="cyan"))
+        if not json_output:
+            console.print("[yellow]OpenRouter anahtari yok; üretilen prompt:[/yellow]\n")
+            console.print(prompt)
+    else:
+        answer = asyncio.run(client.complete(prompt, model=model))
+
+    if json_output:
+        source_rows = [
+            {
+                "citation_index": index,
+                "parent_id": item.parent_id or item.key.partition("#chunk-")[0],
+                "source": item.source,
+                "url": item.url,
+                "content": item.content,
+                "score": item.score,
+                "score_type": item.score_type,
+            }
+            for index, item in enumerate(results, 1)
+        ]
+        parent_ids = list(dict.fromkeys(row["parent_id"] for row in source_rows))
+        console.print_json(
+            json.dumps(
+                {
+                    "query": question,
+                    "answer": answer,
+                    "model": model or (settings.openrouter_model if client.enabled else None),
+                    "prompt": prompt,
+                    "retrieval": {
+                        "mode": "hybrid",
+                        "reranker_model": settings.rag_reranker_model,
+                    },
+                    "retrieved_parent_ids": parent_ids,
+                    "retrieved_sources": source_rows,
+                },
+                ensure_ascii=False,
+            )
+        )
+    elif answer is not None:
+        console.print(Panel(answer, title="OpenRouter yaniti", border_style="cyan"))
 
 
 @app.command()
@@ -315,6 +477,35 @@ def rag_stats():
     db = Database(settings.db_path)
     engine = RAGEngine(db, settings)
     console.print_json(json.dumps(engine.stats(), ensure_ascii=False, default=str))
+
+
+@app.command("rag-reindex")
+def rag_reindex(
+    chunk_tokens: int | None = typer.Option(None, "--chunk-tokens", min=1),
+    overlap_tokens: int | None = typer.Option(None, "--overlap-tokens", min=0),
+) -> None:
+    """Tam kaynak metinlerden RAG indeksini yeni chunk ayarlarıyla oluşturur."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    engine = RAGEngine(db, settings)
+    try:
+        result = engine.reindex(chunk_tokens=chunk_tokens, overlap_tokens=overlap_tokens)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    effective_chunk = chunk_tokens or settings.rag_chunk_tokens
+    effective_overlap = (
+        settings.rag_chunk_overlap_tokens if overlap_tokens is None else overlap_tokens
+    )
+    console.print_json(
+        json.dumps(
+            {
+                **result,
+                "chunk_tokens": effective_chunk,
+                "overlap_tokens": effective_overlap,
+            },
+            ensure_ascii=False,
+        )
+    )
 
 
 @app.command("analyses")
@@ -387,11 +578,11 @@ def ml_train(
     features: str = typer.Option(
         "base",
         "--features",
-        help="base (varsayilan, ablasyonda en iyi) | base+extended | all",
+        help="base (varsayilan) | base+extended | all",
     ),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
-    """Ozniteliklerden yon modeli egitir (purged walk-forward + Platt kalibrasyon)."""
+    """Yon modeli egitir; model secimi, kalibrasyon ve final holdout donemlerini ayirir."""
     from crypto_deep_research.learning.trainer import train_all, train_horizon
 
     settings = get_settings()
@@ -429,9 +620,17 @@ def ml_train(
         console.print_json(json.dumps(results, default=str))
         return
     for result in results:
-        if result["status"] == "insufficient":
+        if result["status"] != "trained":
+            details = [f"n={result.get('n', 0)}"]
+            if "n_calibration" in result:
+                details.append(
+                    f"cal={result['n_calibration']}/{result.get('min_calibration', '?')}"
+                )
+            if "n_holdout" in result:
+                details.append(f"holdout={result['n_holdout']}/{result.get('min_holdout', '?')}")
             console.print(
-                f"  {result['horizon_days']}g: yetersiz örnek ({result['n']}/{result['min_samples']})"
+                f"  {result['horizon_days']}g [{result.get('source', source)}]: "
+                f"{result['status']} · {' · '.join(details)}"
             )
             continue
         metrics = result.get("metrics", {})
@@ -459,7 +658,8 @@ def ml_eval(
         return
     for model in models:
         console.print(
-            f"  {model['model_id']} · {model['status']} · n={model['train_rows']} · {model['metrics']}"
+            f"  {model['model_id']} · {model['status']} · n={model['train_rows']} · "
+            f"protocol={model.get('evaluation_protocol') or 'legacy'} · {model['metrics']}"
         )
 
 
