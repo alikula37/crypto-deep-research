@@ -50,6 +50,12 @@ metin arşivlenmemiş parçaları bir kez birleştirerek kurtarır; sonraki yeni
 kaydedilmiş metni kullanır. Her chunk denemesinde aynı korpusu baştan indeksleyin ve yalnız `dev`
 sonuçlarına bakarak ayar seçin.
 
+Chunk sınırları tam metnin tokenizer offsetlerinden çıkarılır. Offset tokenizer'ı embedding
+modelinin giriş kırpmasından bağımsızdır; örneğin 512 token inference sınırı, uzun belgenin
+sonunu indeksleme öncesinde kesmez. Önceki sürümde indekslenen uzun belgeleri düzeltmek için
+`uv run cdr rag-reindex` çalıştırın. Değişen indeksle eski pilot skorlarını yeni ölçüm saymayın;
+korpus/indeks sürümüyle birlikte benchmark'ı yeniden çalıştırın.
+
 ## Yanıt ve atıf değerlendirmesi
 
 Retrieval doğru belgeyi getirse bile yanıt belgeyi yanlış yorumlayabilir veya desteksiz bir iddia

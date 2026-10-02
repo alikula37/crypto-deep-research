@@ -22,6 +22,7 @@ class Embedder:
         self.model_name = model_name
         self.enabled = enabled
         self._model: Any | None = None
+        self._offset_tokenizer: Any | None = None
         self._load_failed = False
         self._lock = threading.Lock()
 
@@ -73,21 +74,34 @@ class Embedder:
         return vectors[0] if vectors else None
 
     def token_offsets(self, text: str) -> list[tuple[int, int]] | None:
-        """Return character offsets from the active embedding model tokenizer."""
+        """Return full-document offsets without changing embedding input limits."""
         model = self._load()
         if model is None:
             return None
         try:
-            underlying = getattr(model, "model", None)
-            tokenizer = getattr(underlying, "tokenizer", None)
-            if tokenizer is None:
-                model.token_count([text])
-                tokenizer = getattr(underlying, "tokenizer", None)
-            if tokenizer is None:
-                return None
-            encoding = tokenizer.encode(text)
+            # _load acquires this lock itself, so load before entering it. Cache
+            # a separate tokenizer: FastEmbed truncates its inference tokenizer
+            # to the model limit, which would silently drop long-document tails.
+            with self._lock:
+                if self._offset_tokenizer is None:
+                    underlying = getattr(model, "model", None)
+                    tokenizer = getattr(underlying, "tokenizer", None)
+                    if tokenizer is None:
+                        model.token_count([text])
+                        tokenizer = getattr(underlying, "tokenizer", None)
+                    if tokenizer is None:
+                        return None
+                    from tokenizers import Tokenizer
+
+                    offset_tokenizer = Tokenizer.from_str(tokenizer.to_str())
+                    offset_tokenizer.no_truncation()
+                    offset_tokenizer.no_padding()
+                    self._offset_tokenizer = offset_tokenizer
+                encoding = self._offset_tokenizer.encode(text)
             offsets = [(int(start), int(end)) for start, end in encoding.offsets]
             return [(start, end) for start, end in offsets if start < end]
         except Exception as exc:
-            logger.warning("Tokenizer offsetları alınamadı; kelime tabanlı parçalara düşülüyor: %s", exc)
+            logger.warning(
+                "Tokenizer offsetları alınamadı; kelime tabanlı parçalara düşülüyor: %s", exc
+            )
             return None
