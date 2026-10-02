@@ -297,6 +297,11 @@ def rag_eval(
     output = {
         **result,
         "split": split,
+        "configured_chunking": {
+            "strategy": settings.rag_chunk_strategy,
+            "chunk_tokens": settings.rag_chunk_tokens,
+            "overlap_tokens": settings.rag_chunk_overlap_tokens,
+        },
         "retrieval": {
             "mode": retrieval_mode,
             "fusion": "reciprocal_rank_fusion" if retrieval_mode == "hybrid" else None,
@@ -483,13 +488,14 @@ def rag_stats():
 def rag_reindex(
     chunk_tokens: int | None = typer.Option(None, "--chunk-tokens", min=1),
     overlap_tokens: int | None = typer.Option(None, "--overlap-tokens", min=0),
+    strategy: str | None = typer.Option(None, "--strategy", help="sentence (cümle sınırları) veya token (sabit pencere). Bu indeksleme için geçerli."),
 ) -> None:
     """Tam kaynak metinlerden RAG indeksini yeni chunk ayarlarıyla oluşturur."""
     settings = get_settings()
     db = Database(settings.db_path)
     engine = RAGEngine(db, settings)
     try:
-        result = engine.reindex(chunk_tokens=chunk_tokens, overlap_tokens=overlap_tokens)
+        result = engine.reindex(chunk_tokens=chunk_tokens, overlap_tokens=overlap_tokens, strategy=strategy)
     except ValueError as exc:
         raise typer.BadParameter(str(exc)) from exc
     effective_chunk = chunk_tokens or settings.rag_chunk_tokens
@@ -502,6 +508,7 @@ def rag_reindex(
                 **result,
                 "chunk_tokens": effective_chunk,
                 "overlap_tokens": effective_overlap,
+                "strategy": settings.rag_chunk_strategy if strategy is None else strategy,
             },
             ensure_ascii=False,
         )

@@ -23,6 +23,29 @@ ayar seçimi sırasında final kümeye bilgi sızdırabilir. Mümkünse iki kiş
 
 ## Ayar seçimi ve final ölçüm
 
+Varsayılan `sentence` stratejisi cümle/paragraf birimlerini 240 token bütçesinde paketler.
+40 token overlap bir üst hedeftir: bütçeye sığan tam son cümleler tekrar kullanılır. Son cümle
+hedefi aşıyorsa tekrar sıfır olabilir; yeni cümle sığmıyorsa eski overlap çıkarılır. Tek cümle
+chunk bütçesini aşıyorsa token pencerelerine bölünür. Sınır bulma noktalama, paragraf ve yaygın
+Türkçe/İngilizce kısaltma kurallarına dayanır; dilbilimsel ya da semantik bütünlük garantisi değildir.
+
+Bütçe ve `token_start`/`token_count`, tam belgenin tokenizer offsetlerine göre hesaplanır.
+Kelime içinden bölünen kısa fallback parçalarının bağımsız yeniden tokenizasyonu farklı sayılabilir;
+embedding modelinin giriş limiti ayrıca korunur. Sabit `token` stratejisi aynı offsetlerle eşit
+pencereler ve kesin token overlap üretir. Cümle yönteminin kaliteyi artırdığı varsayılmaz.
+
+Kalıcı yöntem `CDR_RAG_CHUNK_STRATEGY` ile seçilir. `rag-reindex --strategy ...` yalnız o yeniden
+indekslemeyi etkiler; gelecekteki ingestion ortam ayarını kullanır. Karşılaştırmada her yöntem
+için hem yeniden indekslemeyi hem evaluation'ı aynı ortam ayarıyla çalıştırın. JSON çıktısındaki
+`configured_chunking`, çalışan ayarı gösterir; indeksin gerçekten o ayarla kurulduğunun kanıtı değildir.
+
+```bash
+CDR_RAG_CHUNK_STRATEGY=token uv run cdr rag-reindex
+CDR_RAG_CHUNK_STRATEGY=token uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval hybrid --json
+CDR_RAG_CHUNK_STRATEGY=sentence uv run cdr rag-reindex
+CDR_RAG_CHUNK_STRATEGY=sentence uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval hybrid --json
+```
+
 Sorguları konu ve sorgu türüne göre dengeli biçimde `dev` ve `test` kümelerine ayırın. `dev`, retrieval
 ve chunk ayarı seçmek içindir. Ayarları dondurduktan sonra final sayıları `test` ile bir kez raporlayın.
 Test sonuçlarına bakıp ayar değiştirilirse o test kümesi artık bağımsız final ölçümü sayılmaz.
@@ -31,7 +54,7 @@ Test sonuçlarına bakıp ayar değiştirilirse o test kümesi artık bağımsı
 uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval dense --json
 uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval bm25 --json
 uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval hybrid --json
-uv run cdr rag-reindex --chunk-tokens 160 --overlap-tokens 32
+uv run cdr rag-reindex --strategy sentence --chunk-tokens 160 --overlap-tokens 32
 uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval hybrid --json
 uv run cdr rag-eval data/rag-evaluation.jsonl --split test --retrieval hybrid --json
 ```

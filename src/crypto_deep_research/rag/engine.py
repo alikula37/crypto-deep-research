@@ -108,6 +108,7 @@ class RAGEngine:
         *,
         chunk_tokens: int | None = None,
         overlap_tokens: int | None = None,
+        strategy: str | None = None,
     ) -> int:
         chunk_size = self.settings.rag_chunk_tokens if chunk_tokens is None else chunk_tokens
         overlap_size = (
@@ -115,6 +116,9 @@ class RAGEngine:
         )
         if chunk_size < 1 or overlap_size < 0 or overlap_size >= chunk_size:
             raise ValueError("chunk_tokens pozitif, overlap_tokens ise 0 <= overlap < chunk olmalı")
+        chunk_strategy = getattr(self.settings, "rag_chunk_strategy", "token") if strategy is None else strategy
+        if chunk_strategy not in {"token", "sentence"}:
+            raise ValueError("chunk strategy 'token' veya 'sentence' olmalı")
         chunked_rows: list[dict] = []
         for row in rows:
             parent_id = row["id"]
@@ -124,6 +128,7 @@ class RAGEngine:
                 offsets if offsets is not None else whitespace_offsets(row["text"]),
                 chunk_tokens=chunk_size,
                 overlap_tokens=overlap_size,
+                strategy=chunk_strategy,
             )
             self.db.delete_documents(parent_id)
             self.store.delete_document(parent_id)
@@ -159,7 +164,8 @@ class RAGEngine:
         return len(chunked_rows)
 
     def reindex(
-        self, *, chunk_tokens: int | None = None, overlap_tokens: int | None = None
+        self, *, chunk_tokens: int | None = None, overlap_tokens: int | None = None,
+        strategy: str | None = None,
     ) -> dict[str, int]:
         """Rebuild the index from complete sources, recovering legacy chunk groups once."""
         archived = {row["id"]: row for row in self.db.list_rag_source_documents()}
@@ -188,6 +194,7 @@ class RAGEngine:
             rows,
             chunk_tokens=chunk_tokens,
             overlap_tokens=overlap_tokens,
+            strategy=strategy,
         )
         return {
             "source_documents": len(rows),
@@ -369,6 +376,11 @@ class RAGEngine:
 
     def stats(self) -> dict:
         return {
+            "configured_chunking": {
+                "strategy": self.settings.rag_chunk_strategy,
+                "chunk_tokens": self.settings.rag_chunk_tokens,
+                "overlap_tokens": self.settings.rag_chunk_overlap_tokens,
+            },
             "documents": self.db.document_count(),
             "vectors": self.store.count(),
             "embedder": {

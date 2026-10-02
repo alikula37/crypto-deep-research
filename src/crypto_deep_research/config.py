@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -41,6 +42,7 @@ class Settings(BaseSettings):
     rag_reranker_model: str | None = None
     rag_chunk_tokens: int = Field(default=240, gt=0)
     rag_chunk_overlap_tokens: int = Field(default=40, ge=0)
+    rag_chunk_strategy: Literal["token", "sentence"] = "sentence"
 
     @model_validator(mode="after")
     def validate_rag_chunk_overlap(self) -> Settings:

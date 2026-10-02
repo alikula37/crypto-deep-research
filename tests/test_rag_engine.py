@@ -124,3 +124,64 @@ def test_reindex_recovers_legacy_chunks_and_applies_new_chunk_size(tmp_path):
     assert len(archived) == 1
     assert archived[0]["text"] == "one two three four five six"
     assert db.document_count() == 5
+
+
+def test_reindex_uses_sentence_strategy_and_keeps_complete_archived_source(tmp_path):
+    text = "İlk cümle burada biter. İkinci cümle ayrıca biter. Son cümle burada."
+    db = Database(tmp_path / "rag.db")
+    db.save_rag_source_document("report", "bitcoin", "report", "report", None, text)
+    engine = object.__new__(RAGEngine)
+    engine.db = db
+    engine.settings = SimpleNamespace(
+        rag_chunk_tokens=6, rag_chunk_overlap_tokens=4, rag_chunk_strategy="sentence"
+    )
+    engine.embedder = StubEmbedder()
+    engine.store = StubVectorStore()
+    embedded_rows = []
+    engine._embed_and_store = lambda rows: embedded_rows.extend(rows)
+
+    result = engine.reindex()
+
+    assert result["chunks_indexed"] == 3
+    assert [row["text"] for row in embedded_rows] == [
+        "İlk cümle burada biter.", "İkinci cümle ayrıca biter.", "Son cümle burada."
+    ]
+    assert db.list_rag_source_documents()[0]["text"] == text
+    assert all(row["token_count"] <= 6 for row in db.list_documents())
+    # Rebuilding with the baseline replaces sentence chunks instead of mixing them.
+    embedded_rows.clear()
+    baseline = engine.reindex(strategy="token")
+    assert baseline["source_documents"] == 1
+    assert baseline["legacy_documents_recovered"] == 0
+    assert baseline["chunks_indexed"] == 4
+    assert db.document_count() == 4
+    assert db.list_rag_source_documents()[0]["text"] == text
+
+
+def test_invalid_chunk_strategy_does_not_delete_existing_documents(tmp_path):
+    db = Database(tmp_path / "rag.db")
+    db.save_document("old", "bitcoin", "report", "report", None, "Korunan belge.")
+    engine = object.__new__(RAGEngine)
+    engine.db = db
+    engine.settings = SimpleNamespace(
+        rag_chunk_tokens=240, rag_chunk_overlap_tokens=40, rag_chunk_strategy="sentence"
+    )
+    engine.embedder = StubEmbedder()
+    engine.store = StubVectorStore()
+    with pytest.raises(ValueError, match="strategy"):
+        engine.reindex(strategy="unknown")
+    assert db.document_count() == 1
+    assert db.list_documents()[0]["text"] == "Korunan belge."
+    assert engine.store.deleted == []
+
+
+def test_settings_default_to_sentence_and_reject_unknown_strategy(monkeypatch):
+    from pydantic import ValidationError
+
+    from crypto_deep_research.config import Settings
+
+    monkeypatch.delenv("CDR_RAG_CHUNK_STRATEGY", raising=False)
+    assert Settings(_env_file=None).rag_chunk_strategy == "sentence"
+    assert Settings(_env_file=None, rag_chunk_strategy="token").rag_chunk_strategy == "token"
+    with pytest.raises(ValidationError, match="rag_chunk_strategy"):
+        Settings(_env_file=None, rag_chunk_strategy="semantic")
