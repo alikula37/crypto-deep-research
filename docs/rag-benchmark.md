@@ -28,8 +28,12 @@ ve chunk ayarı seçmek içindir. Ayarları dondurduktan sonra final sayıları 
 Test sonuçlarına bakıp ayar değiştirilirse o test kümesi artık bağımsız final ölçümü sayılmaz.
 
 ```bash
-uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --json
-uv run cdr rag-eval data/rag-evaluation.jsonl --split test --json
+uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval dense --json
+uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval bm25 --json
+uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval hybrid --json
+uv run cdr rag-reindex --chunk-tokens 160 --overlap-tokens 32
+uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval hybrid --json
+uv run cdr rag-eval data/rag-evaluation.jsonl --split test --retrieval hybrid --json
 ```
 
 `data/` yerel ve git tarafından yok sayılan uygulama verisidir; etiket dosyanızı orada tutabilir ya da
@@ -37,3 +41,11 @@ başka bir yolla sağlayabilirsiniz. Benchmark sonuçlarını paylaşırken sorg
 commit'ini, chunk token/overlap ayarlarını, reranker modelini ve `k` kesimlerini kaydedin. Metrikler
 retrieval sıralamasını ölçer; üretilen yanıtın doğruluğunu veya kaynak iddialarını desteklediğini tek
 başına göstermez.
+
+`--retrieval` üç kontrollü karşılaştırma sunar: `dense` yalnız vektör aramasını, `bm25` yalnız sözcüksel
+aramayı, `hybrid` ise iki sıralamanın RRF birleşimini çalıştırır. Reranker ortam değişkeni açıksa her
+moddaki adaylara uygulanır; baseline kıyaslamasında kapalı tutun veya sonucu ayrıca raporlayın.
+`rag-reindex`, saklanan tam metinlerden indeksin tamamını yeniden kurar. Eski veritabanındaki tam
+metin arşivlenmemiş parçaları bir kez birleştirerek kurtarır; sonraki yeniden indekslemelerde tam
+kaydedilmiş metni kullanır. Her chunk denemesinde aynı korpusu baştan indeksleyin ve yalnız `dev`
+sonuçlarına bakarak ayar seçin.

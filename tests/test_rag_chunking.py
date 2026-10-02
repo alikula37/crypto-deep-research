@@ -2,7 +2,11 @@
 
 import pytest
 
-from crypto_deep_research.rag.chunking import split_text, whitespace_offsets
+from crypto_deep_research.rag.chunking import (
+    reconstruct_chunk_text,
+    split_text,
+    whitespace_offsets,
+)
 
 
 def test_whitespace_token_chunks_keep_overlap_and_offsets():
@@ -38,3 +42,14 @@ def test_split_text_filters_non_text_token_offsets():
 def test_split_text_rejects_overlap_at_or_above_chunk_size():
     with pytest.raises(ValueError, match="overlap_tokens"):
         split_text("one two", whitespace_offsets("one two"), chunk_tokens=2, overlap_tokens=2)
+
+
+def test_reconstruct_chunk_text_removes_stored_overlap():
+    chunks = [
+        {"id": "doc#chunk-0", "chunk_index": 0, "token_start": 0, "token_count": 4,
+         "text": "one two three four"},
+        {"id": "doc#chunk-1", "chunk_index": 1, "token_start": 3, "token_count": 3,
+         "text": "four five six"},
+    ]
+
+    assert reconstruct_chunk_text(chunks) == "one two three four five six"

@@ -96,8 +96,9 @@ uv run cdr deep-research bitcoin --profile conservative --lang en  # profil ve p
 uv run cdr search "ETF akışları" --coin bitcoin                  # yerel RAG araması
 uv run cdr search "ETF akışları" --coin bitcoin --json           # etiketleme için kaynak ID'leri
 uv run cdr rag-eval data/rag-evaluation.jsonl                    # tüm etiketli RAG sorguları
-uv run cdr rag-eval data/rag-evaluation.jsonl --split dev        # ayar geliştirme kümesi
-uv run cdr rag-eval data/rag-evaluation.jsonl --split test       # final ölçüm kümesi
+uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval dense  # dense-only ablation
+uv run cdr rag-eval data/rag-evaluation.jsonl --split test --retrieval hybrid # final hibrit ölçüm
+uv run cdr rag-reindex --chunk-tokens 160 --overlap-tokens 32  # chunk ayarını uygula
 uv run cdr ask "BTC likidasyon riski nedir?" --coin bitcoin      # RAG + isteğe bağlı LLM
 uv run cdr items                                                 # 66 kriter ve açıklamaları
 uv run cdr prompt bitcoin --raw                                  # son promptu yazdır (pipe için)
@@ -131,7 +132,8 @@ Bu değerlendirme retrieval sıralamasını ölçer; üretilen yanıtın olgusal
 iddia etmez. Kendi korpusunuz için etiketli örnekler gerekir. Model/reranker ayarlarını kıyaslarken
 aynı sorgu etiketlerini koruyun, yalnız `dev` üzerinde ayar seçin ve final metriklerini `test`
 üzerinde raporlayın. Etiketleme ve deney protokolü için [`docs/rag-benchmark.md`](docs/rag-benchmark.md)
-rehberine bakın.
+rehberine bakın. Dense-only, BM25-only ve hibrit arama karşılaştırmaları `--retrieval` ile
+seçilebilir; chunk ayarlarını değiştirdikten sonra `rag-reindex` çalıştırın.
 
 ### MCP (Claude Desktop / Code, Codex, Cursor)
 

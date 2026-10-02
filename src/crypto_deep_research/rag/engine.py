@@ -14,7 +14,7 @@ from crypto_deep_research.models import (
     RetrievedContext,
     utcnow,
 )
-from crypto_deep_research.rag.chunking import split_text, whitespace_offsets
+from crypto_deep_research.rag.chunking import reconstruct_chunk_text, split_text, whitespace_offsets
 from crypto_deep_research.rag.embeddings import Embedder
 from crypto_deep_research.rag.store import VectorStore, make_doc_id, now_ts
 from crypto_deep_research.storage.db import Database
@@ -102,7 +102,19 @@ class RAGEngine:
             row["vector"] = vector
         self.store.add(rows)
 
-    def _ingest_rows(self, rows: list[dict]) -> int:
+    def _ingest_rows(
+        self,
+        rows: list[dict],
+        *,
+        chunk_tokens: int | None = None,
+        overlap_tokens: int | None = None,
+    ) -> int:
+        chunk_size = self.settings.rag_chunk_tokens if chunk_tokens is None else chunk_tokens
+        overlap_size = (
+            self.settings.rag_chunk_overlap_tokens if overlap_tokens is None else overlap_tokens
+        )
+        if chunk_size < 1 or overlap_size < 0 or overlap_size >= chunk_size:
+            raise ValueError("chunk_tokens pozitif, overlap_tokens ise 0 <= overlap < chunk olmalı")
         chunked_rows: list[dict] = []
         for row in rows:
             parent_id = row["id"]
@@ -110,11 +122,20 @@ class RAGEngine:
             chunks = split_text(
                 row["text"],
                 offsets if offsets is not None else whitespace_offsets(row["text"]),
-                chunk_tokens=self.settings.rag_chunk_tokens,
-                overlap_tokens=self.settings.rag_chunk_overlap_tokens,
+                chunk_tokens=chunk_size,
+                overlap_tokens=overlap_size,
             )
             self.db.delete_documents(parent_id)
             self.store.delete_document(parent_id)
+            self.db.save_rag_source_document(
+                parent_id,
+                row["coin"],
+                row["kind"],
+                row["source"],
+                row["url"],
+                row["text"],
+                row["ts"],
+            )
             for index, chunk in enumerate(chunks):
                 chunk_id = (
                     parent_id if len(chunks) == 1 else f"{parent_id}#chunk-{index:06d}"
@@ -136,6 +157,43 @@ class RAGEngine:
 
         self._embed_and_store(chunked_rows)
         return len(chunked_rows)
+
+    def reindex(
+        self, *, chunk_tokens: int | None = None, overlap_tokens: int | None = None
+    ) -> dict[str, int]:
+        """Rebuild the index from complete sources, recovering legacy chunk groups once."""
+        archived = {row["id"]: row for row in self.db.list_rag_source_documents()}
+        legacy_groups: dict[str, list[dict]] = {}
+        for row in self.db.list_documents():
+            parent_id = row.get("parent_id") or row["id"]
+            if parent_id not in archived:
+                legacy_groups.setdefault(parent_id, []).append(row)
+
+        recovered = 0
+        for parent_id, chunks in legacy_groups.items():
+            first = min(chunks, key=lambda item: (item["chunk_index"], item["id"]))
+            archived[parent_id] = {
+                "id": parent_id,
+                "coin": first.get("coin"),
+                "kind": first.get("kind") or "document",
+                "source": first.get("source"),
+                "url": first.get("url"),
+                "text": reconstruct_chunk_text(chunks),
+                "ts": first.get("ts"),
+            }
+            recovered += 1
+
+        rows = list(archived.values())
+        chunk_count = self._ingest_rows(
+            rows,
+            chunk_tokens=chunk_tokens,
+            overlap_tokens=overlap_tokens,
+        )
+        return {
+            "source_documents": len(rows),
+            "legacy_documents_recovered": recovered,
+            "chunks_indexed": chunk_count,
+        }
 
     def ingest_articles(self, coin_id: str, articles: list[NewsArticle]) -> int:
         rows: list[dict] = []
@@ -193,11 +251,23 @@ class RAGEngine:
         )
 
     # ------------------------------------------------------------------ arama
-    def search(self, query: str, coin: str | None = None, k: int = 8) -> list[RetrievedContext]:
+    def search(
+        self,
+        query: str,
+        coin: str | None = None,
+        k: int = 8,
+        *,
+        mode: str = "hybrid",
+    ) -> list[RetrievedContext]:
+        if mode not in {"dense", "bm25", "hybrid"}:
+            raise ValueError("mode 'dense', 'bm25' veya 'hybrid' olmalı")
         k = max(1, int(k))
         candidate_count = max(k * RERANK_CANDIDATE_MULTIPLIER, MIN_RERANK_CANDIDATES)
         vector_results: list[RetrievedContext] = []
-        vector = self.embedder.embed_one(query)
+        if mode != "bm25":
+            vector = self.embedder.embed_one(query)
+        else:
+            vector = None
         if vector:
             rows = self.store.search(vector, k=candidate_count, coin=coin)
             for row in rows:
@@ -206,6 +276,7 @@ class RAGEngine:
                         key=row.get("id", ""),
                         content=row.get("text", ""),
                         score=float(row.get("score", 0.0)),
+                        score_type="dense",
                         source=row.get("source"),
                         url=row.get("url"),
                         coin=row.get("coin"),
@@ -217,11 +288,17 @@ class RAGEngine:
                         timestamp=datetime.fromtimestamp(row["ts"]) if row.get("ts") else None,
                     )
                 )
+        lexical_rows = (
+            self.db.search_documents(query, coin=coin, limit=candidate_count)
+            if mode != "dense"
+            else []
+        )
         lexical_results = [
             RetrievedContext(
                 key=row.get("id", ""),
                 content=row.get("text") or "",
                 score=0.0,
+                score_type="bm25",
                 source=row.get("source"),
                 url=row.get("url"),
                 coin=row.get("coin"),
@@ -232,9 +309,16 @@ class RAGEngine:
                 token_count=int(row.get("token_count") or 0),
                 timestamp=datetime.fromtimestamp(row["ts"]) if row.get("ts") else None,
             )
-            for row in self.db.search_documents(query, coin=coin, limit=candidate_count)
+            for row in lexical_rows
         ]
-        results = reciprocal_rank_fusion([vector_results, lexical_results], limit=candidate_count)
+        if mode == "dense":
+            results = vector_results[:candidate_count]
+        elif mode == "bm25":
+            results = lexical_results[:candidate_count]
+        else:
+            results = reciprocal_rank_fusion(
+                [vector_results, lexical_results], limit=candidate_count
+            )
         if not results:
             return []
 

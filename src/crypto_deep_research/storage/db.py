@@ -148,6 +148,16 @@ CREATE TABLE IF NOT EXISTS documents (
 );
 CREATE INDEX IF NOT EXISTS idx_documents_coin ON documents(coin, kind);
 
+CREATE TABLE IF NOT EXISTS rag_source_documents (
+  id TEXT PRIMARY KEY,
+  coin TEXT,
+  kind TEXT,
+  source TEXT,
+  url TEXT,
+  text TEXT NOT NULL,
+  ts REAL
+);
+
 CREATE TABLE IF NOT EXISTS feature_snapshots (
   run_id TEXT PRIMARY KEY,
   coin TEXT NOT NULL,
@@ -1455,7 +1465,32 @@ class Database:
                 "DELETE FROM documents WHERE parent_id = ? OR id = ?",
                 (parent_id, parent_id),
             )
+            self._conn.execute("DELETE FROM rag_source_documents WHERE id = ?", (parent_id,))
             return cursor.rowcount
+
+    def save_rag_source_document(
+        self,
+        doc_id: str,
+        coin: str | None,
+        kind: str,
+        source: str | None,
+        url: str | None,
+        text: str,
+        ts: float | None = None,
+    ) -> None:
+        """Keep the complete source so its chunks can be rebuilt with new settings."""
+        self.execute(
+            """INSERT OR REPLACE INTO rag_source_documents
+               (id, coin, kind, source, url, text, ts) VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (doc_id, coin, kind, source, url, text, ts or time.time()),
+        )
+
+    def list_rag_source_documents(self) -> list[dict[str, Any]]:
+        return self.query("SELECT * FROM rag_source_documents ORDER BY id")
+
+    def list_documents(self) -> list[dict[str, Any]]:
+        """Return indexed chunks for one-time recovery of sources from older databases."""
+        return self.query("SELECT * FROM documents ORDER BY parent_id, chunk_index, id")
 
     def search_documents(
         self, query: str, coin: str | None = None, limit: int = 8

@@ -267,6 +267,9 @@ def rag_eval(
     dataset: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
     ks: str = typer.Option("1,3,5,10", "--ks", help="Virgülle ayrılmış Recall/Precision cut-off'ları"),
     split: str = typer.Option("all", "--split", help="Değerlendirme kümesi: all, dev veya test"),
+    retrieval_mode: str = typer.Option(
+        "hybrid", "--retrieval", help="Karşılaştırma modu: hybrid, dense veya bm25"
+    ),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     """Etiketli JSONL sorgularıyla hibrit RAG retrieval kalitesini ölçer."""
@@ -274,6 +277,8 @@ def rag_eval(
         cutoffs = [int(value.strip()) for value in ks.split(",") if value.strip()]
         if not cutoffs or any(k < 1 for k in cutoffs):
             raise ValueError("--ks pozitif tamsayılardan oluşmalı")
+        if retrieval_mode not in {"hybrid", "dense", "bm25"}:
+            raise ValueError("--retrieval hybrid, dense veya bm25 olmalı")
         cases = load_cases(dataset, split=split)
     except (ValueError, OSError) as exc:
         raise typer.BadParameter(str(exc)) from exc
@@ -282,13 +287,18 @@ def rag_eval(
     db = Database(settings.db_path)
     engine = RAGEngine(db, settings)
     result = evaluate_retrieval(
-        lambda query, coin, k: engine.search(query, coin=coin, k=k), cases, ks=cutoffs
+        lambda query, coin, k: engine.search(
+            query, coin=coin, k=k, mode=retrieval_mode
+        ),
+        cases,
+        ks=cutoffs,
     )
     output = {
         **result,
         "split": split,
         "retrieval": {
-            "fusion": "reciprocal_rank_fusion",
+            "mode": retrieval_mode,
+            "fusion": "reciprocal_rank_fusion" if retrieval_mode == "hybrid" else None,
             "dense_enabled": settings.embeddings_enabled,
             "reranker_model": settings.rag_reranker_model,
         },
@@ -306,8 +316,8 @@ def rag_eval(
         table.add_row(str(k), *values)
     console.print(table)
     console.print(
-        f"Fusion: RRF · dense={'açık' if settings.embeddings_enabled else 'kapalı'} · "
-        f"reranker={settings.rag_reranker_model or 'kapalı'} · etiketler: {dataset}"
+        f"Mod: {retrieval_mode} · dense={'açık' if settings.embeddings_enabled else 'kapalı'} · "
+        f"reranker={settings.rag_reranker_model or 'kapalı'} · split={split} · etiketler: {dataset}"
     )
 
 
@@ -389,6 +399,35 @@ def rag_stats():
     db = Database(settings.db_path)
     engine = RAGEngine(db, settings)
     console.print_json(json.dumps(engine.stats(), ensure_ascii=False, default=str))
+
+
+@app.command("rag-reindex")
+def rag_reindex(
+    chunk_tokens: int | None = typer.Option(None, "--chunk-tokens", min=1),
+    overlap_tokens: int | None = typer.Option(None, "--overlap-tokens", min=0),
+) -> None:
+    """Tam kaynak metinlerden RAG indeksini yeni chunk ayarlarıyla oluşturur."""
+    settings = get_settings()
+    db = Database(settings.db_path)
+    engine = RAGEngine(db, settings)
+    try:
+        result = engine.reindex(chunk_tokens=chunk_tokens, overlap_tokens=overlap_tokens)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    effective_chunk = chunk_tokens or settings.rag_chunk_tokens
+    effective_overlap = (
+        settings.rag_chunk_overlap_tokens if overlap_tokens is None else overlap_tokens
+    )
+    console.print_json(
+        json.dumps(
+            {
+                **result,
+                "chunk_tokens": effective_chunk,
+                "overlap_tokens": effective_overlap,
+            },
+            ensure_ascii=False,
+        )
+    )
 
 
 @app.command("analyses")
