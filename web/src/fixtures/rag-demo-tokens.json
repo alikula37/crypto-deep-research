@@ -1,0 +1,6577 @@
+{
+  "id": "demo-btc-risk-note",
+  "title": "Bitcoin: fonlama, kaldıraç ve kanıt sınırları",
+  "url": null,
+  "source": "Kurgu araştırma notu",
+  "text": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı. Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur.",
+  "label": "Kurgu belge · yöntem gösterimi · canlı piyasa verisi değildir",
+  "tokenizerLabel": "multilingual-e5-large · gerçek tokenizer parçaları",
+  "tokenizer": {
+    "model": "intfloat/multilingual-e5-large",
+    "cacheRevision": "ac6781cd1cf88b8306a536d7c9d18a5bd57cc14b",
+    "method": "cached-tokenizer-json",
+    "isFallback": false,
+    "specialTokensExcluded": true,
+    "offsetUnit": "utf16-character",
+    "truncation": false,
+    "note": "Cached model tokenizer’ıyla tam belge kodlandı. Dense/BM25 ölçümü yalnız 240/40 demo korpusunda yapıldı."
+  },
+  "tokens": [
+    {
+      "index": 0,
+      "start": 0,
+      "end": 3,
+      "text": "Kur",
+      "token": "▁Kur"
+    },
+    {
+      "index": 1,
+      "start": 3,
+      "end": 5,
+      "text": "gu",
+      "token": "gu"
+    },
+    {
+      "index": 2,
+      "start": 6,
+      "end": 11,
+      "text": "belge",
+      "token": "▁belge"
+    },
+    {
+      "index": 3,
+      "start": 12,
+      "end": 13,
+      "text": "·",
+      "token": "▁·"
+    },
+    {
+      "index": 4,
+      "start": 14,
+      "end": 16,
+      "text": "RA",
+      "token": "▁RA"
+    },
+    {
+      "index": 5,
+      "start": 16,
+      "end": 17,
+      "text": "G",
+      "token": "G"
+    },
+    {
+      "index": 6,
+      "start": 18,
+      "end": 27,
+      "text": "mekanizma",
+      "token": "▁mekanizma"
+    },
+    {
+      "index": 7,
+      "start": 27,
+      "end": 29,
+      "text": "sı",
+      "token": "sı"
+    },
+    {
+      "index": 8,
+      "start": 30,
+      "end": 34,
+      "text": "için",
+      "token": "▁için"
+    },
+    {
+      "index": 9,
+      "start": 35,
+      "end": 36,
+      "text": "ö",
+      "token": "▁"
+    },
+    {
+      "index": 10,
+      "start": 35,
+      "end": 42,
+      "text": "öğretim",
+      "token": "öğretim"
+    },
+    {
+      "index": 11,
+      "start": 43,
+      "end": 49,
+      "text": "örneği",
+      "token": "▁örneği"
+    },
+    {
+      "index": 12,
+      "start": 51,
+      "end": 58,
+      "text": "Bitcoin",
+      "token": "▁Bitcoin"
+    },
+    {
+      "index": 13,
+      "start": 58,
+      "end": 59,
+      "text": "’",
+      "token": "’"
+    },
+    {
+      "index": 14,
+      "start": 59,
+      "end": 61,
+      "text": "de",
+      "token": "de"
+    },
+    {
+      "index": 15,
+      "start": 62,
+      "end": 65,
+      "text": "fon",
+      "token": "▁fon"
+    },
+    {
+      "index": 16,
+      "start": 65,
+      "end": 69,
+      "text": "lama",
+      "token": "lama"
+    },
+    {
+      "index": 17,
+      "start": 70,
+      "end": 72,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 18,
+      "start": 73,
+      "end": 77,
+      "text": "liki",
+      "token": "▁liki"
+    },
+    {
+      "index": 19,
+      "start": 77,
+      "end": 79,
+      "text": "da",
+      "token": "da"
+    },
+    {
+      "index": 20,
+      "start": 79,
+      "end": 83,
+      "text": "syon",
+      "token": "syon"
+    },
+    {
+      "index": 21,
+      "start": 84,
+      "end": 89,
+      "text": "riski",
+      "token": "▁riski"
+    },
+    {
+      "index": 22,
+      "start": 90,
+      "end": 92,
+      "text": "Bu",
+      "token": "▁Bu"
+    },
+    {
+      "index": 23,
+      "start": 93,
+      "end": 98,
+      "text": "belge",
+      "token": "▁belge"
+    },
+    {
+      "index": 24,
+      "start": 99,
+      "end": 107,
+      "text": "yalnızca",
+      "token": "▁yalnızca"
+    },
+    {
+      "index": 25,
+      "start": 108,
+      "end": 113,
+      "text": "arama",
+      "token": "▁arama"
+    },
+    {
+      "index": 26,
+      "start": 113,
+      "end": 116,
+      "text": "nın",
+      "token": "nın"
+    },
+    {
+      "index": 27,
+      "start": 117,
+      "end": 122,
+      "text": "nasıl",
+      "token": "▁nasıl"
+    },
+    {
+      "index": 28,
+      "start": 123,
+      "end": 132,
+      "text": "çalıştığı",
+      "token": "▁çalıştığı"
+    },
+    {
+      "index": 29,
+      "start": 132,
+      "end": 134,
+      "text": "nı",
+      "token": "nı"
+    },
+    {
+      "index": 30,
+      "start": 135,
+      "end": 143,
+      "text": "gösterme",
+      "token": "▁gösterme"
+    },
+    {
+      "index": 31,
+      "start": 143,
+      "end": 144,
+      "text": "k",
+      "token": "k"
+    },
+    {
+      "index": 32,
+      "start": 145,
+      "end": 149,
+      "text": "için",
+      "token": "▁için"
+    },
+    {
+      "index": 33,
+      "start": 150,
+      "end": 153,
+      "text": "yaz",
+      "token": "▁yaz"
+    },
+    {
+      "index": 34,
+      "start": 153,
+      "end": 157,
+      "text": "ıldı",
+      "token": "ıldı"
+    },
+    {
+      "index": 35,
+      "start": 157,
+      "end": 158,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 36,
+      "start": 159,
+      "end": 165,
+      "text": "Gerçek",
+      "token": "▁Gerçek"
+    },
+    {
+      "index": 37,
+      "start": 166,
+      "end": 172,
+      "text": "piyasa",
+      "token": "▁piyasa"
+    },
+    {
+      "index": 38,
+      "start": 173,
+      "end": 177,
+      "text": "ölçü",
+      "token": "▁ölçü"
+    },
+    {
+      "index": 39,
+      "start": 177,
+      "end": 179,
+      "text": "mü",
+      "token": "mü"
+    },
+    {
+      "index": 40,
+      "start": 179,
+      "end": 180,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 41,
+      "start": 181,
+      "end": 187,
+      "text": "güncel",
+      "token": "▁güncel"
+    },
+    {
+      "index": 42,
+      "start": 188,
+      "end": 197,
+      "text": "araştırma",
+      "token": "▁araştırma"
+    },
+    {
+      "index": 43,
+      "start": 198,
+      "end": 204,
+      "text": "sonucu",
+      "token": "▁sonucu"
+    },
+    {
+      "index": 44,
+      "start": 205,
+      "end": 209,
+      "text": "veya",
+      "token": "▁veya"
+    },
+    {
+      "index": 45,
+      "start": 210,
+      "end": 215,
+      "text": "işlem",
+      "token": "▁işlem"
+    },
+    {
+      "index": 46,
+      "start": 216,
+      "end": 221,
+      "text": "öneri",
+      "token": "▁öneri"
+    },
+    {
+      "index": 47,
+      "start": 221,
+      "end": 223,
+      "text": "si",
+      "token": "si"
+    },
+    {
+      "index": 48,
+      "start": 224,
+      "end": 232,
+      "text": "değildir",
+      "token": "▁değildir"
+    },
+    {
+      "index": 49,
+      "start": 232,
+      "end": 233,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 50,
+      "start": 234,
+      "end": 235,
+      "text": "S",
+      "token": "▁S"
+    },
+    {
+      "index": 51,
+      "start": 235,
+      "end": 238,
+      "text": "ayı",
+      "token": "ayı"
+    },
+    {
+      "index": 52,
+      "start": 238,
+      "end": 241,
+      "text": "lar",
+      "token": "lar"
+    },
+    {
+      "index": 53,
+      "start": 241,
+      "end": 242,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 54,
+      "start": 243,
+      "end": 250,
+      "text": "isimler",
+      "token": "▁isimler"
+    },
+    {
+      "index": 55,
+      "start": 251,
+      "end": 253,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 56,
+      "start": 254,
+      "end": 261,
+      "text": "olaylar",
+      "token": "▁olaylar"
+    },
+    {
+      "index": 57,
+      "start": 262,
+      "end": 267,
+      "text": "örnek",
+      "token": "▁örnek"
+    },
+    {
+      "index": 58,
+      "start": 267,
+      "end": 270,
+      "text": "tir",
+      "token": "tir"
+    },
+    {
+      "index": 59,
+      "start": 270,
+      "end": 271,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 60,
+      "start": 272,
+      "end": 276,
+      "text": "Aynı",
+      "token": "▁Aynı"
+    },
+    {
+      "index": 61,
+      "start": 277,
+      "end": 281,
+      "text": "soru",
+      "token": "▁soru"
+    },
+    {
+      "index": 62,
+      "start": 282,
+      "end": 288,
+      "text": "farklı",
+      "token": "▁farklı"
+    },
+    {
+      "index": 63,
+      "start": 289,
+      "end": 295,
+      "text": "kaynak",
+      "token": "▁kaynak"
+    },
+    {
+      "index": 64,
+      "start": 296,
+      "end": 301,
+      "text": "parça",
+      "token": "▁parça"
+    },
+    {
+      "index": 65,
+      "start": 301,
+      "end": 308,
+      "text": "larıyla",
+      "token": "larıyla"
+    },
+    {
+      "index": 66,
+      "start": 309,
+      "end": 319,
+      "text": "karşılaştı",
+      "token": "▁karşılaştı"
+    },
+    {
+      "index": 67,
+      "start": 319,
+      "end": 320,
+      "text": "r",
+      "token": "r"
+    },
+    {
+      "index": 68,
+      "start": 320,
+      "end": 324,
+      "text": "ılır",
+      "token": "ılır"
+    },
+    {
+      "index": 69,
+      "start": 324,
+      "end": 325,
+      "text": ";",
+      "token": ";"
+    },
+    {
+      "index": 70,
+      "start": 326,
+      "end": 331,
+      "text": "cevap",
+      "token": "▁cevap"
+    },
+    {
+      "index": 71,
+      "start": 331,
+      "end": 332,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 72,
+      "start": 333,
+      "end": 341,
+      "text": "yalnızca",
+      "token": "▁yalnızca"
+    },
+    {
+      "index": 73,
+      "start": 342,
+      "end": 345,
+      "text": "seç",
+      "token": "▁seç"
+    },
+    {
+      "index": 74,
+      "start": 345,
+      "end": 349,
+      "text": "ilen",
+      "token": "ilen"
+    },
+    {
+      "index": 75,
+      "start": 350,
+      "end": 353,
+      "text": "pas",
+      "token": "▁pas"
+    },
+    {
+      "index": 76,
+      "start": 353,
+      "end": 355,
+      "text": "aj",
+      "token": "aj"
+    },
+    {
+      "index": 77,
+      "start": 355,
+      "end": 360,
+      "text": "ların",
+      "token": "ların"
+    },
+    {
+      "index": 78,
+      "start": 361,
+      "end": 365,
+      "text": "açık",
+      "token": "▁açık"
+    },
+    {
+      "index": 79,
+      "start": 365,
+      "end": 367,
+      "text": "ça",
+      "token": "ça"
+    },
+    {
+      "index": 80,
+      "start": 368,
+      "end": 374,
+      "text": "destek",
+      "token": "▁destek"
+    },
+    {
+      "index": 81,
+      "start": 374,
+      "end": 380,
+      "text": "lediği",
+      "token": "lediği"
+    },
+    {
+      "index": 82,
+      "start": 381,
+      "end": 386,
+      "text": "bilgi",
+      "token": "▁bilgi"
+    },
+    {
+      "index": 83,
+      "start": 386,
+      "end": 388,
+      "text": "yi",
+      "token": "yi"
+    },
+    {
+      "index": 84,
+      "start": 389,
+      "end": 395,
+      "text": "kullan",
+      "token": "▁kullan"
+    },
+    {
+      "index": 85,
+      "start": 395,
+      "end": 397,
+      "text": "ır",
+      "token": "ır"
+    },
+    {
+      "index": 86,
+      "start": 397,
+      "end": 398,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 87,
+      "start": 400,
+      "end": 403,
+      "text": "Fon",
+      "token": "▁Fon"
+    },
+    {
+      "index": 88,
+      "start": 403,
+      "end": 407,
+      "text": "lama",
+      "token": "lama"
+    },
+    {
+      "index": 89,
+      "start": 407,
+      "end": 408,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 90,
+      "start": 409,
+      "end": 416,
+      "text": "sürekli",
+      "token": "▁sürekli"
+    },
+    {
+      "index": 91,
+      "start": 417,
+      "end": 419,
+      "text": "va",
+      "token": "▁va"
+    },
+    {
+      "index": 92,
+      "start": 419,
+      "end": 423,
+      "text": "deli",
+      "token": "deli"
+    },
+    {
+      "index": 93,
+      "start": 424,
+      "end": 432,
+      "text": "sözleşme",
+      "token": "▁sözleşme"
+    },
+    {
+      "index": 94,
+      "start": 432,
+      "end": 437,
+      "text": "lerde",
+      "token": "lerde"
+    },
+    {
+      "index": 95,
+      "start": 438,
+      "end": 443,
+      "text": "taraf",
+      "token": "▁taraf"
+    },
+    {
+      "index": 96,
+      "start": 443,
+      "end": 446,
+      "text": "lar",
+      "token": "lar"
+    },
+    {
+      "index": 97,
+      "start": 447,
+      "end": 455,
+      "text": "arasında",
+      "token": "▁arasında"
+    },
+    {
+      "index": 98,
+      "start": 456,
+      "end": 463,
+      "text": "yapılan",
+      "token": "▁yapılan"
+    },
+    {
+      "index": 99,
+      "start": 464,
+      "end": 469,
+      "text": "dönem",
+      "token": "▁dönem"
+    },
+    {
+      "index": 100,
+      "start": 469,
+      "end": 472,
+      "text": "sel",
+      "token": "sel"
+    },
+    {
+      "index": 101,
+      "start": 473,
+      "end": 478,
+      "text": "ödeme",
+      "token": "▁ödeme"
+    },
+    {
+      "index": 102,
+      "start": 478,
+      "end": 481,
+      "text": "dir",
+      "token": "dir"
+    },
+    {
+      "index": 103,
+      "start": 481,
+      "end": 482,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 104,
+      "start": 483,
+      "end": 485,
+      "text": "Bu",
+      "token": "▁Bu"
+    },
+    {
+      "index": 105,
+      "start": 486,
+      "end": 489,
+      "text": "kur",
+      "token": "▁kur"
+    },
+    {
+      "index": 106,
+      "start": 489,
+      "end": 491,
+      "text": "gu",
+      "token": "gu"
+    },
+    {
+      "index": 107,
+      "start": 492,
+      "end": 495,
+      "text": "not",
+      "token": "▁not"
+    },
+    {
+      "index": 108,
+      "start": 495,
+      "end": 497,
+      "text": "ta",
+      "token": "ta"
+    },
+    {
+      "index": 109,
+      "start": 498,
+      "end": 499,
+      "text": "p",
+      "token": "▁"
+    },
+    {
+      "index": 110,
+      "start": 498,
+      "end": 502,
+      "text": "pozi",
+      "token": "pozi"
+    },
+    {
+      "index": 111,
+      "start": 502,
+      "end": 505,
+      "text": "tif",
+      "token": "tif"
+    },
+    {
+      "index": 112,
+      "start": 506,
+      "end": 509,
+      "text": "fon",
+      "token": "▁fon"
+    },
+    {
+      "index": 113,
+      "start": 509,
+      "end": 513,
+      "text": "lama",
+      "token": "lama"
+    },
+    {
+      "index": 114,
+      "start": 513,
+      "end": 514,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 115,
+      "start": 515,
+      "end": 519,
+      "text": "long",
+      "token": "▁long"
+    },
+    {
+      "index": 116,
+      "start": 520,
+      "end": 526,
+      "text": "tarafı",
+      "token": "▁tarafı"
+    },
+    {
+      "index": 117,
+      "start": 526,
+      "end": 529,
+      "text": "nın",
+      "token": "nın"
+    },
+    {
+      "index": 118,
+      "start": 530,
+      "end": 535,
+      "text": "ödeme",
+      "token": "▁ödeme"
+    },
+    {
+      "index": 119,
+      "start": 536,
+      "end": 543,
+      "text": "yaptığı",
+      "token": "▁yaptığı"
+    },
+    {
+      "index": 120,
+      "start": 544,
+      "end": 547,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 121,
+      "start": 548,
+      "end": 554,
+      "text": "örneği",
+      "token": "▁örneği"
+    },
+    {
+      "index": 122,
+      "start": 555,
+      "end": 561,
+      "text": "temsil",
+      "token": "▁temsil"
+    },
+    {
+      "index": 123,
+      "start": 562,
+      "end": 566,
+      "text": "eder",
+      "token": "▁eder"
+    },
+    {
+      "index": 124,
+      "start": 566,
+      "end": 567,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 125,
+      "start": 568,
+      "end": 571,
+      "text": "Fon",
+      "token": "▁Fon"
+    },
+    {
+      "index": 126,
+      "start": 571,
+      "end": 573,
+      "text": "la",
+      "token": "la"
+    },
+    {
+      "index": 127,
+      "start": 573,
+      "end": 578,
+      "text": "manın",
+      "token": "manın"
+    },
+    {
+      "index": 128,
+      "start": 579,
+      "end": 585,
+      "text": "yüksek",
+      "token": "▁yüksek"
+    },
+    {
+      "index": 129,
+      "start": 586,
+      "end": 592,
+      "text": "olması",
+      "token": "▁olması"
+    },
+    {
+      "index": 130,
+      "start": 593,
+      "end": 596,
+      "text": "tek",
+      "token": "▁tek"
+    },
+    {
+      "index": 131,
+      "start": 597,
+      "end": 603,
+      "text": "başına",
+      "token": "▁başına"
+    },
+    {
+      "index": 132,
+      "start": 604,
+      "end": 610,
+      "text": "fiyatı",
+      "token": "▁fiyatı"
+    },
+    {
+      "index": 133,
+      "start": 610,
+      "end": 611,
+      "text": "n",
+      "token": "n"
+    },
+    {
+      "index": 134,
+      "start": 612,
+      "end": 615,
+      "text": "düş",
+      "token": "▁düş"
+    },
+    {
+      "index": 135,
+      "start": 615,
+      "end": 622,
+      "text": "eceğini",
+      "token": "eceğini"
+    },
+    {
+      "index": 136,
+      "start": 623,
+      "end": 628,
+      "text": "kanıt",
+      "token": "▁kanıt"
+    },
+    {
+      "index": 137,
+      "start": 628,
+      "end": 632,
+      "text": "lama",
+      "token": "lama"
+    },
+    {
+      "index": 138,
+      "start": 632,
+      "end": 633,
+      "text": "z",
+      "token": "z"
+    },
+    {
+      "index": 139,
+      "start": 633,
+      "end": 634,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 140,
+      "start": 635,
+      "end": 640,
+      "text": "Değer",
+      "token": "▁Değer"
+    },
+    {
+      "index": 141,
+      "start": 640,
+      "end": 648,
+      "text": "lendirme",
+      "token": "lendirme"
+    },
+    {
+      "index": 142,
+      "start": 648,
+      "end": 650,
+      "text": "de",
+      "token": "de"
+    },
+    {
+      "index": 143,
+      "start": 651,
+      "end": 655,
+      "text": "açık",
+      "token": "▁açık"
+    },
+    {
+      "index": 144,
+      "start": 656,
+      "end": 664,
+      "text": "pozisyon",
+      "token": "▁pozisyon"
+    },
+    {
+      "index": 145,
+      "start": 665,
+      "end": 670,
+      "text": "büyük",
+      "token": "▁büyük"
+    },
+    {
+      "index": 146,
+      "start": 670,
+      "end": 674,
+      "text": "lüğü",
+      "token": "lüğü"
+    },
+    {
+      "index": 147,
+      "start": 674,
+      "end": 675,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 148,
+      "start": 676,
+      "end": 681,
+      "text": "fiyat",
+      "token": "▁fiyat"
+    },
+    {
+      "index": 149,
+      "start": 682,
+      "end": 689,
+      "text": "hareket",
+      "token": "▁hareket"
+    },
+    {
+      "index": 150,
+      "start": 689,
+      "end": 690,
+      "text": "i",
+      "token": "i"
+    },
+    {
+      "index": 151,
+      "start": 691,
+      "end": 693,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 152,
+      "start": 694,
+      "end": 699,
+      "text": "işlem",
+      "token": "▁işlem"
+    },
+    {
+      "index": 153,
+      "start": 700,
+      "end": 703,
+      "text": "hac",
+      "token": "▁hac"
+    },
+    {
+      "index": 154,
+      "start": 703,
+      "end": 705,
+      "text": "mi",
+      "token": "mi"
+    },
+    {
+      "index": 155,
+      "start": 706,
+      "end": 714,
+      "text": "birlikte",
+      "token": "▁birlikte"
+    },
+    {
+      "index": 156,
+      "start": 715,
+      "end": 719,
+      "text": "ince",
+      "token": "▁ince"
+    },
+    {
+      "index": 157,
+      "start": 719,
+      "end": 724,
+      "text": "lenir",
+      "token": "lenir"
+    },
+    {
+      "index": 158,
+      "start": 724,
+      "end": 725,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 159,
+      "start": 726,
+      "end": 732,
+      "text": "Yüksek",
+      "token": "▁Yüksek"
+    },
+    {
+      "index": 160,
+      "start": 733,
+      "end": 736,
+      "text": "fon",
+      "token": "▁fon"
+    },
+    {
+      "index": 161,
+      "start": 736,
+      "end": 740,
+      "text": "lama",
+      "token": "lama"
+    },
+    {
+      "index": 162,
+      "start": 741,
+      "end": 744,
+      "text": "ile",
+      "token": "▁ile"
+    },
+    {
+      "index": 163,
+      "start": 745,
+      "end": 749,
+      "text": "açık",
+      "token": "▁açık"
+    },
+    {
+      "index": 164,
+      "start": 750,
+      "end": 758,
+      "text": "pozisyon",
+      "token": "▁pozisyon"
+    },
+    {
+      "index": 165,
+      "start": 759,
+      "end": 764,
+      "text": "artış",
+      "token": "▁artış"
+    },
+    {
+      "index": 166,
+      "start": 764,
+      "end": 768,
+      "text": "ının",
+      "token": "ının"
+    },
+    {
+      "index": 167,
+      "start": 769,
+      "end": 776,
+      "text": "beraber",
+      "token": "▁beraber"
+    },
+    {
+      "index": 168,
+      "start": 777,
+      "end": 784,
+      "text": "görülme",
+      "token": "▁görülme"
+    },
+    {
+      "index": 169,
+      "start": 784,
+      "end": 786,
+      "text": "si",
+      "token": "si"
+    },
+    {
+      "index": 170,
+      "start": 786,
+      "end": 787,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 171,
+      "start": 788,
+      "end": 792,
+      "text": "aynı",
+      "token": "▁aynı"
+    },
+    {
+      "index": 172,
+      "start": 793,
+      "end": 798,
+      "text": "yönde",
+      "token": "▁yönde"
+    },
+    {
+      "index": 173,
+      "start": 799,
+      "end": 808,
+      "text": "kalabalık",
+      "token": "▁kalabalık"
+    },
+    {
+      "index": 174,
+      "start": 808,
+      "end": 813,
+      "text": "laşan",
+      "token": "laşan"
+    },
+    {
+      "index": 175,
+      "start": 814,
+      "end": 822,
+      "text": "pozisyon",
+      "token": "▁pozisyon"
+    },
+    {
+      "index": 176,
+      "start": 822,
+      "end": 827,
+      "text": "ların",
+      "token": "ların"
+    },
+    {
+      "index": 177,
+      "start": 828,
+      "end": 835,
+      "text": "araştır",
+      "token": "▁araştır"
+    },
+    {
+      "index": 178,
+      "start": 835,
+      "end": 843,
+      "text": "ılmasını",
+      "token": "ılmasını"
+    },
+    {
+      "index": 179,
+      "start": 844,
+      "end": 852,
+      "text": "gerektir",
+      "token": "▁gerektir"
+    },
+    {
+      "index": 180,
+      "start": 852,
+      "end": 858,
+      "text": "ebilir",
+      "token": "ebilir"
+    },
+    {
+      "index": 181,
+      "start": 858,
+      "end": 859,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 182,
+      "start": 860,
+      "end": 863,
+      "text": "Sin",
+      "token": "▁Sin"
+    },
+    {
+      "index": 183,
+      "start": 863,
+      "end": 866,
+      "text": "yal",
+      "token": "yal"
+    },
+    {
+      "index": 184,
+      "start": 867,
+      "end": 870,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 185,
+      "start": 871,
+      "end": 878,
+      "text": "garanti",
+      "token": "▁garanti"
+    },
+    {
+      "index": 186,
+      "start": 878,
+      "end": 880,
+      "text": "ye",
+      "token": "ye"
+    },
+    {
+      "index": 187,
+      "start": 881,
+      "end": 887,
+      "text": "çevril",
+      "token": "▁çevril"
+    },
+    {
+      "index": 188,
+      "start": 887,
+      "end": 890,
+      "text": "mez",
+      "token": "mez"
+    },
+    {
+      "index": 189,
+      "start": 890,
+      "end": 891,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 190,
+      "start": 892,
+      "end": 898,
+      "text": "Yalnız",
+      "token": "▁Yalnız"
+    },
+    {
+      "index": 191,
+      "start": 899,
+      "end": 902,
+      "text": "fon",
+      "token": "▁fon"
+    },
+    {
+      "index": 192,
+      "start": 902,
+      "end": 906,
+      "text": "lama",
+      "token": "lama"
+    },
+    {
+      "index": 193,
+      "start": 907,
+      "end": 913,
+      "text": "değeri",
+      "token": "▁değeri"
+    },
+    {
+      "index": 194,
+      "start": 913,
+      "end": 915,
+      "text": "ne",
+      "token": "ne"
+    },
+    {
+      "index": 195,
+      "start": 916,
+      "end": 919,
+      "text": "bak",
+      "token": "▁bak"
+    },
+    {
+      "index": 196,
+      "start": 919,
+      "end": 925,
+      "text": "ılarak",
+      "token": "ılarak"
+    },
+    {
+      "index": 197,
+      "start": 926,
+      "end": 934,
+      "text": "otomatik",
+      "token": "▁otomatik"
+    },
+    {
+      "index": 198,
+      "start": 935,
+      "end": 936,
+      "text": "a",
+      "token": "▁"
+    },
+    {
+      "index": 199,
+      "start": 935,
+      "end": 939,
+      "text": "alım",
+      "token": "alım"
+    },
+    {
+      "index": 200,
+      "start": 940,
+      "end": 944,
+      "text": "veya",
+      "token": "▁veya"
+    },
+    {
+      "index": 201,
+      "start": 945,
+      "end": 947,
+      "text": "sa",
+      "token": "▁sa"
+    },
+    {
+      "index": 202,
+      "start": 947,
+      "end": 950,
+      "text": "tım",
+      "token": "tım"
+    },
+    {
+      "index": 203,
+      "start": 951,
+      "end": 957,
+      "text": "kararı",
+      "token": "▁kararı"
+    },
+    {
+      "index": 204,
+      "start": 958,
+      "end": 963,
+      "text": "veril",
+      "token": "▁veril"
+    },
+    {
+      "index": 205,
+      "start": 963,
+      "end": 966,
+      "text": "mez",
+      "token": "mez"
+    },
+    {
+      "index": 206,
+      "start": 966,
+      "end": 967,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 207,
+      "start": 969,
+      "end": 973,
+      "text": "Açık",
+      "token": "▁Açık"
+    },
+    {
+      "index": 208,
+      "start": 974,
+      "end": 982,
+      "text": "pozisyon",
+      "token": "▁pozisyon"
+    },
+    {
+      "index": 209,
+      "start": 982,
+      "end": 983,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 210,
+      "start": 984,
+      "end": 989,
+      "text": "kapan",
+      "token": "▁kapan"
+    },
+    {
+      "index": 211,
+      "start": 989,
+      "end": 994,
+      "text": "mamış",
+      "token": "mamış"
+    },
+    {
+      "index": 212,
+      "start": 995,
+      "end": 997,
+      "text": "va",
+      "token": "▁va"
+    },
+    {
+      "index": 213,
+      "start": 997,
+      "end": 1001,
+      "text": "deli",
+      "token": "deli"
+    },
+    {
+      "index": 214,
+      "start": 1002,
+      "end": 1010,
+      "text": "sözleşme",
+      "token": "▁sözleşme"
+    },
+    {
+      "index": 215,
+      "start": 1010,
+      "end": 1015,
+      "text": "lerin",
+      "token": "lerin"
+    },
+    {
+      "index": 216,
+      "start": 1016,
+      "end": 1022,
+      "text": "toplam",
+      "token": "▁toplam"
+    },
+    {
+      "index": 217,
+      "start": 1022,
+      "end": 1025,
+      "text": "ını",
+      "token": "ını"
+    },
+    {
+      "index": 218,
+      "start": 1026,
+      "end": 1032,
+      "text": "anlatı",
+      "token": "▁anlatı"
+    },
+    {
+      "index": 219,
+      "start": 1032,
+      "end": 1033,
+      "text": "r",
+      "token": "r"
+    },
+    {
+      "index": 220,
+      "start": 1033,
+      "end": 1034,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 221,
+      "start": 1035,
+      "end": 1037,
+      "text": "Ör",
+      "token": "▁Ör"
+    },
+    {
+      "index": 222,
+      "start": 1037,
+      "end": 1040,
+      "text": "nek",
+      "token": "nek"
+    },
+    {
+      "index": 223,
+      "start": 1040,
+      "end": 1042,
+      "text": "te",
+      "token": "te"
+    },
+    {
+      "index": 224,
+      "start": 1043,
+      "end": 1048,
+      "text": "fiyat",
+      "token": "▁fiyat"
+    },
+    {
+      "index": 225,
+      "start": 1049,
+      "end": 1051,
+      "text": "ya",
+      "token": "▁ya"
+    },
+    {
+      "index": 226,
+      "start": 1051,
+      "end": 1054,
+      "text": "tay",
+      "token": "tay"
+    },
+    {
+      "index": 227,
+      "start": 1054,
+      "end": 1057,
+      "text": "ken",
+      "token": "ken"
+    },
+    {
+      "index": 228,
+      "start": 1058,
+      "end": 1062,
+      "text": "açık",
+      "token": "▁açık"
+    },
+    {
+      "index": 229,
+      "start": 1063,
+      "end": 1071,
+      "text": "pozisyon",
+      "token": "▁pozisyon"
+    },
+    {
+      "index": 230,
+      "start": 1072,
+      "end": 1078,
+      "text": "yüksel",
+      "token": "▁yüksel"
+    },
+    {
+      "index": 231,
+      "start": 1078,
+      "end": 1080,
+      "text": "ir",
+      "token": "ir"
+    },
+    {
+      "index": 232,
+      "start": 1080,
+      "end": 1081,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 233,
+      "start": 1082,
+      "end": 1084,
+      "text": "Bu",
+      "token": "▁Bu"
+    },
+    {
+      "index": 234,
+      "start": 1085,
+      "end": 1090,
+      "text": "durum",
+      "token": "▁durum"
+    },
+    {
+      "index": 235,
+      "start": 1090,
+      "end": 1091,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 236,
+      "start": 1092,
+      "end": 1098,
+      "text": "kaldır",
+      "token": "▁kaldır"
+    },
+    {
+      "index": 237,
+      "start": 1098,
+      "end": 1100,
+      "text": "aç",
+      "token": "aç"
+    },
+    {
+      "index": 238,
+      "start": 1101,
+      "end": 1110,
+      "text": "kullanımı",
+      "token": "▁kullanımı"
+    },
+    {
+      "index": 239,
+      "start": 1110,
+      "end": 1113,
+      "text": "nın",
+      "token": "nın"
+    },
+    {
+      "index": 240,
+      "start": 1114,
+      "end": 1117,
+      "text": "art",
+      "token": "▁art"
+    },
+    {
+      "index": 241,
+      "start": 1117,
+      "end": 1123,
+      "text": "tığını",
+      "token": "tığını"
+    },
+    {
+      "index": 242,
+      "start": 1124,
+      "end": 1131,
+      "text": "düşündü",
+      "token": "▁düşündü"
+    },
+    {
+      "index": 243,
+      "start": 1131,
+      "end": 1132,
+      "text": "r",
+      "token": "r"
+    },
+    {
+      "index": 244,
+      "start": 1132,
+      "end": 1138,
+      "text": "ebilir",
+      "token": "ebilir"
+    },
+    {
+      "index": 245,
+      "start": 1138,
+      "end": 1139,
+      "text": ";",
+      "token": ";"
+    },
+    {
+      "index": 246,
+      "start": 1140,
+      "end": 1145,
+      "text": "hangi",
+      "token": "▁hangi"
+    },
+    {
+      "index": 247,
+      "start": 1146,
+      "end": 1152,
+      "text": "tarafı",
+      "token": "▁tarafı"
+    },
+    {
+      "index": 248,
+      "start": 1152,
+      "end": 1153,
+      "text": "n",
+      "token": "n"
+    },
+    {
+      "index": 249,
+      "start": 1154,
+      "end": 1159,
+      "text": "baskı",
+      "token": "▁baskı"
+    },
+    {
+      "index": 250,
+      "start": 1159,
+      "end": 1160,
+      "text": "n",
+      "token": "n"
+    },
+    {
+      "index": 251,
+      "start": 1161,
+      "end": 1169,
+      "text": "olduğunu",
+      "token": "▁olduğunu"
+    },
+    {
+      "index": 252,
+      "start": 1170,
+      "end": 1173,
+      "text": "tek",
+      "token": "▁tek"
+    },
+    {
+      "index": 253,
+      "start": 1174,
+      "end": 1180,
+      "text": "başına",
+      "token": "▁başına"
+    },
+    {
+      "index": 254,
+      "start": 1181,
+      "end": 1189,
+      "text": "gösterme",
+      "token": "▁gösterme"
+    },
+    {
+      "index": 255,
+      "start": 1189,
+      "end": 1190,
+      "text": "z",
+      "token": "z"
+    },
+    {
+      "index": 256,
+      "start": 1190,
+      "end": 1191,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 257,
+      "start": 1192,
+      "end": 1196,
+      "text": "Spot",
+      "token": "▁Spot"
+    },
+    {
+      "index": 258,
+      "start": 1197,
+      "end": 1200,
+      "text": "hac",
+      "token": "▁hac"
+    },
+    {
+      "index": 259,
+      "start": 1200,
+      "end": 1202,
+      "text": "im",
+      "token": "im"
+    },
+    {
+      "index": 260,
+      "start": 1203,
+      "end": 1205,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 261,
+      "start": 1206,
+      "end": 1208,
+      "text": "va",
+      "token": "▁va"
+    },
+    {
+      "index": 262,
+      "start": 1208,
+      "end": 1212,
+      "text": "deli",
+      "token": "deli"
+    },
+    {
+      "index": 263,
+      "start": 1213,
+      "end": 1216,
+      "text": "hac",
+      "token": "▁hac"
+    },
+    {
+      "index": 264,
+      "start": 1216,
+      "end": 1218,
+      "text": "im",
+      "token": "im"
+    },
+    {
+      "index": 265,
+      "start": 1219,
+      "end": 1221,
+      "text": "ay",
+      "token": "▁ay"
+    },
+    {
+      "index": 266,
+      "start": 1221,
+      "end": 1222,
+      "text": "r",
+      "token": "r"
+    },
+    {
+      "index": 267,
+      "start": 1222,
+      "end": 1226,
+      "text": "ılır",
+      "token": "ılır"
+    },
+    {
+      "index": 268,
+      "start": 1226,
+      "end": 1227,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 269,
+      "start": 1228,
+      "end": 1231,
+      "text": "Tek",
+      "token": "▁Tek"
+    },
+    {
+      "index": 270,
+      "start": 1232,
+      "end": 1235,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 271,
+      "start": 1236,
+      "end": 1243,
+      "text": "kaynağı",
+      "token": "▁kaynağı"
+    },
+    {
+      "index": 272,
+      "start": 1243,
+      "end": 1244,
+      "text": "n",
+      "token": "n"
+    },
+    {
+      "index": 273,
+      "start": 1245,
+      "end": 1250,
+      "text": "rakam",
+      "token": "▁rakam"
+    },
+    {
+      "index": 274,
+      "start": 1250,
+      "end": 1251,
+      "text": "ı",
+      "token": "ı"
+    },
+    {
+      "index": 275,
+      "start": 1251,
+      "end": 1252,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 276,
+      "start": 1253,
+      "end": 1258,
+      "text": "başka",
+      "token": "▁başka"
+    },
+    {
+      "index": 277,
+      "start": 1259,
+      "end": 1262,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 278,
+      "start": 1263,
+      "end": 1268,
+      "text": "borsa",
+      "token": "▁borsa"
+    },
+    {
+      "index": 279,
+      "start": 1268,
+      "end": 1271,
+      "text": "nın",
+      "token": "nın"
+    },
+    {
+      "index": 280,
+      "start": 1272,
+      "end": 1275,
+      "text": "tüm",
+      "token": "▁tüm"
+    },
+    {
+      "index": 281,
+      "start": 1276,
+      "end": 1282,
+      "text": "piyasa",
+      "token": "▁piyasa"
+    },
+    {
+      "index": 282,
+      "start": 1282,
+      "end": 1286,
+      "text": "sını",
+      "token": "sını"
+    },
+    {
+      "index": 283,
+      "start": 1287,
+      "end": 1293,
+      "text": "temsil",
+      "token": "▁temsil"
+    },
+    {
+      "index": 284,
+      "start": 1294,
+      "end": 1300,
+      "text": "ediyor",
+      "token": "▁ediyor"
+    },
+    {
+      "index": 285,
+      "start": 1300,
+      "end": 1303,
+      "text": "muş",
+      "token": "muş"
+    },
+    {
+      "index": 286,
+      "start": 1304,
+      "end": 1308,
+      "text": "gibi",
+      "token": "▁gibi"
+    },
+    {
+      "index": 287,
+      "start": 1309,
+      "end": 1319,
+      "text": "kullanılma",
+      "token": "▁kullanılma"
+    },
+    {
+      "index": 288,
+      "start": 1319,
+      "end": 1320,
+      "text": "z",
+      "token": "z"
+    },
+    {
+      "index": 289,
+      "start": 1320,
+      "end": 1321,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 290,
+      "start": 1323,
+      "end": 1326,
+      "text": "Lik",
+      "token": "▁Lik"
+    },
+    {
+      "index": 291,
+      "start": 1326,
+      "end": 1328,
+      "text": "id",
+      "token": "id"
+    },
+    {
+      "index": 292,
+      "start": 1328,
+      "end": 1333,
+      "text": "asyon",
+      "token": "asyon"
+    },
+    {
+      "index": 293,
+      "start": 1334,
+      "end": 1336,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 294,
+      "start": 1337,
+      "end": 1340,
+      "text": "tem",
+      "token": "▁tem"
+    },
+    {
+      "index": 295,
+      "start": 1340,
+      "end": 1344,
+      "text": "inat",
+      "token": "inat"
+    },
+    {
+      "index": 296,
+      "start": 1345,
+      "end": 1348,
+      "text": "Kal",
+      "token": "▁Kal"
+    },
+    {
+      "index": 297,
+      "start": 1348,
+      "end": 1351,
+      "text": "dır",
+      "token": "dır"
+    },
+    {
+      "index": 298,
+      "start": 1351,
+      "end": 1353,
+      "text": "aç",
+      "token": "aç"
+    },
+    {
+      "index": 299,
+      "start": 1353,
+      "end": 1355,
+      "text": "lı",
+      "token": "lı"
+    },
+    {
+      "index": 300,
+      "start": 1356,
+      "end": 1359,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 301,
+      "start": 1360,
+      "end": 1368,
+      "text": "pozisyon",
+      "token": "▁pozisyon"
+    },
+    {
+      "index": 302,
+      "start": 1368,
+      "end": 1370,
+      "text": "un",
+      "token": "un"
+    },
+    {
+      "index": 303,
+      "start": 1371,
+      "end": 1374,
+      "text": "tem",
+      "token": "▁tem"
+    },
+    {
+      "index": 304,
+      "start": 1374,
+      "end": 1376,
+      "text": "in",
+      "token": "in"
+    },
+    {
+      "index": 305,
+      "start": 1376,
+      "end": 1379,
+      "text": "atı",
+      "token": "atı"
+    },
+    {
+      "index": 306,
+      "start": 1380,
+      "end": 1388,
+      "text": "yetersiz",
+      "token": "▁yetersiz"
+    },
+    {
+      "index": 307,
+      "start": 1389,
+      "end": 1396,
+      "text": "kaldığı",
+      "token": "▁kaldığı"
+    },
+    {
+      "index": 308,
+      "start": 1396,
+      "end": 1399,
+      "text": "nda",
+      "token": "nda"
+    },
+    {
+      "index": 309,
+      "start": 1400,
+      "end": 1404,
+      "text": "liki",
+      "token": "▁liki"
+    },
+    {
+      "index": 310,
+      "start": 1404,
+      "end": 1406,
+      "text": "da",
+      "token": "da"
+    },
+    {
+      "index": 311,
+      "start": 1406,
+      "end": 1410,
+      "text": "syon",
+      "token": "syon"
+    },
+    {
+      "index": 312,
+      "start": 1411,
+      "end": 1420,
+      "text": "gerçekleş",
+      "token": "▁gerçekleş"
+    },
+    {
+      "index": 313,
+      "start": 1420,
+      "end": 1426,
+      "text": "ebilir",
+      "token": "ebilir"
+    },
+    {
+      "index": 314,
+      "start": 1426,
+      "end": 1427,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 315,
+      "start": 1428,
+      "end": 1431,
+      "text": "Lik",
+      "token": "▁Lik"
+    },
+    {
+      "index": 316,
+      "start": 1431,
+      "end": 1433,
+      "text": "id",
+      "token": "id"
+    },
+    {
+      "index": 317,
+      "start": 1433,
+      "end": 1438,
+      "text": "asyon",
+      "token": "asyon"
+    },
+    {
+      "index": 318,
+      "start": 1439,
+      "end": 1444,
+      "text": "riski",
+      "token": "▁riski"
+    },
+    {
+      "index": 319,
+      "start": 1444,
+      "end": 1445,
+      "text": ";",
+      "token": ";"
+    },
+    {
+      "index": 320,
+      "start": 1446,
+      "end": 1452,
+      "text": "kaldır",
+      "token": "▁kaldır"
+    },
+    {
+      "index": 321,
+      "start": 1452,
+      "end": 1454,
+      "text": "aç",
+      "token": "aç"
+    },
+    {
+      "index": 322,
+      "start": 1455,
+      "end": 1460,
+      "text": "oranı",
+      "token": "▁oranı"
+    },
+    {
+      "index": 323,
+      "start": 1460,
+      "end": 1462,
+      "text": "na",
+      "token": "na"
+    },
+    {
+      "index": 324,
+      "start": 1462,
+      "end": 1463,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 325,
+      "start": 1464,
+      "end": 1468,
+      "text": "temi",
+      "token": "▁temi"
+    },
+    {
+      "index": 326,
+      "start": 1468,
+      "end": 1472,
+      "text": "nata",
+      "token": "nata"
+    },
+    {
+      "index": 327,
+      "start": 1473,
+      "end": 1475,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 328,
+      "start": 1476,
+      "end": 1484,
+      "text": "pozisyon",
+      "token": "▁pozisyon"
+    },
+    {
+      "index": 329,
+      "start": 1485,
+      "end": 1490,
+      "text": "büyük",
+      "token": "▁büyük"
+    },
+    {
+      "index": 330,
+      "start": 1490,
+      "end": 1494,
+      "text": "lüğü",
+      "token": "lüğü"
+    },
+    {
+      "index": 331,
+      "start": 1494,
+      "end": 1496,
+      "text": "ne",
+      "token": "ne"
+    },
+    {
+      "index": 332,
+      "start": 1497,
+      "end": 1505,
+      "text": "bağlıdır",
+      "token": "▁bağlıdır"
+    },
+    {
+      "index": 333,
+      "start": 1505,
+      "end": 1506,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 334,
+      "start": 1507,
+      "end": 1511,
+      "text": "Aynı",
+      "token": "▁Aynı"
+    },
+    {
+      "index": 335,
+      "start": 1512,
+      "end": 1517,
+      "text": "fiyat",
+      "token": "▁fiyat"
+    },
+    {
+      "index": 336,
+      "start": 1518,
+      "end": 1525,
+      "text": "hareket",
+      "token": "▁hareket"
+    },
+    {
+      "index": 337,
+      "start": 1525,
+      "end": 1526,
+      "text": "i",
+      "token": "i"
+    },
+    {
+      "index": 338,
+      "start": 1526,
+      "end": 1527,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 339,
+      "start": 1528,
+      "end": 1534,
+      "text": "farklı",
+      "token": "▁farklı"
+    },
+    {
+      "index": 340,
+      "start": 1535,
+      "end": 1541,
+      "text": "kaldır",
+      "token": "▁kaldır"
+    },
+    {
+      "index": 341,
+      "start": 1541,
+      "end": 1543,
+      "text": "aç",
+      "token": "aç"
+    },
+    {
+      "index": 342,
+      "start": 1544,
+      "end": 1552,
+      "text": "kullanan",
+      "token": "▁kullanan"
+    },
+    {
+      "index": 343,
+      "start": 1553,
+      "end": 1556,
+      "text": "iki",
+      "token": "▁iki"
+    },
+    {
+      "index": 344,
+      "start": 1557,
+      "end": 1564,
+      "text": "yatırım",
+      "token": "▁yatırım"
+    },
+    {
+      "index": 345,
+      "start": 1564,
+      "end": 1566,
+      "text": "cı",
+      "token": "cı"
+    },
+    {
+      "index": 346,
+      "start": 1567,
+      "end": 1571,
+      "text": "için",
+      "token": "▁için"
+    },
+    {
+      "index": 347,
+      "start": 1572,
+      "end": 1578,
+      "text": "farklı",
+      "token": "▁farklı"
+    },
+    {
+      "index": 348,
+      "start": 1579,
+      "end": 1584,
+      "text": "sonuç",
+      "token": "▁sonuç"
+    },
+    {
+      "index": 349,
+      "start": 1585,
+      "end": 1590,
+      "text": "doğur",
+      "token": "▁doğur"
+    },
+    {
+      "index": 350,
+      "start": 1590,
+      "end": 1592,
+      "text": "ur",
+      "token": "ur"
+    },
+    {
+      "index": 351,
+      "start": 1592,
+      "end": 1593,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 352,
+      "start": 1594,
+      "end": 1600,
+      "text": "Burada",
+      "token": "▁Burada"
+    },
+    {
+      "index": 353,
+      "start": 1601,
+      "end": 1608,
+      "text": "gösteri",
+      "token": "▁gösteri"
+    },
+    {
+      "index": 354,
+      "start": 1608,
+      "end": 1611,
+      "text": "len",
+      "token": "len"
+    },
+    {
+      "index": 355,
+      "start": 1612,
+      "end": 1615,
+      "text": "eşi",
+      "token": "▁eşi"
+    },
+    {
+      "index": 356,
+      "start": 1615,
+      "end": 1619,
+      "text": "kler",
+      "token": "kler"
+    },
+    {
+      "index": 357,
+      "start": 1620,
+      "end": 1626,
+      "text": "tahmin",
+      "token": "▁tahmin"
+    },
+    {
+      "index": 358,
+      "start": 1626,
+      "end": 1627,
+      "text": "i",
+      "token": "i"
+    },
+    {
+      "index": 359,
+      "start": 1628,
+      "end": 1636,
+      "text": "örnekler",
+      "token": "▁örnekler"
+    },
+    {
+      "index": 360,
+      "start": 1636,
+      "end": 1639,
+      "text": "dir",
+      "token": "dir"
+    },
+    {
+      "index": 361,
+      "start": 1639,
+      "end": 1640,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 362,
+      "start": 1641,
+      "end": 1646,
+      "text": "Borsa",
+      "token": "▁Borsa"
+    },
+    {
+      "index": 363,
+      "start": 1646,
+      "end": 1651,
+      "text": "ların",
+      "token": "ların"
+    },
+    {
+      "index": 364,
+      "start": 1652,
+      "end": 1657,
+      "text": "bakım",
+      "token": "▁bakım"
+    },
+    {
+      "index": 365,
+      "start": 1658,
+      "end": 1661,
+      "text": "tem",
+      "token": "▁tem"
+    },
+    {
+      "index": 366,
+      "start": 1661,
+      "end": 1663,
+      "text": "in",
+      "token": "in"
+    },
+    {
+      "index": 367,
+      "start": 1663,
+      "end": 1666,
+      "text": "atı",
+      "token": "atı"
+    },
+    {
+      "index": 368,
+      "start": 1667,
+      "end": 1676,
+      "text": "kuralları",
+      "token": "▁kuralları"
+    },
+    {
+      "index": 369,
+      "start": 1676,
+      "end": 1677,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 370,
+      "start": 1678,
+      "end": 1681,
+      "text": "mar",
+      "token": "▁mar"
+    },
+    {
+      "index": 371,
+      "start": 1681,
+      "end": 1682,
+      "text": "j",
+      "token": "j"
+    },
+    {
+      "index": 372,
+      "start": 1683,
+      "end": 1687,
+      "text": "türü",
+      "token": "▁türü"
+    },
+    {
+      "index": 373,
+      "start": 1688,
+      "end": 1690,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 374,
+      "start": 1691,
+      "end": 1696,
+      "text": "ücret",
+      "token": "▁ücret"
+    },
+    {
+      "index": 375,
+      "start": 1696,
+      "end": 1700,
+      "text": "leri",
+      "token": "leri"
+    },
+    {
+      "index": 376,
+      "start": 1701,
+      "end": 1705,
+      "text": "aynı",
+      "token": "▁aynı"
+    },
+    {
+      "index": 377,
+      "start": 1706,
+      "end": 1714,
+      "text": "değildir",
+      "token": "▁değildir"
+    },
+    {
+      "index": 378,
+      "start": 1714,
+      "end": 1715,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 379,
+      "start": 1716,
+      "end": 1719,
+      "text": "Tah",
+      "token": "▁Tah"
+    },
+    {
+      "index": 380,
+      "start": 1719,
+      "end": 1723,
+      "text": "mini",
+      "token": "mini"
+    },
+    {
+      "index": 381,
+      "start": 1724,
+      "end": 1730,
+      "text": "seviye",
+      "token": "▁seviye"
+    },
+    {
+      "index": 382,
+      "start": 1730,
+      "end": 1733,
+      "text": "ler",
+      "token": "ler"
+    },
+    {
+      "index": 383,
+      "start": 1734,
+      "end": 1740,
+      "text": "gerçek",
+      "token": "▁gerçek"
+    },
+    {
+      "index": 384,
+      "start": 1741,
+      "end": 1745,
+      "text": "liki",
+      "token": "▁liki"
+    },
+    {
+      "index": 385,
+      "start": 1745,
+      "end": 1747,
+      "text": "da",
+      "token": "da"
+    },
+    {
+      "index": 386,
+      "start": 1747,
+      "end": 1751,
+      "text": "syon",
+      "token": "syon"
+    },
+    {
+      "index": 387,
+      "start": 1752,
+      "end": 1755,
+      "text": "har",
+      "token": "▁har"
+    },
+    {
+      "index": 388,
+      "start": 1755,
+      "end": 1758,
+      "text": "ita",
+      "token": "ita"
+    },
+    {
+      "index": 389,
+      "start": 1758,
+      "end": 1760,
+      "text": "sı",
+      "token": "sı"
+    },
+    {
+      "index": 390,
+      "start": 1761,
+      "end": 1767,
+      "text": "olarak",
+      "token": "▁olarak"
+    },
+    {
+      "index": 391,
+      "start": 1768,
+      "end": 1770,
+      "text": "su",
+      "token": "▁su"
+    },
+    {
+      "index": 392,
+      "start": 1770,
+      "end": 1772,
+      "text": "nu",
+      "token": "nu"
+    },
+    {
+      "index": 393,
+      "start": 1772,
+      "end": 1776,
+      "text": "lmaz",
+      "token": "lmaz"
+    },
+    {
+      "index": 394,
+      "start": 1776,
+      "end": 1777,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 395,
+      "start": 1778,
+      "end": 1783,
+      "text": "Kayıt",
+      "token": "▁Kayıt"
+    },
+    {
+      "index": 396,
+      "start": 1783,
+      "end": 1785,
+      "text": "lı",
+      "token": "lı"
+    },
+    {
+      "index": 397,
+      "start": 1786,
+      "end": 1792,
+      "text": "kaynak",
+      "token": "▁kaynak"
+    },
+    {
+      "index": 398,
+      "start": 1793,
+      "end": 1797,
+      "text": "bunu",
+      "token": "▁bunu"
+    },
+    {
+      "index": 399,
+      "start": 1798,
+      "end": 1802,
+      "text": "açık",
+      "token": "▁açık"
+    },
+    {
+      "index": 400,
+      "start": 1802,
+      "end": 1804,
+      "text": "la",
+      "token": "la"
+    },
+    {
+      "index": 401,
+      "start": 1804,
+      "end": 1809,
+      "text": "mıyor",
+      "token": "mıyor"
+    },
+    {
+      "index": 402,
+      "start": 1809,
+      "end": 1811,
+      "text": "sa",
+      "token": "sa"
+    },
+    {
+      "index": 403,
+      "start": 1812,
+      "end": 1817,
+      "text": "yanıt",
+      "token": "▁yanıt"
+    },
+    {
+      "index": 404,
+      "start": 1818,
+      "end": 1820,
+      "text": "da",
+      "token": "▁da"
+    },
+    {
+      "index": 405,
+      "start": 1821,
+      "end": 1826,
+      "text": "kesin",
+      "token": "▁kesin"
+    },
+    {
+      "index": 406,
+      "start": 1827,
+      "end": 1830,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 407,
+      "start": 1831,
+      "end": 1837,
+      "text": "seviye",
+      "token": "▁seviye"
+    },
+    {
+      "index": 408,
+      "start": 1838,
+      "end": 1842,
+      "text": "uydu",
+      "token": "▁uydu"
+    },
+    {
+      "index": 409,
+      "start": 1842,
+      "end": 1843,
+      "text": "r",
+      "token": "r"
+    },
+    {
+      "index": 410,
+      "start": 1843,
+      "end": 1846,
+      "text": "maz",
+      "token": "maz"
+    },
+    {
+      "index": 411,
+      "start": 1846,
+      "end": 1847,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 412,
+      "start": 1849,
+      "end": 1853,
+      "text": "Risk",
+      "token": "▁Risk"
+    },
+    {
+      "index": 413,
+      "start": 1854,
+      "end": 1859,
+      "text": "yorum",
+      "token": "▁yorum"
+    },
+    {
+      "index": 414,
+      "start": 1859,
+      "end": 1863,
+      "text": "unda",
+      "token": "unda"
+    },
+    {
+      "index": 415,
+      "start": 1864,
+      "end": 1869,
+      "text": "fiyat",
+      "token": "▁fiyat"
+    },
+    {
+      "index": 416,
+      "start": 1870,
+      "end": 1873,
+      "text": "ile",
+      "token": "▁ile"
+    },
+    {
+      "index": 417,
+      "start": 1874,
+      "end": 1877,
+      "text": "fon",
+      "token": "▁fon"
+    },
+    {
+      "index": 418,
+      "start": 1877,
+      "end": 1881,
+      "text": "lama",
+      "token": "lama"
+    },
+    {
+      "index": 419,
+      "start": 1882,
+      "end": 1886,
+      "text": "aynı",
+      "token": "▁aynı"
+    },
+    {
+      "index": 420,
+      "start": 1887,
+      "end": 1892,
+      "text": "zaman",
+      "token": "▁zaman"
+    },
+    {
+      "index": 421,
+      "start": 1893,
+      "end": 1896,
+      "text": "ara",
+      "token": "▁ara"
+    },
+    {
+      "index": 422,
+      "start": 1896,
+      "end": 1903,
+      "text": "lığında",
+      "token": "lığında"
+    },
+    {
+      "index": 423,
+      "start": 1904,
+      "end": 1907,
+      "text": "oku",
+      "token": "▁oku"
+    },
+    {
+      "index": 424,
+      "start": 1907,
+      "end": 1910,
+      "text": "nur",
+      "token": "nur"
+    },
+    {
+      "index": 425,
+      "start": 1910,
+      "end": 1911,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 426,
+      "start": 1912,
+      "end": 1915,
+      "text": "Ver",
+      "token": "▁Ver"
+    },
+    {
+      "index": 427,
+      "start": 1915,
+      "end": 1916,
+      "text": "i",
+      "token": "i"
+    },
+    {
+      "index": 428,
+      "start": 1917,
+      "end": 1921,
+      "text": "saat",
+      "token": "▁saat"
+    },
+    {
+      "index": 429,
+      "start": 1921,
+      "end": 1925,
+      "text": "leri",
+      "token": "leri"
+    },
+    {
+      "index": 430,
+      "start": 1926,
+      "end": 1931,
+      "text": "korun",
+      "token": "▁korun"
+    },
+    {
+      "index": 431,
+      "start": 1931,
+      "end": 1933,
+      "text": "ur",
+      "token": "ur"
+    },
+    {
+      "index": 432,
+      "start": 1933,
+      "end": 1934,
+      "text": ";",
+      "token": ";"
+    },
+    {
+      "index": 433,
+      "start": 1935,
+      "end": 1939,
+      "text": "daha",
+      "token": "▁daha"
+    },
+    {
+      "index": 434,
+      "start": 1940,
+      "end": 1944,
+      "text": "eski",
+      "token": "▁eski"
+    },
+    {
+      "index": 435,
+      "start": 1945,
+      "end": 1948,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 436,
+      "start": 1949,
+      "end": 1953,
+      "text": "ölçü",
+      "token": "▁ölçü"
+    },
+    {
+      "index": 437,
+      "start": 1953,
+      "end": 1954,
+      "text": "m",
+      "token": "m"
+    },
+    {
+      "index": 438,
+      "start": 1955,
+      "end": 1959,
+      "text": "yeni",
+      "token": "▁yeni"
+    },
+    {
+      "index": 439,
+      "start": 1959,
+      "end": 1960,
+      "text": "y",
+      "token": "y"
+    },
+    {
+      "index": 440,
+      "start": 1960,
+      "end": 1963,
+      "text": "miş",
+      "token": "miş"
+    },
+    {
+      "index": 441,
+      "start": 1964,
+      "end": 1968,
+      "text": "gibi",
+      "token": "▁gibi"
+    },
+    {
+      "index": 442,
+      "start": 1969,
+      "end": 1971,
+      "text": "su",
+      "token": "▁su"
+    },
+    {
+      "index": 443,
+      "start": 1971,
+      "end": 1973,
+      "text": "nu",
+      "token": "nu"
+    },
+    {
+      "index": 444,
+      "start": 1973,
+      "end": 1977,
+      "text": "lmaz",
+      "token": "lmaz"
+    },
+    {
+      "index": 445,
+      "start": 1977,
+      "end": 1978,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 446,
+      "start": 1979,
+      "end": 1985,
+      "text": "İlgili",
+      "token": "▁İlgili"
+    },
+    {
+      "index": 447,
+      "start": 1986,
+      "end": 1992,
+      "text": "kaynak",
+      "token": "▁kaynak"
+    },
+    {
+      "index": 448,
+      "start": 1992,
+      "end": 1993,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 449,
+      "start": 1994,
+      "end": 2000,
+      "text": "kaldır",
+      "token": "▁kaldır"
+    },
+    {
+      "index": 450,
+      "start": 2000,
+      "end": 2002,
+      "text": "aç",
+      "token": "aç"
+    },
+    {
+      "index": 451,
+      "start": 2003,
+      "end": 2005,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 452,
+      "start": 2006,
+      "end": 2009,
+      "text": "tem",
+      "token": "▁tem"
+    },
+    {
+      "index": 453,
+      "start": 2009,
+      "end": 2013,
+      "text": "inat",
+      "token": "inat"
+    },
+    {
+      "index": 454,
+      "start": 2014,
+      "end": 2020,
+      "text": "ilişki",
+      "token": "▁ilişki"
+    },
+    {
+      "index": 455,
+      "start": 2020,
+      "end": 2024,
+      "text": "sini",
+      "token": "sini"
+    },
+    {
+      "index": 456,
+      "start": 2025,
+      "end": 2029,
+      "text": "açık",
+      "token": "▁açık"
+    },
+    {
+      "index": 457,
+      "start": 2029,
+      "end": 2031,
+      "text": "ça",
+      "token": "ça"
+    },
+    {
+      "index": 458,
+      "start": 2032,
+      "end": 2041,
+      "text": "anlatıyor",
+      "token": "▁anlatıyor"
+    },
+    {
+      "index": 459,
+      "start": 2041,
+      "end": 2043,
+      "text": "sa",
+      "token": "sa"
+    },
+    {
+      "index": 460,
+      "start": 2044,
+      "end": 2049,
+      "text": "cevap",
+      "token": "▁cevap"
+    },
+    {
+      "index": 461,
+      "start": 2050,
+      "end": 2052,
+      "text": "bu",
+      "token": "▁bu"
+    },
+    {
+      "index": 462,
+      "start": 2053,
+      "end": 2058,
+      "text": "parça",
+      "token": "▁parça"
+    },
+    {
+      "index": 463,
+      "start": 2058,
+      "end": 2060,
+      "text": "ya",
+      "token": "ya"
+    },
+    {
+      "index": 464,
+      "start": 2061,
+      "end": 2062,
+      "text": "a",
+      "token": "▁"
+    },
+    {
+      "index": 465,
+      "start": 2061,
+      "end": 2064,
+      "text": "atı",
+      "token": "atı"
+    },
+    {
+      "index": 466,
+      "start": 2064,
+      "end": 2065,
+      "text": "f",
+      "token": "f"
+    },
+    {
+      "index": 467,
+      "start": 2066,
+      "end": 2071,
+      "text": "verir",
+      "token": "▁verir"
+    },
+    {
+      "index": 468,
+      "start": 2071,
+      "end": 2072,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 469,
+      "start": 2073,
+      "end": 2079,
+      "text": "Kaynak",
+      "token": "▁Kaynak"
+    },
+    {
+      "index": 470,
+      "start": 2079,
+      "end": 2081,
+      "text": "ta",
+      "token": "ta"
+    },
+    {
+      "index": 471,
+      "start": 2082,
+      "end": 2089,
+      "text": "bulunma",
+      "token": "▁bulunma"
+    },
+    {
+      "index": 472,
+      "start": 2089,
+      "end": 2092,
+      "text": "yan",
+      "token": "yan"
+    },
+    {
+      "index": 473,
+      "start": 2093,
+      "end": 2096,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 474,
+      "start": 2097,
+      "end": 2102,
+      "text": "olası",
+      "token": "▁olası"
+    },
+    {
+      "index": 475,
+      "start": 2102,
+      "end": 2105,
+      "text": "lık",
+      "token": "lık"
+    },
+    {
+      "index": 476,
+      "start": 2105,
+      "end": 2106,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 477,
+      "start": 2107,
+      "end": 2112,
+      "text": "yüzde",
+      "token": "▁yüzde"
+    },
+    {
+      "index": 478,
+      "start": 2113,
+      "end": 2117,
+      "text": "veya",
+      "token": "▁veya"
+    },
+    {
+      "index": 479,
+      "start": 2118,
+      "end": 2125,
+      "text": "gelecek",
+      "token": "▁gelecek"
+    },
+    {
+      "index": 480,
+      "start": 2125,
+      "end": 2129,
+      "text": "teki",
+      "token": "teki"
+    },
+    {
+      "index": 481,
+      "start": 2130,
+      "end": 2135,
+      "text": "fiyat",
+      "token": "▁fiyat"
+    },
+    {
+      "index": 482,
+      "start": 2136,
+      "end": 2142,
+      "text": "tahmin",
+      "token": "▁tahmin"
+    },
+    {
+      "index": 483,
+      "start": 2142,
+      "end": 2143,
+      "text": "i",
+      "token": "i"
+    },
+    {
+      "index": 484,
+      "start": 2144,
+      "end": 2148,
+      "text": "ceva",
+      "token": "▁ceva"
+    },
+    {
+      "index": 485,
+      "start": 2148,
+      "end": 2150,
+      "text": "ba",
+      "token": "ba"
+    },
+    {
+      "index": 486,
+      "start": 2151,
+      "end": 2153,
+      "text": "ek",
+      "token": "▁ek"
+    },
+    {
+      "index": 487,
+      "start": 2153,
+      "end": 2158,
+      "text": "lenme",
+      "token": "lenme"
+    },
+    {
+      "index": 488,
+      "start": 2158,
+      "end": 2159,
+      "text": "z",
+      "token": "z"
+    },
+    {
+      "index": 489,
+      "start": 2159,
+      "end": 2160,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 490,
+      "start": 2161,
+      "end": 2164,
+      "text": "Bir",
+      "token": "▁Bir"
+    },
+    {
+      "index": 491,
+      "start": 2165,
+      "end": 2170,
+      "text": "iddia",
+      "token": "▁iddia"
+    },
+    {
+      "index": 492,
+      "start": 2170,
+      "end": 2172,
+      "text": "ya",
+      "token": "ya"
+    },
+    {
+      "index": 493,
+      "start": 2173,
+      "end": 2178,
+      "text": "bağla",
+      "token": "▁bağla"
+    },
+    {
+      "index": 494,
+      "start": 2178,
+      "end": 2181,
+      "text": "nan",
+      "token": "nan"
+    },
+    {
+      "index": 495,
+      "start": 2182,
+      "end": 2183,
+      "text": "a",
+      "token": "▁"
+    },
+    {
+      "index": 496,
+      "start": 2182,
+      "end": 2185,
+      "text": "atı",
+      "token": "atı"
+    },
+    {
+      "index": 497,
+      "start": 2185,
+      "end": 2186,
+      "text": "f",
+      "token": "f"
+    },
+    {
+      "index": 498,
+      "start": 2186,
+      "end": 2188,
+      "text": "ın",
+      "token": "ın"
+    },
+    {
+      "index": 499,
+      "start": 2189,
+      "end": 2198,
+      "text": "gerçekten",
+      "token": "▁gerçekten"
+    },
+    {
+      "index": 500,
+      "start": 2199,
+      "end": 2200,
+      "text": "o",
+      "token": "▁o"
+    },
+    {
+      "index": 501,
+      "start": 2201,
+      "end": 2206,
+      "text": "iddia",
+      "token": "▁iddia"
+    },
+    {
+      "index": 502,
+      "start": 2206,
+      "end": 2208,
+      "text": "yı",
+      "token": "yı"
+    },
+    {
+      "index": 503,
+      "start": 2209,
+      "end": 2215,
+      "text": "destek",
+      "token": "▁destek"
+    },
+    {
+      "index": 504,
+      "start": 2215,
+      "end": 2217,
+      "text": "le",
+      "token": "le"
+    },
+    {
+      "index": 505,
+      "start": 2217,
+      "end": 2221,
+      "text": "mesi",
+      "token": "mesi"
+    },
+    {
+      "index": 506,
+      "start": 2222,
+      "end": 2229,
+      "text": "kontrol",
+      "token": "▁kontrol"
+    },
+    {
+      "index": 507,
+      "start": 2230,
+      "end": 2236,
+      "text": "edilir",
+      "token": "▁edilir"
+    },
+    {
+      "index": 508,
+      "start": 2236,
+      "end": 2237,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 509,
+      "start": 2239,
+      "end": 2245,
+      "text": "Teknik",
+      "token": "▁Teknik"
+    },
+    {
+      "index": 510,
+      "start": 2246,
+      "end": 2253,
+      "text": "görünüm",
+      "token": "▁görünüm"
+    },
+    {
+      "index": 511,
+      "start": 2254,
+      "end": 2260,
+      "text": "Destek",
+      "token": "▁Destek"
+    },
+    {
+      "index": 512,
+      "start": 2261,
+      "end": 2263,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 513,
+      "start": 2264,
+      "end": 2269,
+      "text": "diren",
+      "token": "▁diren"
+    },
+    {
+      "index": 514,
+      "start": 2269,
+      "end": 2270,
+      "text": "ç",
+      "token": "ç"
+    },
+    {
+      "index": 515,
+      "start": 2270,
+      "end": 2271,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 516,
+      "start": 2272,
+      "end": 2278,
+      "text": "geçmiş",
+      "token": "▁geçmiş"
+    },
+    {
+      "index": 517,
+      "start": 2279,
+      "end": 2284,
+      "text": "fiyat",
+      "token": "▁fiyat"
+    },
+    {
+      "index": 518,
+      "start": 2285,
+      "end": 2293,
+      "text": "davranış",
+      "token": "▁davranış"
+    },
+    {
+      "index": 519,
+      "start": 2293,
+      "end": 2296,
+      "text": "ını",
+      "token": "ını"
+    },
+    {
+      "index": 520,
+      "start": 2297,
+      "end": 2299,
+      "text": "öz",
+      "token": "▁öz"
+    },
+    {
+      "index": 521,
+      "start": 2299,
+      "end": 2301,
+      "text": "et",
+      "token": "et"
+    },
+    {
+      "index": 522,
+      "start": 2301,
+      "end": 2306,
+      "text": "leyen",
+      "token": "leyen"
+    },
+    {
+      "index": 523,
+      "start": 2307,
+      "end": 2313,
+      "text": "seviye",
+      "token": "▁seviye"
+    },
+    {
+      "index": 524,
+      "start": 2313,
+      "end": 2319,
+      "text": "lerdir",
+      "token": "lerdir"
+    },
+    {
+      "index": 525,
+      "start": 2319,
+      "end": 2320,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 526,
+      "start": 2321,
+      "end": 2323,
+      "text": "Bu",
+      "token": "▁Bu"
+    },
+    {
+      "index": 527,
+      "start": 2324,
+      "end": 2325,
+      "text": "ö",
+      "token": "▁"
+    },
+    {
+      "index": 528,
+      "start": 2324,
+      "end": 2331,
+      "text": "öğretim",
+      "token": "öğretim"
+    },
+    {
+      "index": 529,
+      "start": 2332,
+      "end": 2339,
+      "text": "belgesi",
+      "token": "▁belgesi"
+    },
+    {
+      "index": 530,
+      "start": 2339,
+      "end": 2342,
+      "text": "nde",
+      "token": "nde"
+    },
+    {
+      "index": 531,
+      "start": 2343,
+      "end": 2349,
+      "text": "destek",
+      "token": "▁destek"
+    },
+    {
+      "index": 532,
+      "start": 2349,
+      "end": 2350,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 533,
+      "start": 2351,
+      "end": 2357,
+      "text": "fiyatı",
+      "token": "▁fiyatı"
+    },
+    {
+      "index": 534,
+      "start": 2357,
+      "end": 2358,
+      "text": "n",
+      "token": "n"
+    },
+    {
+      "index": 535,
+      "start": 2359,
+      "end": 2363,
+      "text": "daha",
+      "token": "▁daha"
+    },
+    {
+      "index": 536,
+      "start": 2364,
+      "end": 2368,
+      "text": "önce",
+      "token": "▁önce"
+    },
+    {
+      "index": 537,
+      "start": 2369,
+      "end": 2374,
+      "text": "tepki",
+      "token": "▁tepki"
+    },
+    {
+      "index": 538,
+      "start": 2375,
+      "end": 2382,
+      "text": "verdiği",
+      "token": "▁verdiği"
+    },
+    {
+      "index": 539,
+      "start": 2383,
+      "end": 2386,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 540,
+      "start": 2387,
+      "end": 2392,
+      "text": "bölge",
+      "token": "▁bölge"
+    },
+    {
+      "index": 541,
+      "start": 2392,
+      "end": 2394,
+      "text": "yi",
+      "token": "yi"
+    },
+    {
+      "index": 542,
+      "start": 2395,
+      "end": 2401,
+      "text": "anlatı",
+      "token": "▁anlatı"
+    },
+    {
+      "index": 543,
+      "start": 2401,
+      "end": 2402,
+      "text": "r",
+      "token": "r"
+    },
+    {
+      "index": 544,
+      "start": 2402,
+      "end": 2403,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 545,
+      "start": 2404,
+      "end": 2409,
+      "text": "Bölge",
+      "token": "▁Bölge"
+    },
+    {
+      "index": 546,
+      "start": 2409,
+      "end": 2412,
+      "text": "nin",
+      "token": "nin"
+    },
+    {
+      "index": 547,
+      "start": 2413,
+      "end": 2419,
+      "text": "tekrar",
+      "token": "▁tekrar"
+    },
+    {
+      "index": 548,
+      "start": 2420,
+      "end": 2425,
+      "text": "çalış",
+      "token": "▁çalış"
+    },
+    {
+      "index": 549,
+      "start": 2425,
+      "end": 2430,
+      "text": "acağı",
+      "token": "acağı"
+    },
+    {
+      "index": 550,
+      "start": 2431,
+      "end": 2438,
+      "text": "garanti",
+      "token": "▁garanti"
+    },
+    {
+      "index": 551,
+      "start": 2439,
+      "end": 2445,
+      "text": "edilme",
+      "token": "▁edilme"
+    },
+    {
+      "index": 552,
+      "start": 2445,
+      "end": 2446,
+      "text": "z",
+      "token": "z"
+    },
+    {
+      "index": 553,
+      "start": 2446,
+      "end": 2447,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 554,
+      "start": 2448,
+      "end": 2450,
+      "text": "Oy",
+      "token": "▁Oy"
+    },
+    {
+      "index": 555,
+      "start": 2450,
+      "end": 2453,
+      "text": "nak",
+      "token": "nak"
+    },
+    {
+      "index": 556,
+      "start": 2453,
+      "end": 2456,
+      "text": "lık",
+      "token": "lık"
+    },
+    {
+      "index": 557,
+      "start": 2457,
+      "end": 2460,
+      "text": "art",
+      "token": "▁art"
+    },
+    {
+      "index": 558,
+      "start": 2460,
+      "end": 2464,
+      "text": "tığı",
+      "token": "tığı"
+    },
+    {
+      "index": 559,
+      "start": 2464,
+      "end": 2467,
+      "text": "nda",
+      "token": "nda"
+    },
+    {
+      "index": 560,
+      "start": 2468,
+      "end": 2472,
+      "text": "aynı",
+      "token": "▁aynı"
+    },
+    {
+      "index": 561,
+      "start": 2473,
+      "end": 2478,
+      "text": "büyük",
+      "token": "▁büyük"
+    },
+    {
+      "index": 562,
+      "start": 2478,
+      "end": 2481,
+      "text": "lük",
+      "token": "lük"
+    },
+    {
+      "index": 563,
+      "start": 2481,
+      "end": 2483,
+      "text": "te",
+      "token": "te"
+    },
+    {
+      "index": 564,
+      "start": 2484,
+      "end": 2487,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 565,
+      "start": 2488,
+      "end": 2493,
+      "text": "fiyat",
+      "token": "▁fiyat"
+    },
+    {
+      "index": 566,
+      "start": 2494,
+      "end": 2501,
+      "text": "hareket",
+      "token": "▁hareket"
+    },
+    {
+      "index": 567,
+      "start": 2501,
+      "end": 2502,
+      "text": "i",
+      "token": "i"
+    },
+    {
+      "index": 568,
+      "start": 2503,
+      "end": 2507,
+      "text": "daha",
+      "token": "▁daha"
+    },
+    {
+      "index": 569,
+      "start": 2508,
+      "end": 2511,
+      "text": "sık",
+      "token": "▁sık"
+    },
+    {
+      "index": 570,
+      "start": 2512,
+      "end": 2517,
+      "text": "görül",
+      "token": "▁görül"
+    },
+    {
+      "index": 571,
+      "start": 2517,
+      "end": 2523,
+      "text": "ebilir",
+      "token": "ebilir"
+    },
+    {
+      "index": 572,
+      "start": 2523,
+      "end": 2524,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 573,
+      "start": 2525,
+      "end": 2526,
+      "text": "A",
+      "token": "▁A"
+    },
+    {
+      "index": 574,
+      "start": 2526,
+      "end": 2528,
+      "text": "TR",
+      "token": "TR"
+    },
+    {
+      "index": 575,
+      "start": 2528,
+      "end": 2529,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 576,
+      "start": 2530,
+      "end": 2536,
+      "text": "geçmiş",
+      "token": "▁geçmiş"
+    },
+    {
+      "index": 577,
+      "start": 2537,
+      "end": 2540,
+      "text": "mum",
+      "token": "▁mum"
+    },
+    {
+      "index": 578,
+      "start": 2540,
+      "end": 2546,
+      "text": "lardan",
+      "token": "lardan"
+    },
+    {
+      "index": 579,
+      "start": 2547,
+      "end": 2550,
+      "text": "tür",
+      "token": "▁tür"
+    },
+    {
+      "index": 580,
+      "start": 2550,
+      "end": 2552,
+      "text": "et",
+      "token": "et"
+    },
+    {
+      "index": 581,
+      "start": 2552,
+      "end": 2556,
+      "text": "ilen",
+      "token": "ilen"
+    },
+    {
+      "index": 582,
+      "start": 2557,
+      "end": 2560,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 583,
+      "start": 2561,
+      "end": 2565,
+      "text": "oyna",
+      "token": "▁oyna"
+    },
+    {
+      "index": 584,
+      "start": 2565,
+      "end": 2566,
+      "text": "k",
+      "token": "k"
+    },
+    {
+      "index": 585,
+      "start": 2566,
+      "end": 2569,
+      "text": "lık",
+      "token": "lık"
+    },
+    {
+      "index": 586,
+      "start": 2570,
+      "end": 2574,
+      "text": "ölçü",
+      "token": "▁ölçü"
+    },
+    {
+      "index": 587,
+      "start": 2574,
+      "end": 2575,
+      "text": "s",
+      "token": "s"
+    },
+    {
+      "index": 588,
+      "start": 2575,
+      "end": 2579,
+      "text": "üdür",
+      "token": "üdür"
+    },
+    {
+      "index": 589,
+      "start": 2579,
+      "end": 2580,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 590,
+      "start": 2581,
+      "end": 2583,
+      "text": "Bu",
+      "token": "▁Bu"
+    },
+    {
+      "index": 591,
+      "start": 2584,
+      "end": 2588,
+      "text": "ölçü",
+      "token": "▁ölçü"
+    },
+    {
+      "index": 592,
+      "start": 2589,
+      "end": 2592,
+      "text": "tek",
+      "token": "▁tek"
+    },
+    {
+      "index": 593,
+      "start": 2593,
+      "end": 2599,
+      "text": "başına",
+      "token": "▁başına"
+    },
+    {
+      "index": 594,
+      "start": 2600,
+      "end": 2604,
+      "text": "liki",
+      "token": "▁liki"
+    },
+    {
+      "index": 595,
+      "start": 2604,
+      "end": 2606,
+      "text": "da",
+      "token": "da"
+    },
+    {
+      "index": 596,
+      "start": 2606,
+      "end": 2610,
+      "text": "syon",
+      "token": "syon"
+    },
+    {
+      "index": 597,
+      "start": 2611,
+      "end": 2617,
+      "text": "hesabı",
+      "token": "▁hesabı"
+    },
+    {
+      "index": 598,
+      "start": 2618,
+      "end": 2623,
+      "text": "yapma",
+      "token": "▁yapma"
+    },
+    {
+      "index": 599,
+      "start": 2623,
+      "end": 2624,
+      "text": "z",
+      "token": "z"
+    },
+    {
+      "index": 600,
+      "start": 2624,
+      "end": 2625,
+      "text": ";",
+      "token": ";"
+    },
+    {
+      "index": 601,
+      "start": 2626,
+      "end": 2629,
+      "text": "tem",
+      "token": "▁tem"
+    },
+    {
+      "index": 602,
+      "start": 2629,
+      "end": 2633,
+      "text": "inat",
+      "token": "inat"
+    },
+    {
+      "index": 603,
+      "start": 2634,
+      "end": 2636,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 604,
+      "start": 2637,
+      "end": 2643,
+      "text": "kaldır",
+      "token": "▁kaldır"
+    },
+    {
+      "index": 605,
+      "start": 2643,
+      "end": 2645,
+      "text": "aç",
+      "token": "aç"
+    },
+    {
+      "index": 606,
+      "start": 2646,
+      "end": 2653,
+      "text": "bilgisi",
+      "token": "▁bilgisi"
+    },
+    {
+      "index": 607,
+      "start": 2654,
+      "end": 2661,
+      "text": "gerekir",
+      "token": "▁gerekir"
+    },
+    {
+      "index": 608,
+      "start": 2661,
+      "end": 2662,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 609,
+      "start": 2663,
+      "end": 2665,
+      "text": "Gö",
+      "token": "▁Gö"
+    },
+    {
+      "index": 610,
+      "start": 2665,
+      "end": 2669,
+      "text": "ster",
+      "token": "ster"
+    },
+    {
+      "index": 611,
+      "start": 2669,
+      "end": 2673,
+      "text": "ilen",
+      "token": "ilen"
+    },
+    {
+      "index": 612,
+      "start": 2674,
+      "end": 2680,
+      "text": "teknik",
+      "token": "▁teknik"
+    },
+    {
+      "index": 613,
+      "start": 2681,
+      "end": 2689,
+      "text": "örnekler",
+      "token": "▁örnekler"
+    },
+    {
+      "index": 614,
+      "start": 2689,
+      "end": 2690,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 615,
+      "start": 2691,
+      "end": 2700,
+      "text": "kullanıcı",
+      "token": "▁kullanıcı"
+    },
+    {
+      "index": 616,
+      "start": 2700,
+      "end": 2703,
+      "text": "nın",
+      "token": "nın"
+    },
+    {
+      "index": 617,
+      "start": 2704,
+      "end": 2709,
+      "text": "kendi",
+      "token": "▁kendi"
+    },
+    {
+      "index": 618,
+      "start": 2710,
+      "end": 2714,
+      "text": "risk",
+      "token": "▁risk"
+    },
+    {
+      "index": 619,
+      "start": 2715,
+      "end": 2720,
+      "text": "koşul",
+      "token": "▁koşul"
+    },
+    {
+      "index": 620,
+      "start": 2720,
+      "end": 2726,
+      "text": "larını",
+      "token": "larını"
+    },
+    {
+      "index": 621,
+      "start": 2727,
+      "end": 2733,
+      "text": "temsil",
+      "token": "▁temsil"
+    },
+    {
+      "index": 622,
+      "start": 2734,
+      "end": 2736,
+      "text": "et",
+      "token": "▁et"
+    },
+    {
+      "index": 623,
+      "start": 2736,
+      "end": 2739,
+      "text": "mez",
+      "token": "mez"
+    },
+    {
+      "index": 624,
+      "start": 2739,
+      "end": 2740,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 625,
+      "start": 2742,
+      "end": 2747,
+      "text": "Haber",
+      "token": "▁Haber"
+    },
+    {
+      "index": 626,
+      "start": 2748,
+      "end": 2750,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 627,
+      "start": 2751,
+      "end": 2752,
+      "text": "E",
+      "token": "▁"
+    },
+    {
+      "index": 628,
+      "start": 2751,
+      "end": 2754,
+      "text": "ETF",
+      "token": "ETF"
+    },
+    {
+      "index": 629,
+      "start": 2755,
+      "end": 2756,
+      "text": "a",
+      "token": "▁a"
+    },
+    {
+      "index": 630,
+      "start": 2756,
+      "end": 2759,
+      "text": "kış",
+      "token": "kış"
+    },
+    {
+      "index": 631,
+      "start": 2759,
+      "end": 2763,
+      "text": "ları",
+      "token": "ları"
+    },
+    {
+      "index": 632,
+      "start": 2764,
+      "end": 2767,
+      "text": "Kur",
+      "token": "▁Kur"
+    },
+    {
+      "index": 633,
+      "start": 2767,
+      "end": 2769,
+      "text": "gu",
+      "token": "gu"
+    },
+    {
+      "index": 634,
+      "start": 2770,
+      "end": 2775,
+      "text": "haber",
+      "token": "▁haber"
+    },
+    {
+      "index": 635,
+      "start": 2776,
+      "end": 2777,
+      "text": "a",
+      "token": "▁a"
+    },
+    {
+      "index": 636,
+      "start": 2777,
+      "end": 2780,
+      "text": "kış",
+      "token": "kış"
+    },
+    {
+      "index": 637,
+      "start": 2780,
+      "end": 2784,
+      "text": "ında",
+      "token": "ında"
+    },
+    {
+      "index": 638,
+      "start": 2785,
+      "end": 2792,
+      "text": "Bitcoin",
+      "token": "▁Bitcoin"
+    },
+    {
+      "index": 639,
+      "start": 2793,
+      "end": 2794,
+      "text": "E",
+      "token": "▁"
+    },
+    {
+      "index": 640,
+      "start": 2793,
+      "end": 2796,
+      "text": "ETF",
+      "token": "ETF"
+    },
+    {
+      "index": 641,
+      "start": 2797,
+      "end": 2802,
+      "text": "ifade",
+      "token": "▁ifade"
+    },
+    {
+      "index": 642,
+      "start": 2802,
+      "end": 2804,
+      "text": "si",
+      "token": "si"
+    },
+    {
+      "index": 643,
+      "start": 2805,
+      "end": 2811,
+      "text": "birkaç",
+      "token": "▁birkaç"
+    },
+    {
+      "index": 644,
+      "start": 2812,
+      "end": 2815,
+      "text": "kez",
+      "token": "▁kez"
+    },
+    {
+      "index": 645,
+      "start": 2816,
+      "end": 2821,
+      "text": "geçer",
+      "token": "▁geçer"
+    },
+    {
+      "index": 646,
+      "start": 2821,
+      "end": 2822,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 647,
+      "start": 2823,
+      "end": 2825,
+      "text": "Bu",
+      "token": "▁Bu"
+    },
+    {
+      "index": 648,
+      "start": 2826,
+      "end": 2831,
+      "text": "bölüm",
+      "token": "▁bölüm"
+    },
+    {
+      "index": 649,
+      "start": 2832,
+      "end": 2835,
+      "text": "söz",
+      "token": "▁söz"
+    },
+    {
+      "index": 650,
+      "start": 2835,
+      "end": 2837,
+      "text": "cü",
+      "token": "cü"
+    },
+    {
+      "index": 651,
+      "start": 2837,
+      "end": 2838,
+      "text": "k",
+      "token": "k"
+    },
+    {
+      "index": 652,
+      "start": 2838,
+      "end": 2841,
+      "text": "sel",
+      "token": "sel"
+    },
+    {
+      "index": 653,
+      "start": 2842,
+      "end": 2847,
+      "text": "arama",
+      "token": "▁arama"
+    },
+    {
+      "index": 654,
+      "start": 2847,
+      "end": 2850,
+      "text": "nın",
+      "token": "nın"
+    },
+    {
+      "index": 655,
+      "start": 2851,
+      "end": 2856,
+      "text": "neden",
+      "token": "▁neden"
+    },
+    {
+      "index": 656,
+      "start": 2857,
+      "end": 2862,
+      "text": "bazen",
+      "token": "▁bazen"
+    },
+    {
+      "index": 657,
+      "start": 2863,
+      "end": 2867,
+      "text": "soru",
+      "token": "▁soru"
+    },
+    {
+      "index": 658,
+      "start": 2867,
+      "end": 2870,
+      "text": "yla",
+      "token": "yla"
+    },
+    {
+      "index": 659,
+      "start": 2871,
+      "end": 2875,
+      "text": "aynı",
+      "token": "▁aynı"
+    },
+    {
+      "index": 660,
+      "start": 2876,
+      "end": 2885,
+      "text": "kelimeler",
+      "token": "▁kelimeler"
+    },
+    {
+      "index": 661,
+      "start": 2885,
+      "end": 2886,
+      "text": "i",
+      "token": "i"
+    },
+    {
+      "index": 662,
+      "start": 2887,
+      "end": 2893,
+      "text": "içeren",
+      "token": "▁içeren"
+    },
+    {
+      "index": 663,
+      "start": 2893,
+      "end": 2894,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 664,
+      "start": 2895,
+      "end": 2900,
+      "text": "fakat",
+      "token": "▁fakat"
+    },
+    {
+      "index": 665,
+      "start": 2901,
+      "end": 2907,
+      "text": "cevabı",
+      "token": "▁cevabı"
+    },
+    {
+      "index": 666,
+      "start": 2908,
+      "end": 2916,
+      "text": "doğrudan",
+      "token": "▁doğrudan"
+    },
+    {
+      "index": 667,
+      "start": 2917,
+      "end": 2924,
+      "text": "vermeye",
+      "token": "▁vermeye"
+    },
+    {
+      "index": 668,
+      "start": 2924,
+      "end": 2925,
+      "text": "n",
+      "token": "n"
+    },
+    {
+      "index": 669,
+      "start": 2926,
+      "end": 2929,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 670,
+      "start": 2930,
+      "end": 2935,
+      "text": "parça",
+      "token": "▁parça"
+    },
+    {
+      "index": 671,
+      "start": 2935,
+      "end": 2937,
+      "text": "yı",
+      "token": "yı"
+    },
+    {
+      "index": 672,
+      "start": 2938,
+      "end": 2941,
+      "text": "üst",
+      "token": "▁üst"
+    },
+    {
+      "index": 673,
+      "start": 2942,
+      "end": 2946,
+      "text": "sıra",
+      "token": "▁sıra"
+    },
+    {
+      "index": 674,
+      "start": 2946,
+      "end": 2950,
+      "text": "lara",
+      "token": "lara"
+    },
+    {
+      "index": 675,
+      "start": 2951,
+      "end": 2955,
+      "text": "taşı",
+      "token": "▁taşı"
+    },
+    {
+      "index": 676,
+      "start": 2955,
+      "end": 2956,
+      "text": "y",
+      "token": "y"
+    },
+    {
+      "index": 677,
+      "start": 2956,
+      "end": 2964,
+      "text": "abildiği",
+      "token": "abildiği"
+    },
+    {
+      "index": 678,
+      "start": 2964,
+      "end": 2966,
+      "text": "ni",
+      "token": "ni"
+    },
+    {
+      "index": 679,
+      "start": 2967,
+      "end": 2975,
+      "text": "gösterme",
+      "token": "▁gösterme"
+    },
+    {
+      "index": 680,
+      "start": 2975,
+      "end": 2976,
+      "text": "k",
+      "token": "k"
+    },
+    {
+      "index": 681,
+      "start": 2977,
+      "end": 2981,
+      "text": "için",
+      "token": "▁için"
+    },
+    {
+      "index": 682,
+      "start": 2981,
+      "end": 2984,
+      "text": "dir",
+      "token": "dir"
+    },
+    {
+      "index": 683,
+      "start": 2984,
+      "end": 2985,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 684,
+      "start": 2986,
+      "end": 2987,
+      "text": "E",
+      "token": "▁"
+    },
+    {
+      "index": 685,
+      "start": 2986,
+      "end": 2989,
+      "text": "ETF",
+      "token": "ETF"
+    },
+    {
+      "index": 686,
+      "start": 2990,
+      "end": 2996,
+      "text": "haberi",
+      "token": "▁haberi"
+    },
+    {
+      "index": 687,
+      "start": 2996,
+      "end": 2997,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 688,
+      "start": 2998,
+      "end": 3001,
+      "text": "fon",
+      "token": "▁fon"
+    },
+    {
+      "index": 689,
+      "start": 3001,
+      "end": 3005,
+      "text": "lama",
+      "token": "lama"
+    },
+    {
+      "index": 690,
+      "start": 3006,
+      "end": 3010,
+      "text": "veya",
+      "token": "▁veya"
+    },
+    {
+      "index": 691,
+      "start": 3011,
+      "end": 3014,
+      "text": "tem",
+      "token": "▁tem"
+    },
+    {
+      "index": 692,
+      "start": 3014,
+      "end": 3018,
+      "text": "inat",
+      "token": "inat"
+    },
+    {
+      "index": 693,
+      "start": 3019,
+      "end": 3028,
+      "text": "mekanizma",
+      "token": "▁mekanizma"
+    },
+    {
+      "index": 694,
+      "start": 3028,
+      "end": 3032,
+      "text": "sını",
+      "token": "sını"
+    },
+    {
+      "index": 695,
+      "start": 3033,
+      "end": 3041,
+      "text": "açıklama",
+      "token": "▁açıklama"
+    },
+    {
+      "index": 696,
+      "start": 3041,
+      "end": 3045,
+      "text": "dığı",
+      "token": "dığı"
+    },
+    {
+      "index": 697,
+      "start": 3046,
+      "end": 3050,
+      "text": "süre",
+      "token": "▁süre"
+    },
+    {
+      "index": 698,
+      "start": 3050,
+      "end": 3052,
+      "text": "ce",
+      "token": "ce"
+    },
+    {
+      "index": 699,
+      "start": 3053,
+      "end": 3057,
+      "text": "liki",
+      "token": "▁liki"
+    },
+    {
+      "index": 700,
+      "start": 3057,
+      "end": 3059,
+      "text": "da",
+      "token": "da"
+    },
+    {
+      "index": 701,
+      "start": 3059,
+      "end": 3063,
+      "text": "syon",
+      "token": "syon"
+    },
+    {
+      "index": 702,
+      "start": 3064,
+      "end": 3068,
+      "text": "soru",
+      "token": "▁soru"
+    },
+    {
+      "index": 703,
+      "start": 3068,
+      "end": 3069,
+      "text": "s",
+      "token": "s"
+    },
+    {
+      "index": 704,
+      "start": 3069,
+      "end": 3072,
+      "text": "una",
+      "token": "una"
+    },
+    {
+      "index": 705,
+      "start": 3073,
+      "end": 3076,
+      "text": "tek",
+      "token": "▁tek"
+    },
+    {
+      "index": 706,
+      "start": 3077,
+      "end": 3083,
+      "text": "başına",
+      "token": "▁başına"
+    },
+    {
+      "index": 707,
+      "start": 3084,
+      "end": 3089,
+      "text": "kanıt",
+      "token": "▁kanıt"
+    },
+    {
+      "index": 708,
+      "start": 3090,
+      "end": 3098,
+      "text": "değildir",
+      "token": "▁değildir"
+    },
+    {
+      "index": 709,
+      "start": 3098,
+      "end": 3099,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 710,
+      "start": 3100,
+      "end": 3105,
+      "text": "Haber",
+      "token": "▁Haber"
+    },
+    {
+      "index": 711,
+      "start": 3106,
+      "end": 3113,
+      "text": "başlığı",
+      "token": "▁başlığı"
+    },
+    {
+      "index": 712,
+      "start": 3114,
+      "end": 3117,
+      "text": "ile",
+      "token": "▁ile"
+    },
+    {
+      "index": 713,
+      "start": 3118,
+      "end": 3123,
+      "text": "haber",
+      "token": "▁haber"
+    },
+    {
+      "index": 714,
+      "start": 3123,
+      "end": 3125,
+      "text": "in",
+      "token": "in"
+    },
+    {
+      "index": 715,
+      "start": 3126,
+      "end": 3132,
+      "text": "gerçek",
+      "token": "▁gerçek"
+    },
+    {
+      "index": 716,
+      "start": 3133,
+      "end": 3140,
+      "text": "içeriği",
+      "token": "▁içeriği"
+    },
+    {
+      "index": 717,
+      "start": 3141,
+      "end": 3143,
+      "text": "ay",
+      "token": "▁ay"
+    },
+    {
+      "index": 718,
+      "start": 3143,
+      "end": 3144,
+      "text": "r",
+      "token": "r"
+    },
+    {
+      "index": 719,
+      "start": 3144,
+      "end": 3148,
+      "text": "ılır",
+      "token": "ılır"
+    },
+    {
+      "index": 720,
+      "start": 3148,
+      "end": 3149,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 721,
+      "start": 3150,
+      "end": 3154,
+      "text": "Eski",
+      "token": "▁Eski"
+    },
+    {
+      "index": 722,
+      "start": 3155,
+      "end": 3158,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 723,
+      "start": 3159,
+      "end": 3165,
+      "text": "başlık",
+      "token": "▁başlık"
+    },
+    {
+      "index": 724,
+      "start": 3166,
+      "end": 3170,
+      "text": "yeni",
+      "token": "▁yeni"
+    },
+    {
+      "index": 725,
+      "start": 3171,
+      "end": 3175,
+      "text": "olay",
+      "token": "▁olay"
+    },
+    {
+      "index": 726,
+      "start": 3176,
+      "end": 3180,
+      "text": "gibi",
+      "token": "▁gibi"
+    },
+    {
+      "index": 727,
+      "start": 3181,
+      "end": 3186,
+      "text": "yorum",
+      "token": "▁yorum"
+    },
+    {
+      "index": 728,
+      "start": 3186,
+      "end": 3191,
+      "text": "lanma",
+      "token": "lanma"
+    },
+    {
+      "index": 729,
+      "start": 3191,
+      "end": 3192,
+      "text": "z",
+      "token": "z"
+    },
+    {
+      "index": 730,
+      "start": 3192,
+      "end": 3193,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 731,
+      "start": 3194,
+      "end": 3197,
+      "text": "Kay",
+      "token": "▁Kay"
+    },
+    {
+      "index": 732,
+      "start": 3197,
+      "end": 3199,
+      "text": "na",
+      "token": "na"
+    },
+    {
+      "index": 733,
+      "start": 3199,
+      "end": 3202,
+      "text": "ğın",
+      "token": "ğın"
+    },
+    {
+      "index": 734,
+      "start": 3203,
+      "end": 3209,
+      "text": "tarihi",
+      "token": "▁tarihi"
+    },
+    {
+      "index": 735,
+      "start": 3209,
+      "end": 3210,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 736,
+      "start": 3211,
+      "end": 3216,
+      "text": "belge",
+      "token": "▁belge"
+    },
+    {
+      "index": 737,
+      "start": 3217,
+      "end": 3221,
+      "text": "türü",
+      "token": "▁türü"
+    },
+    {
+      "index": 738,
+      "start": 3222,
+      "end": 3224,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 739,
+      "start": 3225,
+      "end": 3231,
+      "text": "ilgili",
+      "token": "▁ilgili"
+    },
+    {
+      "index": 740,
+      "start": 3232,
+      "end": 3235,
+      "text": "pas",
+      "token": "▁pas"
+    },
+    {
+      "index": 741,
+      "start": 3235,
+      "end": 3237,
+      "text": "aj",
+      "token": "aj"
+    },
+    {
+      "index": 742,
+      "start": 3238,
+      "end": 3245,
+      "text": "görünür",
+      "token": "▁görünür"
+    },
+    {
+      "index": 743,
+      "start": 3246,
+      "end": 3253,
+      "text": "tutulur",
+      "token": "▁tutulur"
+    },
+    {
+      "index": 744,
+      "start": 3253,
+      "end": 3254,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 745,
+      "start": 3256,
+      "end": 3261,
+      "text": "Makro",
+      "token": "▁Makro"
+    },
+    {
+      "index": 746,
+      "start": 3262,
+      "end": 3264,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 747,
+      "start": 3265,
+      "end": 3269,
+      "text": "veri",
+      "token": "▁veri"
+    },
+    {
+      "index": 748,
+      "start": 3270,
+      "end": 3275,
+      "text": "kapsa",
+      "token": "▁kapsa"
+    },
+    {
+      "index": 749,
+      "start": 3275,
+      "end": 3277,
+      "text": "mı",
+      "token": "mı"
+    },
+    {
+      "index": 750,
+      "start": 3278,
+      "end": 3283,
+      "text": "Makro",
+      "token": "▁Makro"
+    },
+    {
+      "index": 751,
+      "start": 3284,
+      "end": 3290,
+      "text": "göster",
+      "token": "▁göster"
+    },
+    {
+      "index": 752,
+      "start": 3290,
+      "end": 3293,
+      "text": "gel",
+      "token": "gel"
+    },
+    {
+      "index": 753,
+      "start": 3293,
+      "end": 3295,
+      "text": "er",
+      "token": "er"
+    },
+    {
+      "index": 754,
+      "start": 3296,
+      "end": 3305,
+      "text": "araştırma",
+      "token": "▁araştırma"
+    },
+    {
+      "index": 755,
+      "start": 3305,
+      "end": 3307,
+      "text": "ya",
+      "token": "ya"
+    },
+    {
+      "index": 756,
+      "start": 3308,
+      "end": 3313,
+      "text": "bağla",
+      "token": "▁bağla"
+    },
+    {
+      "index": 757,
+      "start": 3313,
+      "end": 3314,
+      "text": "m",
+      "token": "m"
+    },
+    {
+      "index": 758,
+      "start": 3315,
+      "end": 3318,
+      "text": "sağ",
+      "token": "▁sağ"
+    },
+    {
+      "index": 759,
+      "start": 3318,
+      "end": 3327,
+      "text": "layabilir",
+      "token": "layabilir"
+    },
+    {
+      "index": 760,
+      "start": 3327,
+      "end": 3328,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 761,
+      "start": 3329,
+      "end": 3331,
+      "text": "Bu",
+      "token": "▁Bu"
+    },
+    {
+      "index": 762,
+      "start": 3332,
+      "end": 3337,
+      "text": "örnek",
+      "token": "▁örnek"
+    },
+    {
+      "index": 763,
+      "start": 3337,
+      "end": 3339,
+      "text": "te",
+      "token": "te"
+    },
+    {
+      "index": 764,
+      "start": 3340,
+      "end": 3344,
+      "text": "faiz",
+      "token": "▁faiz"
+    },
+    {
+      "index": 765,
+      "start": 3345,
+      "end": 3347,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 766,
+      "start": 3348,
+      "end": 3354,
+      "text": "piyasa",
+      "token": "▁piyasa"
+    },
+    {
+      "index": 767,
+      "start": 3355,
+      "end": 3359,
+      "text": "oyna",
+      "token": "▁oyna"
+    },
+    {
+      "index": 768,
+      "start": 3359,
+      "end": 3360,
+      "text": "k",
+      "token": "k"
+    },
+    {
+      "index": 769,
+      "start": 3360,
+      "end": 3364,
+      "text": "lığı",
+      "token": "lığı"
+    },
+    {
+      "index": 770,
+      "start": 3365,
+      "end": 3371,
+      "text": "yalnız",
+      "token": "▁yalnız"
+    },
+    {
+      "index": 771,
+      "start": 3372,
+      "end": 3374,
+      "text": "ek",
+      "token": "▁ek"
+    },
+    {
+      "index": 772,
+      "start": 3375,
+      "end": 3381,
+      "text": "başlık",
+      "token": "▁başlık"
+    },
+    {
+      "index": 773,
+      "start": 3381,
+      "end": 3387,
+      "text": "lardır",
+      "token": "lardır"
+    },
+    {
+      "index": 774,
+      "start": 3387,
+      "end": 3388,
+      "text": ";",
+      "token": ";"
+    },
+    {
+      "index": 775,
+      "start": 3389,
+      "end": 3395,
+      "text": "güncel",
+      "token": "▁güncel"
+    },
+    {
+      "index": 776,
+      "start": 3396,
+      "end": 3401,
+      "text": "değer",
+      "token": "▁değer"
+    },
+    {
+      "index": 777,
+      "start": 3401,
+      "end": 3404,
+      "text": "ler",
+      "token": "ler"
+    },
+    {
+      "index": 778,
+      "start": 3405,
+      "end": 3410,
+      "text": "veril",
+      "token": "▁veril"
+    },
+    {
+      "index": 779,
+      "start": 3410,
+      "end": 3413,
+      "text": "mez",
+      "token": "mez"
+    },
+    {
+      "index": 780,
+      "start": 3413,
+      "end": 3414,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 781,
+      "start": 3415,
+      "end": 3418,
+      "text": "Ver",
+      "token": "▁Ver"
+    },
+    {
+      "index": 782,
+      "start": 3418,
+      "end": 3419,
+      "text": "i",
+      "token": "i"
+    },
+    {
+      "index": 783,
+      "start": 3420,
+      "end": 3425,
+      "text": "eksik",
+      "token": "▁eksik"
+    },
+    {
+      "index": 784,
+      "start": 3425,
+      "end": 3427,
+      "text": "se",
+      "token": "se"
+    },
+    {
+      "index": 785,
+      "start": 3428,
+      "end": 3433,
+      "text": "durum",
+      "token": "▁durum"
+    },
+    {
+      "index": 786,
+      "start": 3434,
+      "end": 3438,
+      "text": "açık",
+      "token": "▁açık"
+    },
+    {
+      "index": 787,
+      "start": 3438,
+      "end": 3440,
+      "text": "ça",
+      "token": "ça"
+    },
+    {
+      "index": 788,
+      "start": 3441,
+      "end": 3447,
+      "text": "işaret",
+      "token": "▁işaret"
+    },
+    {
+      "index": 789,
+      "start": 3447,
+      "end": 3452,
+      "text": "lenir",
+      "token": "lenir"
+    },
+    {
+      "index": 790,
+      "start": 3452,
+      "end": 3453,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 791,
+      "start": 3454,
+      "end": 3457,
+      "text": "Eks",
+      "token": "▁Eks"
+    },
+    {
+      "index": 792,
+      "start": 3457,
+      "end": 3459,
+      "text": "ik",
+      "token": "ik"
+    },
+    {
+      "index": 793,
+      "start": 3460,
+      "end": 3464,
+      "text": "veri",
+      "token": "▁veri"
+    },
+    {
+      "index": 794,
+      "start": 3465,
+      "end": 3470,
+      "text": "sıfır",
+      "token": "▁sıfır"
+    },
+    {
+      "index": 795,
+      "start": 3471,
+      "end": 3475,
+      "text": "risk",
+      "token": "▁risk"
+    },
+    {
+      "index": 796,
+      "start": 3476,
+      "end": 3483,
+      "text": "anlamın",
+      "token": "▁anlamın"
+    },
+    {
+      "index": 797,
+      "start": 3483,
+      "end": 3484,
+      "text": "a",
+      "token": "a"
+    },
+    {
+      "index": 798,
+      "start": 3485,
+      "end": 3490,
+      "text": "gelme",
+      "token": "▁gelme"
+    },
+    {
+      "index": 799,
+      "start": 3490,
+      "end": 3491,
+      "text": "z",
+      "token": "z"
+    },
+    {
+      "index": 800,
+      "start": 3491,
+      "end": 3492,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 801,
+      "start": 3493,
+      "end": 3502,
+      "text": "Araştırma",
+      "token": "▁Araştırma"
+    },
+    {
+      "index": 802,
+      "start": 3503,
+      "end": 3507,
+      "text": "skor",
+      "token": "▁skor"
+    },
+    {
+      "index": 803,
+      "start": 3507,
+      "end": 3508,
+      "text": "u",
+      "token": "u"
+    },
+    {
+      "index": 804,
+      "start": 3509,
+      "end": 3512,
+      "text": "ile",
+      "token": "▁ile"
+    },
+    {
+      "index": 805,
+      "start": 3513,
+      "end": 3518,
+      "text": "öğren",
+      "token": "▁öğren"
+    },
+    {
+      "index": 806,
+      "start": 3518,
+      "end": 3523,
+      "text": "ilmiş",
+      "token": "ilmiş"
+    },
+    {
+      "index": 807,
+      "start": 3524,
+      "end": 3529,
+      "text": "model",
+      "token": "▁model"
+    },
+    {
+      "index": 808,
+      "start": 3529,
+      "end": 3531,
+      "text": "in",
+      "token": "in"
+    },
+    {
+      "index": 809,
+      "start": 3532,
+      "end": 3537,
+      "text": "olası",
+      "token": "▁olası"
+    },
+    {
+      "index": 810,
+      "start": 3537,
+      "end": 3541,
+      "text": "lığı",
+      "token": "lığı"
+    },
+    {
+      "index": 811,
+      "start": 3542,
+      "end": 3553,
+      "text": "birbirinden",
+      "token": "▁birbirinden"
+    },
+    {
+      "index": 812,
+      "start": 3554,
+      "end": 3556,
+      "text": "ay",
+      "token": "▁ay"
+    },
+    {
+      "index": 813,
+      "start": 3556,
+      "end": 3557,
+      "text": "r",
+      "token": "r"
+    },
+    {
+      "index": 814,
+      "start": 3557,
+      "end": 3561,
+      "text": "ılır",
+      "token": "ılır"
+    },
+    {
+      "index": 815,
+      "start": 3561,
+      "end": 3562,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 816,
+      "start": 3563,
+      "end": 3570,
+      "text": "Böylece",
+      "token": "▁Böylece"
+    },
+    {
+      "index": 817,
+      "start": 3571,
+      "end": 3574,
+      "text": "bir",
+      "token": "▁bir"
+    },
+    {
+      "index": 818,
+      "start": 3575,
+      "end": 3580,
+      "text": "rapor",
+      "token": "▁rapor"
+    },
+    {
+      "index": 819,
+      "start": 3580,
+      "end": 3584,
+      "text": "daki",
+      "token": "daki"
+    },
+    {
+      "index": 820,
+      "start": 3585,
+      "end": 3587,
+      "text": "se",
+      "token": "▁se"
+    },
+    {
+      "index": 821,
+      "start": 3587,
+      "end": 3588,
+      "text": "z",
+      "token": "z"
+    },
+    {
+      "index": 822,
+      "start": 3588,
+      "end": 3590,
+      "text": "gi",
+      "token": "gi"
+    },
+    {
+      "index": 823,
+      "start": 3590,
+      "end": 3593,
+      "text": "sel",
+      "token": "sel"
+    },
+    {
+      "index": 824,
+      "start": 3594,
+      "end": 3598,
+      "text": "sayı",
+      "token": "▁sayı"
+    },
+    {
+      "index": 825,
+      "start": 3598,
+      "end": 3599,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 826,
+      "start": 3600,
+      "end": 3605,
+      "text": "doğru",
+      "token": "▁doğru"
+    },
+    {
+      "index": 827,
+      "start": 3605,
+      "end": 3611,
+      "text": "lanmış",
+      "token": "lanmış"
+    },
+    {
+      "index": 828,
+      "start": 3612,
+      "end": 3618,
+      "text": "tahmin",
+      "token": "▁tahmin"
+    },
+    {
+      "index": 829,
+      "start": 3618,
+      "end": 3621,
+      "text": "miş",
+      "token": "miş"
+    },
+    {
+      "index": 830,
+      "start": 3622,
+      "end": 3626,
+      "text": "gibi",
+      "token": "▁gibi"
+    },
+    {
+      "index": 831,
+      "start": 3627,
+      "end": 3629,
+      "text": "su",
+      "token": "▁su"
+    },
+    {
+      "index": 832,
+      "start": 3629,
+      "end": 3631,
+      "text": "nu",
+      "token": "nu"
+    },
+    {
+      "index": 833,
+      "start": 3631,
+      "end": 3635,
+      "text": "lmaz",
+      "token": "lmaz"
+    },
+    {
+      "index": 834,
+      "start": 3635,
+      "end": 3636,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 835,
+      "start": 3637,
+      "end": 3640,
+      "text": "Her",
+      "token": "▁Her"
+    },
+    {
+      "index": 836,
+      "start": 3641,
+      "end": 3644,
+      "text": "bul",
+      "token": "▁bul"
+    },
+    {
+      "index": 837,
+      "start": 3644,
+      "end": 3646,
+      "text": "gu",
+      "token": "gu"
+    },
+    {
+      "index": 838,
+      "start": 3647,
+      "end": 3654,
+      "text": "kaynağı",
+      "token": "▁kaynağı"
+    },
+    {
+      "index": 839,
+      "start": 3654,
+      "end": 3655,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 840,
+      "start": 3656,
+      "end": 3662,
+      "text": "zamanı",
+      "token": "▁zamanı"
+    },
+    {
+      "index": 841,
+      "start": 3663,
+      "end": 3665,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 842,
+      "start": 3666,
+      "end": 3671,
+      "text": "kapsa",
+      "token": "▁kapsa"
+    },
+    {
+      "index": 843,
+      "start": 3671,
+      "end": 3672,
+      "text": "m",
+      "token": "m"
+    },
+    {
+      "index": 844,
+      "start": 3672,
+      "end": 3676,
+      "text": "ıyla",
+      "token": "ıyla"
+    },
+    {
+      "index": 845,
+      "start": 3677,
+      "end": 3680,
+      "text": "oku",
+      "token": "▁oku"
+    },
+    {
+      "index": 846,
+      "start": 3680,
+      "end": 3683,
+      "text": "nur",
+      "token": "nur"
+    },
+    {
+      "index": 847,
+      "start": 3683,
+      "end": 3684,
+      "text": ";",
+      "token": ";"
+    },
+    {
+      "index": 848,
+      "start": 3685,
+      "end": 3688,
+      "text": "seç",
+      "token": "▁seç"
+    },
+    {
+      "index": 849,
+      "start": 3688,
+      "end": 3692,
+      "text": "ilen",
+      "token": "ilen"
+    },
+    {
+      "index": 850,
+      "start": 3693,
+      "end": 3698,
+      "text": "parça",
+      "token": "▁parça"
+    },
+    {
+      "index": 851,
+      "start": 3698,
+      "end": 3703,
+      "text": "ların",
+      "token": "ların"
+    },
+    {
+      "index": 852,
+      "start": 3704,
+      "end": 3711,
+      "text": "dışında",
+      "token": "▁dışında"
+    },
+    {
+      "index": 853,
+      "start": 3712,
+      "end": 3717,
+      "text": "kalan",
+      "token": "▁kalan"
+    },
+    {
+      "index": 854,
+      "start": 3718,
+      "end": 3725,
+      "text": "ayrıntı",
+      "token": "▁ayrıntı"
+    },
+    {
+      "index": 855,
+      "start": 3725,
+      "end": 3728,
+      "text": "lar",
+      "token": "lar"
+    },
+    {
+      "index": 856,
+      "start": 3729,
+      "end": 3734,
+      "text": "yanıt",
+      "token": "▁yanıt"
+    },
+    {
+      "index": 857,
+      "start": 3734,
+      "end": 3735,
+      "text": "a",
+      "token": "a"
+    },
+    {
+      "index": 858,
+      "start": 3736,
+      "end": 3737,
+      "text": "t",
+      "token": "▁t"
+    },
+    {
+      "index": 859,
+      "start": 3737,
+      "end": 3744,
+      "text": "aşınmaz",
+      "token": "aşınmaz"
+    },
+    {
+      "index": 860,
+      "start": 3744,
+      "end": 3745,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 861,
+      "start": 3747,
+      "end": 3752,
+      "text": "Doğru",
+      "token": "▁Doğru"
+    },
+    {
+      "index": 862,
+      "start": 3753,
+      "end": 3760,
+      "text": "kaynağı",
+      "token": "▁kaynağı"
+    },
+    {
+      "index": 863,
+      "start": 3761,
+      "end": 3767,
+      "text": "bulmak",
+      "token": "▁bulmak"
+    },
+    {
+      "index": 864,
+      "start": 3768,
+      "end": 3771,
+      "text": "ile",
+      "token": "▁ile"
+    },
+    {
+      "index": 865,
+      "start": 3772,
+      "end": 3777,
+      "text": "doğru",
+      "token": "▁doğru"
+    },
+    {
+      "index": 866,
+      "start": 3778,
+      "end": 3783,
+      "text": "cevap",
+      "token": "▁cevap"
+    },
+    {
+      "index": 867,
+      "start": 3784,
+      "end": 3790,
+      "text": "vermek",
+      "token": "▁vermek"
+    },
+    {
+      "index": 868,
+      "start": 3791,
+      "end": 3795,
+      "text": "ayrı",
+      "token": "▁ayrı"
+    },
+    {
+      "index": 869,
+      "start": 3796,
+      "end": 3800,
+      "text": "adım",
+      "token": "▁adım"
+    },
+    {
+      "index": 870,
+      "start": 3800,
+      "end": 3806,
+      "text": "lardır",
+      "token": "lardır"
+    },
+    {
+      "index": 871,
+      "start": 3806,
+      "end": 3807,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 872,
+      "start": 3808,
+      "end": 3809,
+      "text": "A",
+      "token": "▁A"
+    },
+    {
+      "index": 873,
+      "start": 3809,
+      "end": 3813,
+      "text": "rama",
+      "token": "rama"
+    },
+    {
+      "index": 874,
+      "start": 3814,
+      "end": 3823,
+      "text": "sonuçları",
+      "token": "▁sonuçları"
+    },
+    {
+      "index": 875,
+      "start": 3823,
+      "end": 3824,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 876,
+      "start": 3825,
+      "end": 3830,
+      "text": "iddia",
+      "token": "▁iddia"
+    },
+    {
+      "index": 877,
+      "start": 3830,
+      "end": 3833,
+      "text": "lar",
+      "token": "lar"
+    },
+    {
+      "index": 878,
+      "start": 3834,
+      "end": 3836,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 879,
+      "start": 3837,
+      "end": 3838,
+      "text": "a",
+      "token": "▁"
+    },
+    {
+      "index": 880,
+      "start": 3837,
+      "end": 3840,
+      "text": "atı",
+      "token": "atı"
+    },
+    {
+      "index": 881,
+      "start": 3840,
+      "end": 3841,
+      "text": "f",
+      "token": "f"
+    },
+    {
+      "index": 882,
+      "start": 3841,
+      "end": 3844,
+      "text": "lar",
+      "token": "lar"
+    },
+    {
+      "index": 883,
+      "start": 3845,
+      "end": 3849,
+      "text": "ayrı",
+      "token": "▁ayrı"
+    },
+    {
+      "index": 884,
+      "start": 3850,
+      "end": 3863,
+      "text": "değerlendiril",
+      "token": "▁değerlendiril"
+    },
+    {
+      "index": 885,
+      "start": 3863,
+      "end": 3865,
+      "text": "ir",
+      "token": "ir"
+    },
+    {
+      "index": 886,
+      "start": 3865,
+      "end": 3866,
+      "text": ".",
+      "token": "."
+    },
+    {
+      "index": 887,
+      "start": 3867,
+      "end": 3869,
+      "text": "Bu",
+      "token": "▁Bu"
+    },
+    {
+      "index": 888,
+      "start": 3870,
+      "end": 3873,
+      "text": "met",
+      "token": "▁met"
+    },
+    {
+      "index": 889,
+      "start": 3873,
+      "end": 3876,
+      "text": "nin",
+      "token": "nin"
+    },
+    {
+      "index": 890,
+      "start": 3877,
+      "end": 3883,
+      "text": "tekrar",
+      "token": "▁tekrar"
+    },
+    {
+      "index": 891,
+      "start": 3883,
+      "end": 3887,
+      "text": "ları",
+      "token": "ları"
+    },
+    {
+      "index": 892,
+      "start": 3887,
+      "end": 3888,
+      "text": ",",
+      "token": ","
+    },
+    {
+      "index": 893,
+      "start": 3889,
+      "end": 3893,
+      "text": "konu",
+      "token": "▁konu"
+    },
+    {
+      "index": 894,
+      "start": 3894,
+      "end": 3899,
+      "text": "geçiş",
+      "token": "▁geçiş"
+    },
+    {
+      "index": 895,
+      "start": 3899,
+      "end": 3903,
+      "text": "leri",
+      "token": "leri"
+    },
+    {
+      "index": 896,
+      "start": 3904,
+      "end": 3906,
+      "text": "ve",
+      "token": "▁ve"
+    },
+    {
+      "index": 897,
+      "start": 3907,
+      "end": 3916,
+      "text": "sınırları",
+      "token": "▁sınırları"
+    },
+    {
+      "index": 898,
+      "start": 3917,
+      "end": 3922,
+      "text": "parça",
+      "token": "▁parça"
+    },
+    {
+      "index": 899,
+      "start": 3922,
+      "end": 3926,
+      "text": "lama",
+      "token": "lama"
+    },
+    {
+      "index": 900,
+      "start": 3927,
+      "end": 3935,
+      "text": "davranış",
+      "token": "▁davranış"
+    },
+    {
+      "index": 901,
+      "start": 3935,
+      "end": 3938,
+      "text": "ını",
+      "token": "ını"
+    },
+    {
+      "index": 902,
+      "start": 3939,
+      "end": 3946,
+      "text": "görünür",
+      "token": "▁görünür"
+    },
+    {
+      "index": 903,
+      "start": 3947,
+      "end": 3950,
+      "text": "kıl",
+      "token": "▁kıl"
+    },
+    {
+      "index": 904,
+      "start": 3950,
+      "end": 3953,
+      "text": "mak",
+      "token": "mak"
+    },
+    {
+      "index": 905,
+      "start": 3954,
+      "end": 3958,
+      "text": "için",
+      "token": "▁için"
+    },
+    {
+      "index": 906,
+      "start": 3959,
+      "end": 3968,
+      "text": "özellikle",
+      "token": "▁özellikle"
+    },
+    {
+      "index": 907,
+      "start": 3969,
+      "end": 3974,
+      "text": "korun",
+      "token": "▁korun"
+    },
+    {
+      "index": 908,
+      "start": 3974,
+      "end": 3980,
+      "text": "muştur",
+      "token": "muştur"
+    },
+    {
+      "index": 909,
+      "start": 3980,
+      "end": 3981,
+      "text": ".",
+      "token": "."
+    }
+  ],
+  "tokenCount": 910,
+  "retrieval": {
+    "query": "Bitcoin’de fonlama yükselirken likidasyon riskini nasıl yorumlamalıyım?",
+    "documents": [
+      {
+        "id": "C1",
+        "title": "Fonlama tek başına yön kanıtı değildir",
+        "excerpt": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı. Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının",
+        "source": "Kurgu araştırma notu",
+        "parentId": "demo-btc-risk-note",
+        "tokenStart": 0,
+        "tokenCount": 240,
+        "vectorPreview": [
+          0.8225697350172587,
+          -0.34995772963012606,
+          -0.8191735025626138,
+          -0.7412921343660674,
+          0.7327955528393326,
+          -0.6164971406894836,
+          -0.46680531601353226,
+          1.6247670511322574
+        ],
+        "vectorDimension": 1024,
+        "denseScore": 0.004643420373375323,
+        "bm25Score": -2.075334210602357
+      },
+      {
+        "id": "C2",
+        "title": "Açık pozisyon, kaldıraç ve teminat",
+        "excerpt": "veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniy",
+        "source": "Kurgu araştırma notu",
+        "parentId": "demo-btc-risk-note",
+        "tokenStart": 200,
+        "tokenCount": 240,
+        "vectorPreview": [
+          0.5984452137384902,
+          0.05907048789730434,
+          -0.5836616628187562,
+          -0.9383916731708306,
+          1.081157193834747,
+          -0.04160672594977866,
+          -0.38555085644643555,
+          2.208824406970631
+        ],
+        "vectorDimension": 1024,
+        "denseScore": 0.0039393426822994905,
+        "bm25Score": -2.6340734022830007e-06
+      },
+      {
+        "id": "C3",
+        "title": "Risk yorumu ve teknik görünüm",
+        "excerpt": "lamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin E",
+        "source": "Kurgu araştırma notu",
+        "parentId": "demo-btc-risk-note",
+        "tokenStart": 400,
+        "tokenCount": 240,
+        "vectorPreview": [
+          0.9667004865925174,
+          -0.7049904569583244,
+          -0.5593463399616833,
+          -1.1560806818922196,
+          0.8769305092090172,
+          -0.7832313063246591,
+          -0.72775927563881,
+          2.067832283737246
+        ],
+        "vectorDimension": 1024,
+        "denseScore": 0.00413093479923024,
+        "bm25Score": -1.907505247159297e-06
+      },
+      {
+        "id": "C4",
+        "title": "Teknik sınırlar ve ETF haberleri",
+        "excerpt": "; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı,",
+        "source": "Kurgu araştırma notu",
+        "parentId": "demo-btc-risk-note",
+        "tokenStart": 600,
+        "tokenCount": 240,
+        "vectorPreview": [
+          0.5977082077398403,
+          -0.20501851895535442,
+          -0.7011838355775122,
+          -0.6545092635807266,
+          0.6997404384141988,
+          -0.3380114072241074,
+          -0.3655747553749272,
+          1.8433897990333148
+        ],
+        "vectorDimension": 1024,
+        "denseScore": 0.003968490178295636,
+        "bm25Score": -1.8890481651376149e-06
+      },
+      {
+        "id": "C5",
+        "title": "Veri kapsamı ve yanıtın sınırları",
+        "excerpt": ". Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur.",
+        "source": "Kurgu araştırma notu",
+        "parentId": "demo-btc-risk-note",
+        "tokenStart": 800,
+        "tokenCount": 110,
+        "vectorPreview": [
+          0.9072225194721095,
+          -0.22209402072795592,
+          -0.7615362397864857,
+          -0.5024169760316289,
+          0.5785244734858913,
+          -0.8625250366409268,
+          -0.5040180291321161,
+          0.8668046092235409
+        ],
+        "vectorDimension": 1024,
+        "denseScore": 0.0026006239815023,
+        "bm25Score": null
+      }
+    ],
+    "dense": [
+      "C1",
+      "C3",
+      "C4",
+      "C2",
+      "C5"
+    ],
+    "bm25": [
+      "C1",
+      "C2",
+      "C3",
+      "C4"
+    ],
+    "fused": [
+      {
+        "id": "C1",
+        "score": 0.03278688524590164
+      },
+      {
+        "id": "C3",
+        "score": 0.03200204813108039
+      },
+      {
+        "id": "C2",
+        "score": 0.031754032258064516
+      },
+      {
+        "id": "C4",
+        "score": 0.03149801587301587
+      },
+      {
+        "id": "C5",
+        "score": 0.015384615384615385
+      }
+    ],
+    "reranked": [
+      "C2",
+      "C1",
+      "C3",
+      "C5",
+      "C4"
+    ],
+    "queryVectorPreview": [
+      0.33766069673001764,
+      -0.07626890735700727,
+      -0.7247091874480247,
+      -0.7300296813249588,
+      1.285809725522995,
+      -0.14196241069585086,
+      0.03146898227278143,
+      1.5494286268949509
+    ],
+    "vectorDimension": 1024,
+    "provenance": {
+      "computedAt": "2026-10-02T14:22:21.394184+00:00",
+      "model": "intfloat/multilingual-e5-large",
+      "sourceIsFictional": true,
+      "denseIsMeasured": true,
+      "bm25IsMeasured": true,
+      "rrfIsComputed": true,
+      "rerankerIsIllustrative": true,
+      "answerIsIllustrative": true,
+      "chunkTokens": 240,
+      "overlapTokens": 40,
+      "rankConstant": 60,
+      "candidateCount": 5,
+      "method": "Backend Embedder + temporary VectorStore + temporary Database.search_documents",
+      "label": "Sabit kurgu korpusta önceden hesaplanmış gerçek dense/BM25 sonuçları; canlı arama değildir.",
+      "reproduce": "uv run python scripts/generate_rag_walkthrough.py"
+    }
+  }
+}

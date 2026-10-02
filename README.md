@@ -83,11 +83,20 @@ Gereksinimler: Python 3.10+ ve [uv](https://docs.astral.sh/uv/). Web geliştirme
 | Prompt Çıktısı | Hazır prompt + MCP entegrasyon panosu + OpenRouter ile çalıştırma |
 | Kaynak Arama | Yerel RAG araması ve (anahtar varsa) AI yanıtı |
 | Rapor Arşivi | Geçmiş koşular, rapor arama filtresi ve Markdown görüntüleme |
-| Nasıl Çalışır? | Three.js ile etkileşimli akış, ürün turu, temsili RRF karşılaştırması ve mülakat modu |
+| Nasıl Çalışır? | Ürün turu, gerçek token sınırları ve hesaplanmış retrieval sonuçlarıyla etkileşimli mülakat laboratuvarı |
 
 Klavye kısayolları: `/` arama alanına git · `?` yardım · `⌘/Ctrl + Enter` derin araştırmayı başlat · `Esc` kapat.
 
-**Rehber:** sol menüde **Rehber** üzerinden veya `http://127.0.0.1:8000/?tab=how` adresinden açılır. **Mülakat modu** (`?tab=how&mode=interview`), ayrı araştırma ve RAG hatlarını, ölçüm protokollerini ve güncel deneylerin sınırlarını anlatır. Aşamalara tıklanabilir; 60 saniyelik otomatik tur, duraklatma ve destekleyen tarayıcılarda sunum ekranı vardır. Animasyonlar hareket azaltma tercihini izler; WebGL kullanılamadığında sabit, etkileşimli şemaya geçilir. Arama örnekleri temsildir; gerçek kaynaklara geçiş düğmesi soruyu Kaynak Arama’ya taşır.
+**Rehber:** sol menüde **Rehber** üzerinden veya `http://127.0.0.1:8000/?tab=how` adresinden açılır. **Mülakat modu** (`?tab=how&mode=interview`), bir kurgu araştırma belgesinin soru-cevap hattındaki bütün dönüşümlerini gösterir:
+
+- **Chunking:** 910 gerçek tokenizer tokenı, değiştirilebilir pencere/overlap, birebir ortak metin, alt-parçalar ve tüm tokenların kapsanması.
+- **Embedding ve retrieval:** 1024 boyutlu embedding'in ilk koordinatları; geçici LanceDB/SQLite indekslerinde önceden hesaplanan dense ve BM25 listeleri.
+- **Fusion ve kanıt:** aday bazında RRF katkıları, seçilen top-k ile prompt, değişen atıf numaraları ve iddiayı destekleyen tam kaynak cümlesi. Reranker sırası ve yanıt açıkça işaretlenmiş öğretim örnekleridir; tur model çağrısı yapmaz.
+- **Değerlendirme:** dev/test kilidi ve Recall/RR hesabı; zaman çizgisinde etiket ufku, purge, ayrı kalibrasyon ve final holdout. Bu küçük öğretim örnekleri ile tarihli proje deneyleri ayrı gösterilir.
+
+Aşamalara tıklanabilir; otomatik akış, duraklatma ve destekleyen tarayıcılarda sunum ekranı vardır. Three.js kartlarında pasaj ve sayısal değerler gösterilir. Animasyonlar hareket azaltma tercihini izler; WebGL yokken metin ve kontroller kullanılabilir. Gerçek arşive geçiş düğmesi soruyu Kaynak Arama'ya taşır.
+
+Demo verisini önbellekteki `intfloat/multilingual-e5-large` modeliyle yeniden üretmek için `uv run python scripts/generate_rag_walkthrough.py` çalıştırılır. Script geçici indeks kullanır ve `web/src/fixtures/rag-demo-tokens.json` dosyasını günceller; uygulamanın veritabanına yazmaz. Model önbellekte yoksa hata verir.
 
 ### CLI
 
