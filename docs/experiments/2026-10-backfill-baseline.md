@@ -1,10 +1,12 @@
 # Backfill baseline: separate calibration and final holdout
 
-**Run date:** 2026-10-02  
-**Protocol:** `separate_calibration_final_holdout_v1`  
-**Source:** historical replay (`backfill`)  
-**Features:** `base` (10 features; extended features were not selected)  
-**Universe:** the 10 default watchlist coins, 730 requested days per coin
+| Field | Value |
+| --- | --- |
+| Run date | 2026-10-02 |
+| Protocol | `separate_calibration_final_holdout_v1` |
+| Source | historical replay (`backfill`) |
+| Features | `base` (10 features; extended features were not selected) |
+| Universe | the 10 default watchlist coins, 730 requested days per coin |
 
 ## Result
 
