@@ -29,6 +29,7 @@ from crypto_deep_research.formatting import (
 )
 from crypto_deep_research.llm import OpenRouterClient
 from crypto_deep_research.providers.registry import build_providers
+from crypto_deep_research.rag.answer_evaluation import evaluate_answers, load_answer_cases
 from crypto_deep_research.rag.engine import RAGEngine
 from crypto_deep_research.rag.evaluation import evaluate_retrieval, load_cases
 from crypto_deep_research.storage.db import Database
@@ -321,24 +322,101 @@ def rag_eval(
     )
 
 
+@app.command("rag-answer-eval")
+def rag_answer_eval(
+    dataset: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
+    split: str = typer.Option("all", "--split", help="Değerlendirme kümesi: all, dev veya test"),
+    json_output: bool = typer.Option(False, "--json"),
+) -> None:
+    """İnsan etiketleriyle RAG cevaplarının dayanağını ve atıflarını ölçer."""
+    try:
+        cases = load_answer_cases(dataset, split=split)
+        result = evaluate_answers(cases)
+    except (ValueError, OSError) as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    output = {**result, "split": split}
+    if json_output:
+        console.print_json(json.dumps(output, ensure_ascii=False))
+        return
+
+    table = Table(title=f"RAG Answer Evaluation · {result['n_answers']} yanıt · {split}")
+    table.add_column("Metrik")
+    table.add_column("Sorgu ort.", justify="right")
+    table.add_column("Toplam ort.", justify="right")
+    macro = result["metrics"]["macro_by_answer"]
+    micro = result["metrics"]["micro_by_claim_or_citation"]
+    for name in ("faithfulness", "citation_coverage", "citation_precision"):
+        macro_value = macro[name]
+        micro_value = micro[name]
+        table.add_row(
+            name,
+            f"{macro_value:.3f}" if macro_value is not None else "n/a",
+            f"{micro_value:.3f}" if micro_value is not None else "n/a",
+        )
+    table.add_row(
+        "answer_relevance (1–5)",
+        f"{macro['answer_relevance']:.2f}",
+        f"{micro['answer_relevance']:.2f}",
+    )
+    console.print(table)
+    console.print(f"Etiketler: {dataset} · iddialar={result['n_claims']} · atıflar={result['n_citations']}")
+
+
 @app.command()
 def ask(
     question: str = typer.Argument(...),
     coin: str | None = typer.Option(None, "--coin", "-c"),
     model: str | None = typer.Option(None, "--model"),
+    json_output: bool = typer.Option(False, "--json", help="Yanıtı ve kaynakları etiketleme için yazdır"),
 ):
     """RAG bağlamıyla OpenRouter üzerinden soru sorar (anahtar yoksa prompt yazdırir)."""
     settings = get_settings()
     db = Database(settings.db_path)
     rag = RAGEngine(db, settings)
-    prompt = rag.answer_prompt(question, coin=coin)
+    results = rag.search(question, coin=coin)
+    prompt = rag.answer_prompt(question, coin=coin, results=results)
     client = OpenRouterClient(settings)
+    answer = None
     if not client.enabled:
-        console.print("[yellow]OpenRouter anahtari yok; üretilen prompt:[/yellow]\n")
-        console.print(prompt)
-        return
-    answer = asyncio.run(client.complete(prompt, model=model))
-    console.print(Panel(answer, title="OpenRouter yaniti", border_style="cyan"))
+        if not json_output:
+            console.print("[yellow]OpenRouter anahtari yok; üretilen prompt:[/yellow]\n")
+            console.print(prompt)
+    else:
+        answer = asyncio.run(client.complete(prompt, model=model))
+
+    if json_output:
+        source_rows = [
+            {
+                "citation_index": index,
+                "parent_id": item.parent_id or item.key.partition("#chunk-")[0],
+                "source": item.source,
+                "url": item.url,
+                "content": item.content,
+                "score": item.score,
+                "score_type": item.score_type,
+            }
+            for index, item in enumerate(results, 1)
+        ]
+        parent_ids = list(dict.fromkeys(row["parent_id"] for row in source_rows))
+        console.print_json(
+            json.dumps(
+                {
+                    "query": question,
+                    "answer": answer,
+                    "model": model or (settings.openrouter_model if client.enabled else None),
+                    "prompt": prompt,
+                    "retrieval": {
+                        "mode": "hybrid",
+                        "reranker_model": settings.rag_reranker_model,
+                    },
+                    "retrieved_parent_ids": parent_ids,
+                    "retrieved_sources": source_rows,
+                },
+                ensure_ascii=False,
+            )
+        )
+    elif answer is not None:
+        console.print(Panel(answer, title="OpenRouter yaniti", border_style="cyan"))
 
 
 @app.command()

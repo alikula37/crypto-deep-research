@@ -81,6 +81,17 @@ def test_search_rejects_unknown_retrieval_mode():
         make_engine().search("query", mode="semantic")
 
 
+def test_answer_prompt_can_use_recorded_results_without_searching_twice():
+    engine = make_engine()
+    results = engine.search("query", mode="dense")
+
+    prompt = engine.answer_prompt("query", results=results)
+
+    assert "[1]" in prompt
+    assert "semantic result A" in prompt
+    assert engine.embedder.calls == 1
+
+
 def test_reindex_recovers_legacy_chunks_and_applies_new_chunk_size(tmp_path):
     db = Database(tmp_path / "rag.db")
     db.save_document(

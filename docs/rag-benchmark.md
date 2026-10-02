@@ -49,3 +49,31 @@ moddaki adaylara uygulanır; baseline kıyaslamasında kapalı tutun veya sonucu
 metin arşivlenmemiş parçaları bir kez birleştirerek kurtarır; sonraki yeniden indekslemelerde tam
 kaydedilmiş metni kullanır. Her chunk denemesinde aynı korpusu baştan indeksleyin ve yalnız `dev`
 sonuçlarına bakarak ayar seçin.
+
+## Yanıt ve atıf değerlendirmesi
+
+Retrieval doğru belgeyi getirse bile yanıt belgeyi yanlış yorumlayabilir veya desteksiz bir iddia
+ekleyebilir. Yanıt örneği üretmek için modeli etkinleştirip `cdr ask "..." --json` çalıştırın. Çıktıdaki
+`retrieved_parent_ids` ve `retrieved_sources` alanlarını koruyun; `citation_index`, yanıttaki `[1]`,
+`[2]` atıflarının hangi kaynak belgesine karşılık geldiğini gösterir.
+
+Her cevaba 1–5 arasında insan tarafından `answer_relevance` puanı verin (1: ilgisiz, 3: kısmen yanıtlıyor,
+5: doğrudan ve yeterli). Cevabı atomik, doğrulanabilir iddialara bölün. Her iddia için `supported`,
+getirilen kaynakların iddiayı gerçekten destekleyip desteklemediğini belirtir. Her atıf için ayrıca
+`supports_claim` alanı o belirli kaynağın bu iddiayı destekleyip desteklemediğini söyler:
+
+```jsonl
+{"id":"answer-btc-01","split":"dev","query":"BTC fonlama oranı ne söylüyor?","answer":"Fonlama pozitifti [1].","answer_relevance":5,"retrieved_parent_ids":["report-abc"],"claims":[{"text":"Fonlama pozitifti.","supported":true,"citations":[{"parent_id":"report-abc","supports_claim":true}]}]}
+```
+
+```bash
+uv run cdr rag-answer-eval data/rag-answers.jsonl --split dev --json
+uv run cdr rag-answer-eval data/rag-answers.jsonl --split test --json
+```
+
+`faithfulness`, desteklenen iddia oranıdır. `citation_coverage`, en az bir doğru ve retrieval'da bulunan
+atıfı olan iddia oranıdır. `citation_precision`, doğru iddiayı destekleyen ve retrieval sonucunda yer
+alan kaynak atıflarının tüm atıflara oranıdır. `answer_relevance` insan puanlarının ortalamasıdır.
+Rapor hem cevap başına macro ortalamayı hem tüm iddia/atıfları bir arada değerlendiren micro oranı
+verir. Model yargıçları yerine insan etiketleri kullanılır; bu yüzden benchmark boyutu ve etiketleyenler
+arası tutarlılık sonuçla birlikte raporlanmalıdır.

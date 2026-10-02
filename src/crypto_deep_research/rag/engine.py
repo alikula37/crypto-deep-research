@@ -338,8 +338,7 @@ class RAGEngine:
             logger.warning("RAG reranking başarısız, RRF sıralaması kullanılıyor: %s", exc)
             return results[:k]
 
-    def build_context(self, query: str, coin: str | None = None, k: int = 8) -> str:
-        results = self.search(query, coin=coin, k=k)
+    def _format_context(self, query: str, results: list[RetrievedContext]) -> str:
         if not results:
             return "Ilgili kaynak bulunamadı."
         lines = [f"Soru: {query}", ""]
@@ -349,9 +348,19 @@ class RAGEngine:
             lines.append(f"[{index}] ({item.source or 'kaynak'}, {when}{url}) {item.content}")
         return "\n".join(lines)
 
-    def answer_prompt(self, query: str, coin: str | None = None) -> str:
+    def build_context(self, query: str, coin: str | None = None, k: int = 8) -> str:
+        return self._format_context(query, self.search(query, coin=coin, k=k))
+
+    def answer_prompt(
+        self,
+        query: str,
+        coin: str | None = None,
+        *,
+        results: list[RetrievedContext] | None = None,
+    ) -> str:
         """Harici LLM'e verilecek RAG prompt'u üretir."""
-        context = self.build_context(query, coin=coin)
+        contexts = results if results is not None else self.search(query, coin=coin)
+        context = self._format_context(query, contexts)
         return (
             "Aşağıdaki kaynaklara dayanarak soruyu Turkce, kaynak numaralarina atif yaparak yanitla.\n"
             "Bilgi yoksa bunu açıkça belirt, uydurma.\n\n"

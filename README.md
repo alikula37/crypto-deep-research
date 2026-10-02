@@ -99,7 +99,8 @@ uv run cdr rag-eval data/rag-evaluation.jsonl                    # tüm etiketli
 uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval dense  # dense-only ablation
 uv run cdr rag-eval data/rag-evaluation.jsonl --split test --retrieval hybrid # final hibrit ölçüm
 uv run cdr rag-reindex --chunk-tokens 160 --overlap-tokens 32  # chunk ayarını uygula
-uv run cdr ask "BTC likidasyon riski nedir?" --coin bitcoin      # RAG + isteğe bağlı LLM
+uv run cdr ask "BTC likidasyon riski nedir?" --coin bitcoin --json # yanıt + kaynakları dışa aktar
+uv run cdr rag-answer-eval data/rag-answers.jsonl --split test   # yanıt/atıf kalitesi
 uv run cdr items                                                 # 66 kriter ve açıklamaları
 uv run cdr prompt bitcoin --raw                                  # son promptu yazdır (pipe için)
 uv run cdr learning-backfill                                     # geçmiş koşulardan özellik çıkar
@@ -134,6 +135,11 @@ aynı sorgu etiketlerini koruyun, yalnız `dev` üzerinde ayar seçin ve final m
 üzerinde raporlayın. Etiketleme ve deney protokolü için [`docs/rag-benchmark.md`](docs/rag-benchmark.md)
 rehberine bakın. Dense-only, BM25-only ve hibrit arama karşılaştırmaları `--retrieval` ile
 seçilebilir; chunk ayarlarını değiştirdikten sonra `rag-reindex` çalıştırın.
+
+`cdr ask --json`, üretilen yanıtı ve kaynak kimliklerini claim/citation etiketi eklemeye uygun JSON
+olarak verir. `cdr rag-answer-eval`, insan etiketleriyle faithfulness, citation coverage, citation
+precision ve 1–5 cevap ilgililiğini ölçer. Bu ölçüm retrieval değerlendirmesinden ayrıdır ve rehberdeki
+claim etiketleme protokolünü gerektirir.
 
 ### MCP (Claude Desktop / Code, Codex, Cursor)
 
