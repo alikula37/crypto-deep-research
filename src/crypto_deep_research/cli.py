@@ -266,6 +266,7 @@ def search(
 def rag_eval(
     dataset: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
     ks: str = typer.Option("1,3,5,10", "--ks", help="Virgülle ayrılmış Recall/Precision cut-off'ları"),
+    split: str = typer.Option("all", "--split", help="Değerlendirme kümesi: all, dev veya test"),
     json_output: bool = typer.Option(False, "--json"),
 ) -> None:
     """Etiketli JSONL sorgularıyla hibrit RAG retrieval kalitesini ölçer."""
@@ -273,7 +274,7 @@ def rag_eval(
         cutoffs = [int(value.strip()) for value in ks.split(",") if value.strip()]
         if not cutoffs or any(k < 1 for k in cutoffs):
             raise ValueError("--ks pozitif tamsayılardan oluşmalı")
-        cases = load_cases(dataset)
+        cases = load_cases(dataset, split=split)
     except (ValueError, OSError) as exc:
         raise typer.BadParameter(str(exc)) from exc
 
@@ -285,6 +286,7 @@ def rag_eval(
     )
     output = {
         **result,
+        "split": split,
         "retrieval": {
             "fusion": "reciprocal_rank_fusion",
             "dense_enabled": settings.embeddings_enabled,

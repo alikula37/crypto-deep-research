@@ -95,7 +95,9 @@ uv run cdr deep-research bitcoin --platform claude --json        # 66 kriter + r
 uv run cdr deep-research bitcoin --profile conservative --lang en  # profil ve prompt dili
 uv run cdr search "ETF akışları" --coin bitcoin                  # yerel RAG araması
 uv run cdr search "ETF akışları" --coin bitcoin --json           # etiketleme için kaynak ID'leri
-uv run cdr rag-eval data/rag-evaluation.jsonl                    # RAG retrieval metrikleri
+uv run cdr rag-eval data/rag-evaluation.jsonl                    # tüm etiketli RAG sorguları
+uv run cdr rag-eval data/rag-evaluation.jsonl --split dev        # ayar geliştirme kümesi
+uv run cdr rag-eval data/rag-evaluation.jsonl --split test       # final ölçüm kümesi
 uv run cdr ask "BTC likidasyon riski nedir?" --coin bitcoin      # RAG + isteğe bağlı LLM
 uv run cdr items                                                 # 66 kriter ve açıklamaları
 uv run cdr prompt bitcoin --raw                                  # son promptu yazdır (pipe için)
@@ -118,16 +120,18 @@ Docker içinde çalıştırmak için: `docker compose run --rm app cdr snapshot 
 `rag-eval`, elle etiketlenmiş JSONL sorgularında kaynak-belge düzeyinde macro Precision@k,
 Recall@k, Hit Rate@k, MRR ve nDCG ölçer. `cdr search ... --json` çıktısındaki `parent_id`
 değerlerini sorgunun ilgili kaynakları olarak `data/rag-evaluation.jsonl` dosyasındaki
-`relevant_parent_ids` alanına yazın:
+`relevant_parent_ids` alanına yazın. Ayar seçimi ve son değerlendirme sorgularını ayırmak için
+her satıra `split: "dev"` veya `split: "test"` ekleyin:
 
 ```jsonl
-{"id":"btc-etf-akis","query":"Bitcoin ETF akışları nasıl değişti?","coin":"bitcoin","relevant_parent_ids":["news-..."]}
+{"id":"btc-etf-akis-01","split":"dev","query":"Bitcoin ETF akışları nasıl değişti?","coin":"bitcoin","relevant_parent_ids":["news-..."]}
 ```
 
 Bu değerlendirme retrieval sıralamasını ölçer; üretilen yanıtın olgusal doğruluğunu ölçtüğünü
 iddia etmez. Kendi korpusunuz için etiketli örnekler gerekir. Model/reranker ayarlarını kıyaslarken
-aynı sorgu etiketlerini koruyun ve ayar seçimi için kullandığınız sorgulardan ayrı bir final
-değerlendirme kümesi ayırın.
+aynı sorgu etiketlerini koruyun, yalnız `dev` üzerinde ayar seçin ve final metriklerini `test`
+üzerinde raporlayın. Etiketleme ve deney protokolü için [`docs/rag-benchmark.md`](docs/rag-benchmark.md)
+rehberine bakın.
 
 ### MCP (Claude Desktop / Code, Codex, Cursor)
 

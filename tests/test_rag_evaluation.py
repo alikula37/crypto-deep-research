@@ -58,3 +58,39 @@ def test_load_cases_requires_human_relevance_labels(tmp_path):
     dataset.write_text('{"query":"etiketsiz","relevant_parent_ids":[]}\n', encoding="utf-8")
     with pytest.raises(ValueError, match="relevant_parent_ids"):
         load_cases(dataset)
+
+
+def test_load_cases_selects_dev_or_final_test_split(tmp_path):
+    dataset = tmp_path / "rag.jsonl"
+    dataset.write_text(
+        '{"id":"dev-1","split":"dev","query":"dev query",'
+        '"relevant_parent_ids":["doc-dev"]}\n'
+        '{"id":"test-1","split":"test","query":"test query",'
+        '"relevant_parent_ids":["doc-test"]}\n',
+        encoding="utf-8",
+    )
+
+    assert [case.case_id for case in load_cases(dataset)] == ["dev-1", "test-1"]
+    assert [case.case_id for case in load_cases(dataset, split="dev")] == ["dev-1"]
+    assert [case.case_id for case in load_cases(dataset, split="test")] == ["test-1"]
+
+
+def test_split_evaluation_requires_explicit_split_labels(tmp_path):
+    dataset = tmp_path / "rag.jsonl"
+    dataset.write_text(
+        '{"query":"query","relevant_parent_ids":["doc"]}\n', encoding="utf-8"
+    )
+
+    with pytest.raises(ValueError, match="split alanı gerekli"):
+        load_cases(dataset, split="test")
+
+
+def test_load_cases_rejects_unknown_split_values(tmp_path):
+    dataset = tmp_path / "rag.jsonl"
+    dataset.write_text(
+        '{"split":"holdout","query":"query","relevant_parent_ids":["doc"]}\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="split 'dev' veya 'test'"):
+        load_cases(dataset)

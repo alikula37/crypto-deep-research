@@ -16,10 +16,14 @@ class EvaluationCase:
     relevant_parent_ids: frozenset[str]
     coin: str | None = None
     case_id: str | None = None
+    split: str | None = None
 
 
-def load_cases(path: Path) -> list[EvaluationCase]:
-    """Load JSONL queries whose relevance labels are source-document IDs."""
+def load_cases(path: Path, split: str = "all") -> list[EvaluationCase]:
+    """Load JSONL queries, optionally selecting the dev or final test split."""
+    if split not in {"all", "dev", "test"}:
+        raise ValueError("split 'all', 'dev' veya 'test' olmalı")
+
     cases: list[EvaluationCase] = []
     for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         if not line.strip():
@@ -42,20 +46,32 @@ def load_cases(path: Path) -> list[EvaluationCase]:
             )
         coin = row.get("coin")
         case_id = row.get("id")
+        case_split = row.get("split")
         if coin is not None and not isinstance(coin, str):
             raise ValueError(f"{path}:{line_number}: coin metin olmalı")
         if case_id is not None and not isinstance(case_id, str):
             raise ValueError(f"{path}:{line_number}: id metin olmalı")
+        if case_split is not None and case_split not in {"dev", "test"}:
+            raise ValueError(f"{path}:{line_number}: split 'dev' veya 'test' olmalı")
+        if split != "all" and case_split is None:
+            raise ValueError(
+                f"{path}:{line_number}: --split {split} için her sorguda split alanı gerekli"
+            )
+        if split != "all" and case_split != split:
+            continue
         cases.append(
             EvaluationCase(
                 query=query.strip(),
                 relevant_parent_ids=frozenset(item.strip() for item in relevant),
                 coin=coin.strip() if coin else None,
                 case_id=case_id.strip() if case_id else None,
+                split=case_split,
             )
         )
     if not cases:
-        raise ValueError(f"{path}: en az bir değerlendirme sorgusu gerekli")
+        if split == "all":
+            raise ValueError(f"{path}: en az bir değerlendirme sorgusu gerekli")
+        raise ValueError(f"{path}: split '{split}' için etiketli sorgu bulunamadı")
     return cases
 
 
