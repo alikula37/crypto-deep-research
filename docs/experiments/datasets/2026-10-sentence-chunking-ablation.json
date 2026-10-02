@@ -1,0 +1,160 @@
+{
+  "source_documents": 170,
+  "source_sha256": "b6ffdeb1967053292fae8b93dadc16771a12cd33951b9c04c4399e82465b8a85",
+  "n_dev_queries": 5,
+  "labels": "existing assistant draft; not human quality labels",
+  "chunk_tokens": 240,
+  "overlap_tokens": 40,
+  "methods": {
+    "token": {
+      "chunks": 473,
+      "model": "intfloat/multilingual-e5-large",
+      "metrics": {
+        "dense": {
+          "1": {
+            "precision": 0.6,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.6,
+            "ndcg": 0.6
+          },
+          "5": {
+            "precision": 0.12,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.6,
+            "ndcg": 0.6
+          },
+          "10": {
+            "precision": 0.06,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.6,
+            "ndcg": 0.6
+          }
+        },
+        "bm25": {
+          "1": {
+            "precision": 0.4,
+            "recall": 0.4,
+            "hit_rate": 0.4,
+            "mrr": 0.4,
+            "ndcg": 0.4
+          },
+          "5": {
+            "precision": 0.12,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.44,
+            "ndcg": 0.477371
+          },
+          "10": {
+            "precision": 0.06,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.44,
+            "ndcg": 0.477371
+          }
+        },
+        "hybrid": {
+          "1": {
+            "precision": 0.4,
+            "recall": 0.4,
+            "hit_rate": 0.4,
+            "mrr": 0.4,
+            "ndcg": 0.4
+          },
+          "5": {
+            "precision": 0.12,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.5,
+            "ndcg": 0.526186
+          },
+          "10": {
+            "precision": 0.06,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.5,
+            "ndcg": 0.526186
+          }
+        }
+      }
+    },
+    "sentence": {
+      "chunks": 483,
+      "model": "intfloat/multilingual-e5-large",
+      "metrics": {
+        "dense": {
+          "1": {
+            "precision": 0.6,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.6,
+            "ndcg": 0.6
+          },
+          "5": {
+            "precision": 0.12,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.6,
+            "ndcg": 0.6
+          },
+          "10": {
+            "precision": 0.06,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.6,
+            "ndcg": 0.6
+          }
+        },
+        "bm25": {
+          "1": {
+            "precision": 0.4,
+            "recall": 0.4,
+            "hit_rate": 0.4,
+            "mrr": 0.4,
+            "ndcg": 0.4
+          },
+          "5": {
+            "precision": 0.12,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.44,
+            "ndcg": 0.477371
+          },
+          "10": {
+            "precision": 0.06,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.44,
+            "ndcg": 0.477371
+          }
+        },
+        "hybrid": {
+          "1": {
+            "precision": 0.4,
+            "recall": 0.4,
+            "hit_rate": 0.4,
+            "mrr": 0.4,
+            "ndcg": 0.4
+          },
+          "5": {
+            "precision": 0.12,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.5,
+            "ndcg": 0.526186
+          },
+          "10": {
+            "precision": 0.06,
+            "recall": 0.6,
+            "hit_rate": 0.6,
+            "mrr": 0.5,
+            "ndcg": 0.526186
+          }
+        }
+      }
+    }
+  }
+}

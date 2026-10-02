@@ -19,6 +19,13 @@ export const DEMO_SOURCE = {
 };
 
 export const DEMO_QUERY = fixture.retrieval.query;
+export const SENTENCE_SPANS = fixture.sentenceSpans || [];
+export const SENTENCE_EXAMPLES = fixture.sentenceExamples || [];
+
+export const CHUNK_STRATEGIES = {
+  sentence: { label: "Cümle sınırları", detail: "Tam cümleleri token bütçesine sığdır" },
+  token: { label: "Sabit token · baseline", detail: "Boyut ve overlap kadar kes" },
+};
 
 export const CHUNK_PRESETS = [
   { id: "default", label: "Varsayılan · 240 / 40", chunkTokens: 240, overlapTokens: 40 },
@@ -31,13 +38,17 @@ export const CHUNK_PRESETS = [
  * No concatenation of token strings: that would lose original whitespace.
  * The final window stops at EOF instead of producing a redundant overlap tail.
  */
-export function buildChunks(tokens, chunkTokens, overlapTokens, sourceText = DEMO_SOURCE.text) {
+function validateChunkSettings(chunkTokens, overlapTokens) {
   if (!Number.isInteger(chunkTokens) || chunkTokens < 1) {
     throw new Error("chunkTokens must be a positive integer");
   }
   if (!Number.isInteger(overlapTokens) || overlapTokens < 0 || overlapTokens >= chunkTokens) {
     throw new Error("overlapTokens must satisfy 0 <= overlapTokens < chunkTokens");
   }
+}
+
+export function buildChunks(tokens, chunkTokens, overlapTokens, sourceText = DEMO_SOURCE.text) {
+  validateChunkSettings(chunkTokens, overlapTokens);
   const offsets = tokens.filter(({ start, end }) => start >= 0 && start < end && end <= sourceText.length);
   const chunks = [];
   let start = 0;
@@ -62,16 +73,79 @@ export function buildChunks(tokens, chunkTokens, overlapTokens, sourceText = DEM
   return chunks;
 }
 
-// Real measured ranks for the fixed default corpus only. When showing 48/8 or
-// another window size, do not label these ranks as a fresh retrieval result.
-// The parent may override excerpts with current chunks, but must retain the
-// "önceden hesaplanmış 240/40 sıralaması" label in that teaching view.
-export const RETRIEVAL_DEMO = {
-  ...fixture.retrieval,
-  label: fixture.retrieval.provenance.label,
+/** Mirrors backend sentence packing, using Python-generated token spans.
+ * Oversized sentences fall back to disjoint budget-sized token fragments.
+ * Only a contiguous suffix of complete sentences can be carried as overlap.
+ * Drop the oldest overlap sentence if it leaves no room for the next new unit.
+ */
+export function buildSentenceChunks(tokens, chunkTokens, overlapTokens, spans = SENTENCE_SPANS, sourceText = DEMO_SOURCE.text) {
+  validateChunkSettings(chunkTokens, overlapTokens);
+  const offsets = tokens.filter(({ start, end }) => start >= 0 && start < end && end <= sourceText.length);
+  if (!offsets.length) return [];
+  if (!spans.length || spans[0].start !== 0 || spans.at(-1).end !== offsets.length || spans.some((span, index) => span.end <= span.start || (index && span.start !== spans[index - 1].end))) {
+    throw new Error("Sentence spans must partition all valid tokens");
+  }
+  const units = spans.flatMap(({ start, end }) => {
+    if (end - start <= chunkTokens) return [{ start, end, whole: true }];
+    const fragments = [];
+    for (let cursor = start; cursor < end; cursor += chunkTokens) {
+      fragments.push({ start: cursor, end: Math.min(cursor + chunkTokens, end), whole: false });
+    }
+    return fragments;
+  });
+  const chunks = [];
+  let cursor = 0;
+  let carry = [];
+  while (cursor < units.length) {
+    while (carry.length && units[cursor].end - carry[0].start > chunkTokens) carry.shift();
+    const packed = [...carry];
+    const start = carry[0]?.start ?? units[cursor].start;
+    while (cursor < units.length && units[cursor].end - start <= chunkTokens) {
+      packed.push(units[cursor]);
+      cursor += 1;
+    }
+    const end = packed.at(-1).end;
+    const charStart = offsets[start].start;
+    const charEnd = offsets[end - 1].end;
+    chunks.push({
+      id: `C${chunks.length + 1}`, start, end, tokenStart: start, tokenCount: end - start,
+      overlapCount: chunks.length ? Math.max(0, chunks.at(-1).end - start) : 0,
+      charStart, charEnd, text: sourceText.slice(charStart, charEnd),
+      hasFallback: packed.some((unit) => !unit.whole),
+      endsAtSentenceBoundary: spans.some((span) => span.end === end),
+    });
+    carry = [];
+    for (let index = packed.length - 1; index >= 0; index -= 1) {
+      const unit = packed[index];
+      if (!unit.whole || end - unit.start > overlapTokens) break;
+      carry.unshift(unit);
+    }
+  }
+  return chunks;
+}
+
+export function chunksForStrategy(strategy, chunkTokens, overlapTokens) {
+  if (strategy === "sentence") return buildSentenceChunks(DEMO_SOURCE.tokens, chunkTokens, overlapTokens);
+  if (strategy === "token") return buildChunks(DEMO_SOURCE.tokens, chunkTokens, overlapTokens);
+  throw new Error("Unknown chunk strategy");
+}
+
+// Measured ranks exist separately for each strategy at fixed 240/40 settings.
+// Teaching controls for another budget do not alter either retrieval snapshot.
+const retrievalDemo = (retrieval) => ({
+  ...retrieval,
+  label: retrieval.provenance.label,
   rerankerLabel: "Temsili yeniden sıralama · cross-encoder çalıştırılmadı",
   vectorLabel: "Gerçek embedding’in ilk 8 koordinatı · bir görselleştirme izdüşümü değildir",
-};
+});
+export const RETRIEVAL_DEMO = retrievalDemo(fixture.retrieval);
+export const SENTENCE_RETRIEVAL_DEMO = fixture.sentenceRetrieval ? retrievalDemo(fixture.sentenceRetrieval) : null;
+
+export function retrievalForStrategy(strategy) {
+  if (strategy === "token") return RETRIEVAL_DEMO;
+  if (strategy === "sentence" && SENTENCE_RETRIEVAL_DEMO) return SENTENCE_RETRIEVAL_DEMO;
+  throw new Error("Measured snapshot is unavailable for this chunk strategy");
+}
 
 /** Same RRF as backend: ignore duplicates inside each list, sum 1/(60+rank),
  * and break equal scores by source ID. Missing BM25 candidates remain missing.
@@ -101,10 +175,9 @@ export function fuseDemoRanks(demo = RETRIEVAL_DEMO, rankConstant = 60) {
 }
 
 // Authored answer, not an OpenRouter output or faithfulness measurement.
-// Claims refer to immutable DEFAULT 240/40 chunks. Citation numbers must be
-// assigned from the currently selected top-3 order, never hardcoded: reranking
-// changes [1]/[2]. For other window sizes show extractive current-chunk text,
-// or withhold this answer; do not attribute these quotes to a different C1/C2.
+// Claims resolve to the first measured chunk containing their full quotation.
+// Citation numbers follow the selected context order. Changing the strategy or
+// reranking must resolve sources again rather than reusing token-baseline IDs.
 export const ANSWER_DEMO = {
   label: "Yazılmış örnek yanıt · LLM çağrısı değildir",
   defaultChunkOnly: true,
@@ -115,19 +188,24 @@ export const ANSWER_DEMO = {
     {
       id: "funding-alone",
       text: "Yüksek fonlama, fiyatın düşeceğini tek başına kanıtlamaz.",
-      sourceIDs: ["C1"],
       quote: "Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz.",
     },
     {
       id: "margin-risk",
       text: "Likidasyon riskini yorumlamak için kaldıraç oranı, teminat ve pozisyon büyüklüğü birlikte değerlendirilmelidir.",
-      sourceIDs: ["C2"],
       quote: "Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır.",
     },
   ],
   unsupportedQuestion: "Bitcoin yarın tam olarak hangi fiyata düşecek?",
   abstention: "Bu kaynaklarda yarının fiyatını belirleyen bir bilgi yok; kesin bir seviye veremem.",
 };
+
+export function claimsForChunks(chunks) {
+  return ANSWER_DEMO.claims.map((claim) => ({
+    ...claim,
+    sourceIDs: chunks.filter((chunk) => chunk.text.includes(claim.quote)).slice(0, 1).map((chunk) => chunk.id),
+  }));
+}
 
 // Instructions match backend RAGEngine.answer_prompt. A real generation call
 // is optional and requires OpenRouter configuration. The sandbox makes none.

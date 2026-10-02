@@ -19,7 +19,7 @@ Kripto varlıklar için **tamamen yerel** derin araştırma sistemi. Ücretsiz v
 - **Şeffaf kriterler:** her kartta "Ne araştırılır?", bulgu, durum (Tam / Kısmi / Veri Yok),
   skor, güven ve kaynak bilgisi.
 - **Hibrit RAG araması:** LanceDB vektör sonuçları ile SQLite BM25 sonuçları Reciprocal Rank Fusion (RRF) ile birleştirilir; isteğe bağlı yerel FastEmbed cross-encoder ilk adayları yeniden sıralar.
-- **Belge kapsamı:** haber, analiz ve raporlar embedding modelinin tokenizer'ıyla 240 tokenlık parçalara ayrılır; 40 token overlap bağlamı korur. Raporların önceki karakter sınırları kaldırıldı ve tekrar indekslemede eski parçalar değiştirilir.
+- **Belge kapsamı:** varsayılan cümle stratejisi, haber/analiz/raporlardaki cümle ve paragraf sınırlarını 240 token bütçesinde korumaya çalışır. Overlap, en fazla 40 tokenlık tam cümleleri tekrar eder; gerçekleşen miktar daha az veya sıfır olabilir. Çok uzun cümle token pencerelerine bölünür. Sabit token baseline seçeneği korunur; tam kaynak metinleri yeniden indeksleme için saklanır.
 - **Çift sayım koruması:** aynı sinyali paylaşan kriterler skorda bir kez sayılır; kısmi veri
   yarım ağırlıkla katkı verir. Böylece aynı teknik skor 7 kez tartılmaz.
 - **Dürüst veri:** veri bulunamayan kriter "veri yok" işaretlenir ve ortalamaya katılmaz.
@@ -89,7 +89,7 @@ Klavye kısayolları: `/` arama alanına git · `?` yardım · `⌘/Ctrl + Enter
 
 **Rehber:** sol menüde **Rehber** üzerinden veya `http://127.0.0.1:8000/?tab=how` adresinden açılır. **Mülakat modu** (`?tab=how&mode=interview`), bir kurgu araştırma belgesinin soru-cevap hattındaki bütün dönüşümlerini gösterir:
 
-- **Chunking:** 910 gerçek tokenizer tokenı, değiştirilebilir pencere/overlap, birebir ortak metin, alt-parçalar ve tüm tokenların kapsanması.
+- **Chunking:** 910 gerçek tokenizer tokenı; cümle sınırları ve sabit token baseline arasında geçiş, aynı bütçede chunk sonlarının karşılaştırması, hedef/gerçek overlap, açık önizleme ve tam chunk metinleri.
 - **Embedding ve retrieval:** 1024 boyutlu embedding'in ilk koordinatları; geçici LanceDB/SQLite indekslerinde önceden hesaplanan dense ve BM25 listeleri.
 - **Fusion ve kanıt:** aday bazında RRF katkıları, seçilen top-k ile prompt, değişen atıf numaraları ve iddiayı destekleyen tam kaynak cümlesi. Reranker sırası ve yanıt açıkça işaretlenmiş öğretim örnekleridir; tur model çağrısı yapmaz.
 - **Değerlendirme:** dev/test kilidi ve Recall/RR hesabı; zaman çizgisinde etiket ufku, purge, ayrı kalibrasyon ve final holdout. Bu küçük öğretim örnekleri ile tarihli proje deneyleri ayrı gösterilir.
@@ -110,7 +110,7 @@ uv run cdr search "ETF akışları" --coin bitcoin --json           # etiketleme
 uv run cdr rag-eval data/rag-evaluation.jsonl                    # tüm etiketli RAG sorguları
 uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval dense  # dense-only ablation
 uv run cdr rag-eval data/rag-evaluation.jsonl --split test --retrieval hybrid # final hibrit ölçüm
-uv run cdr rag-reindex --chunk-tokens 160 --overlap-tokens 32  # chunk ayarını uygula
+uv run cdr rag-reindex --strategy sentence --chunk-tokens 240 --overlap-tokens 40  # cümle indeksi
 uv run cdr ask "BTC likidasyon riski nedir?" --coin bitcoin --json # yanıt + kaynakları dışa aktar
 uv run cdr rag-answer-eval data/rag-answers.jsonl --split test   # yanıt/atıf kalitesi
 uv run cdr items                                                 # 66 kriter ve açıklamaları
@@ -146,7 +146,12 @@ iddia etmez. Kendi korpusunuz için etiketli örnekler gerekir. Model/reranker a
 aynı sorgu etiketlerini koruyun, yalnız `dev` üzerinde ayar seçin ve final metriklerini `test`
 üzerinde raporlayın. Etiketleme ve deney protokolü için [`docs/rag-benchmark.md`](docs/rag-benchmark.md)
 rehberine bakın. Dense-only, BM25-only ve hibrit arama karşılaştırmaları `--retrieval` ile
-seçilebilir; chunk ayarlarını değiştirdikten sonra `rag-reindex` çalıştırın.
+seçilebilir; chunk ayarlarını değiştirdikten sonra `rag-reindex` çalıştırın. Kalıcı strateji
+`CDR_RAG_CHUNK_STRATEGY=sentence` (varsayılan) veya `token` ile seçilir; CLI `--strategy` yalnız
+o yeniden indekslemeyi etkiler. Yeni belgelerin aynı ayarla indekslenmesi için ortam ayarını da
+eşleştirin. Cümle yöntemi kurallı bir sınır bulucudur, semantik model değildir; kalite kazancı
+ayrı dev ölçümü olmadan varsayılmaz. Bütçe tam belgenin tokenizer offsetlerine göre sayılır;
+özellikle küçük bütçede kesilen kelime parçalarının bağımsız yeniden tokenizasyonu farklı sayılabilir.
 
 `cdr ask --json`, üretilen yanıtı ve kaynak kimliklerini claim/citation etiketi eklemeye uygun JSON
 olarak verir. `cdr rag-answer-eval`, insan etiketleriyle faithfulness, citation coverage, citation
@@ -311,6 +316,7 @@ Tüm ayarlar `.env` üzerinden yönetilir; hiçbiri zorunlu değildir:
 | `CDR_EMBEDDING_MODEL` | Daha küçük embedding modeli (hız/disk kazancı) |
 | `CDR_RAG_RERANKER_MODEL` | Hibrit adayları yerel cross-encoder ile yeniden sıralar (opsiyonel; İngilizce Apache-2.0 örneği: `Xenova/ms-marco-MiniLM-L-6-v2`; çok dilli Jina modeli ticari olmayan lisanslıdır) |
 | `CDR_RAG_CHUNK_TOKENS` / `CDR_RAG_CHUNK_OVERLAP_TOKENS` | Belge parça boyutu / örtüşmesi (varsayılan: 240/40) |
+| `CDR_RAG_CHUNK_STRATEGY` | `sentence` (varsayılan): cümle/paragraf sınırları, en fazla hedef overlap; `token`: sabit pencere baseline |
 | `CDR_WATCHLIST_ENABLED` | Takip listesi otomatik koşuları (varsayılan: açık) |
 | `CDR_WATCHLIST_INTERVAL_MINUTES` | Zamanlayıcı kontrol aralığı (varsayılan: 60) |
 | `CDR_WATCHLIST_AUTO_RUN_HOURS` | Aynı coin için otomatik koşu sıklığı (varsayılan: 24 saat) |

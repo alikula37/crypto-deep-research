@@ -14,7 +14,7 @@
     "specialTokensExcluded": true,
     "offsetUnit": "utf16-character",
     "truncation": false,
-    "note": "Cached model tokenizer’ıyla tam belge kodlandı. Dense/BM25 ölçümü yalnız 240/40 demo korpusunda yapıldı."
+    "note": "Tam belge tokenizer offsetleri; token ve sentence stratejileri ayrı 240/40 korpuslarında ölçüldü."
   },
   "tokens": [
     {
@@ -6394,7 +6394,7 @@
     "documents": [
       {
         "id": "C1",
-        "title": "Fonlama tek başına yön kanıtı değildir",
+        "title": "Pasaj 1 · Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’d",
         "excerpt": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı. Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının",
         "source": "Kurgu araştırma notu",
         "parentId": "demo-btc-risk-note",
@@ -6416,7 +6416,7 @@
       },
       {
         "id": "C2",
-        "title": "Açık pozisyon, kaldıraç ve teminat",
+        "title": "Pasaj 2 · veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadel",
         "excerpt": "veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniy",
         "source": "Kurgu araştırma notu",
         "parentId": "demo-btc-risk-note",
@@ -6438,7 +6438,7 @@
       },
       {
         "id": "C3",
-        "title": "Risk yorumu ve teknik görünüm",
+        "title": "Pasaj 3 · lamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumund",
         "excerpt": "lamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin E",
         "source": "Kurgu araştırma notu",
         "parentId": "demo-btc-risk-note",
@@ -6460,7 +6460,7 @@
       },
       {
         "id": "C4",
-        "title": "Teknik sınırlar ve ETF haberleri",
+        "title": "Pasaj 4 · ; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örn",
         "excerpt": "; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı,",
         "source": "Kurgu araştırma notu",
         "parentId": "demo-btc-risk-note",
@@ -6482,7 +6482,7 @@
       },
       {
         "id": "C5",
-        "title": "Veri kapsamı ve yanıtın sınırları",
+        "title": "Pasaj 5 · . Araştırma skoru ile öğrenilmiş modelin olasılığı birbirind",
         "excerpt": ". Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur.",
         "source": "Kurgu araştırma notu",
         "parentId": "demo-btc-risk-note",
@@ -6557,7 +6557,7 @@
     ],
     "vectorDimension": 1024,
     "provenance": {
-      "computedAt": "2026-10-02T14:22:21.394184+00:00",
+      "computedAt": "2026-10-02T15:54:29.856389+00:00",
       "model": "intfloat/multilingual-e5-large",
       "sourceIsFictional": true,
       "denseIsMeasured": true,
@@ -6567,10 +6567,1235 @@
       "answerIsIllustrative": true,
       "chunkTokens": 240,
       "overlapTokens": 40,
+      "chunkStrategy": "token",
       "rankConstant": 60,
       "candidateCount": 5,
-      "method": "Backend Embedder + temporary VectorStore + temporary Database.search_documents",
-      "label": "Sabit kurgu korpusta önceden hesaplanmış gerçek dense/BM25 sonuçları; canlı arama değildir.",
+      "actualOverlaps": [
+        40,
+        40,
+        40,
+        40
+      ],
+      "method": "Backend split_text + Embedder + temporary VectorStore + temporary Database",
+      "label": "token / 240/40 kurgu korpusunda hesaplanan gerçek dense/BM25 sonuçları; canlı arama değildir.",
+      "reproduce": "uv run python scripts/generate_rag_walkthrough.py"
+    }
+  },
+  "sentenceSpans": [
+    {
+      "start": 0,
+      "end": 12
+    },
+    {
+      "start": 12,
+      "end": 36
+    },
+    {
+      "start": 36,
+      "end": 50
+    },
+    {
+      "start": 50,
+      "end": 60
+    },
+    {
+      "start": 60,
+      "end": 87
+    },
+    {
+      "start": 87,
+      "end": 104
+    },
+    {
+      "start": 104,
+      "end": 125
+    },
+    {
+      "start": 125,
+      "end": 140
+    },
+    {
+      "start": 140,
+      "end": 159
+    },
+    {
+      "start": 159,
+      "end": 182
+    },
+    {
+      "start": 182,
+      "end": 190
+    },
+    {
+      "start": 190,
+      "end": 207
+    },
+    {
+      "start": 207,
+      "end": 221
+    },
+    {
+      "start": 221,
+      "end": 233
+    },
+    {
+      "start": 233,
+      "end": 257
+    },
+    {
+      "start": 257,
+      "end": 269
+    },
+    {
+      "start": 269,
+      "end": 290
+    },
+    {
+      "start": 290,
+      "end": 315
+    },
+    {
+      "start": 315,
+      "end": 334
+    },
+    {
+      "start": 334,
+      "end": 352
+    },
+    {
+      "start": 352,
+      "end": 362
+    },
+    {
+      "start": 362,
+      "end": 379
+    },
+    {
+      "start": 379,
+      "end": 395
+    },
+    {
+      "start": 395,
+      "end": 412
+    },
+    {
+      "start": 412,
+      "end": 426
+    },
+    {
+      "start": 426,
+      "end": 446
+    },
+    {
+      "start": 446,
+      "end": 469
+    },
+    {
+      "start": 469,
+      "end": 490
+    },
+    {
+      "start": 490,
+      "end": 509
+    },
+    {
+      "start": 509,
+      "end": 526
+    },
+    {
+      "start": 526,
+      "end": 545
+    },
+    {
+      "start": 545,
+      "end": 554
+    },
+    {
+      "start": 554,
+      "end": 573
+    },
+    {
+      "start": 573,
+      "end": 590
+    },
+    {
+      "start": 590,
+      "end": 609
+    },
+    {
+      "start": 609,
+      "end": 625
+    },
+    {
+      "start": 625,
+      "end": 647
+    },
+    {
+      "start": 647,
+      "end": 684
+    },
+    {
+      "start": 684,
+      "end": 710
+    },
+    {
+      "start": 710,
+      "end": 721
+    },
+    {
+      "start": 721,
+      "end": 731
+    },
+    {
+      "start": 731,
+      "end": 745
+    },
+    {
+      "start": 745,
+      "end": 761
+    },
+    {
+      "start": 761,
+      "end": 781
+    },
+    {
+      "start": 781,
+      "end": 791
+    },
+    {
+      "start": 791,
+      "end": 801
+    },
+    {
+      "start": 801,
+      "end": 816
+    },
+    {
+      "start": 816,
+      "end": 835
+    },
+    {
+      "start": 835,
+      "end": 861
+    },
+    {
+      "start": 861,
+      "end": 872
+    },
+    {
+      "start": 872,
+      "end": 887
+    },
+    {
+      "start": 887,
+      "end": 910
+    }
+  ],
+  "sentenceExamples": [
+    {
+      "chunkTokens": 48,
+      "overlapTokens": 0,
+      "chunks": [
+        {
+          "tokenStart": 0,
+          "tokenCount": 36,
+          "excerpt": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı."
+        },
+        {
+          "tokenStart": 36,
+          "tokenCount": 24,
+          "excerpt": "Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir."
+        },
+        {
+          "tokenStart": 60,
+          "tokenCount": 44,
+          "excerpt": "Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir."
+        },
+        {
+          "tokenStart": 104,
+          "tokenCount": 36,
+          "excerpt": "Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz."
+        },
+        {
+          "tokenStart": 140,
+          "tokenCount": 42,
+          "excerpt": "Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir."
+        },
+        {
+          "tokenStart": 182,
+          "tokenCount": 39,
+          "excerpt": "Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır."
+        },
+        {
+          "tokenStart": 221,
+          "tokenCount": 48,
+          "excerpt": "Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır."
+        },
+        {
+          "tokenStart": 269,
+          "tokenCount": 46,
+          "excerpt": "Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir."
+        },
+        {
+          "tokenStart": 315,
+          "tokenCount": 47,
+          "excerpt": "Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir."
+        },
+        {
+          "tokenStart": 362,
+          "tokenCount": 33,
+          "excerpt": "Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz."
+        },
+        {
+          "tokenStart": 395,
+          "tokenCount": 31,
+          "excerpt": "Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur."
+        },
+        {
+          "tokenStart": 426,
+          "tokenCount": 43,
+          "excerpt": "Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir."
+        },
+        {
+          "tokenStart": 469,
+          "tokenCount": 40,
+          "excerpt": "Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir."
+        },
+        {
+          "tokenStart": 509,
+          "tokenCount": 45,
+          "excerpt": "Teknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez."
+        },
+        {
+          "tokenStart": 554,
+          "tokenCount": 36,
+          "excerpt": "Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür."
+        },
+        {
+          "tokenStart": 590,
+          "tokenCount": 35,
+          "excerpt": "Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez."
+        },
+        {
+          "tokenStart": 625,
+          "tokenCount": 22,
+          "excerpt": "Haber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer."
+        },
+        {
+          "tokenStart": 647,
+          "tokenCount": 37,
+          "excerpt": "Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir."
+        },
+        {
+          "tokenStart": 684,
+          "tokenCount": 47,
+          "excerpt": "ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz."
+        },
+        {
+          "tokenStart": 731,
+          "tokenCount": 30,
+          "excerpt": "Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir."
+        },
+        {
+          "tokenStart": 761,
+          "tokenCount": 40,
+          "excerpt": "Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez."
+        },
+        {
+          "tokenStart": 801,
+          "tokenCount": 34,
+          "excerpt": "Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz."
+        },
+        {
+          "tokenStart": 835,
+          "tokenCount": 37,
+          "excerpt": "Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır."
+        },
+        {
+          "tokenStart": 872,
+          "tokenCount": 38,
+          "excerpt": "Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur."
+        }
+      ]
+    },
+    {
+      "chunkTokens": 48,
+      "overlapTokens": 8,
+      "chunks": [
+        {
+          "tokenStart": 0,
+          "tokenCount": 36,
+          "excerpt": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı."
+        },
+        {
+          "tokenStart": 36,
+          "tokenCount": 24,
+          "excerpt": "Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir."
+        },
+        {
+          "tokenStart": 60,
+          "tokenCount": 44,
+          "excerpt": "Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir."
+        },
+        {
+          "tokenStart": 104,
+          "tokenCount": 36,
+          "excerpt": "Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz."
+        },
+        {
+          "tokenStart": 140,
+          "tokenCount": 42,
+          "excerpt": "Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir."
+        },
+        {
+          "tokenStart": 182,
+          "tokenCount": 39,
+          "excerpt": "Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır."
+        },
+        {
+          "tokenStart": 221,
+          "tokenCount": 48,
+          "excerpt": "Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır."
+        },
+        {
+          "tokenStart": 269,
+          "tokenCount": 46,
+          "excerpt": "Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir."
+        },
+        {
+          "tokenStart": 315,
+          "tokenCount": 47,
+          "excerpt": "Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir."
+        },
+        {
+          "tokenStart": 362,
+          "tokenCount": 33,
+          "excerpt": "Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz."
+        },
+        {
+          "tokenStart": 395,
+          "tokenCount": 31,
+          "excerpt": "Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur."
+        },
+        {
+          "tokenStart": 426,
+          "tokenCount": 43,
+          "excerpt": "Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir."
+        },
+        {
+          "tokenStart": 469,
+          "tokenCount": 40,
+          "excerpt": "Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir."
+        },
+        {
+          "tokenStart": 509,
+          "tokenCount": 45,
+          "excerpt": "Teknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez."
+        },
+        {
+          "tokenStart": 554,
+          "tokenCount": 36,
+          "excerpt": "Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür."
+        },
+        {
+          "tokenStart": 590,
+          "tokenCount": 35,
+          "excerpt": "Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez."
+        },
+        {
+          "tokenStart": 625,
+          "tokenCount": 22,
+          "excerpt": "Haber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer."
+        },
+        {
+          "tokenStart": 647,
+          "tokenCount": 37,
+          "excerpt": "Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir."
+        },
+        {
+          "tokenStart": 684,
+          "tokenCount": 47,
+          "excerpt": "ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz."
+        },
+        {
+          "tokenStart": 731,
+          "tokenCount": 30,
+          "excerpt": "Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir."
+        },
+        {
+          "tokenStart": 761,
+          "tokenCount": 40,
+          "excerpt": "Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez."
+        },
+        {
+          "tokenStart": 801,
+          "tokenCount": 34,
+          "excerpt": "Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz."
+        },
+        {
+          "tokenStart": 835,
+          "tokenCount": 37,
+          "excerpt": "Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır."
+        },
+        {
+          "tokenStart": 872,
+          "tokenCount": 38,
+          "excerpt": "Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur."
+        }
+      ]
+    },
+    {
+      "chunkTokens": 48,
+      "overlapTokens": 40,
+      "chunks": [
+        {
+          "tokenStart": 0,
+          "tokenCount": 36,
+          "excerpt": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı."
+        },
+        {
+          "tokenStart": 12,
+          "tokenCount": 48,
+          "excerpt": "Bitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı. Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir."
+        },
+        {
+          "tokenStart": 50,
+          "tokenCount": 37,
+          "excerpt": "Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır."
+        },
+        {
+          "tokenStart": 60,
+          "tokenCount": 44,
+          "excerpt": "Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir."
+        },
+        {
+          "tokenStart": 87,
+          "tokenCount": 38,
+          "excerpt": "Fonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder."
+        },
+        {
+          "tokenStart": 104,
+          "tokenCount": 36,
+          "excerpt": "Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz."
+        },
+        {
+          "tokenStart": 125,
+          "tokenCount": 34,
+          "excerpt": "Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir."
+        },
+        {
+          "tokenStart": 140,
+          "tokenCount": 42,
+          "excerpt": "Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir."
+        },
+        {
+          "tokenStart": 159,
+          "tokenCount": 48,
+          "excerpt": "Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez."
+        },
+        {
+          "tokenStart": 182,
+          "tokenCount": 39,
+          "excerpt": "Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır."
+        },
+        {
+          "tokenStart": 190,
+          "tokenCount": 43,
+          "excerpt": "Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir."
+        },
+        {
+          "tokenStart": 221,
+          "tokenCount": 48,
+          "excerpt": "Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır."
+        },
+        {
+          "tokenStart": 257,
+          "tokenCount": 33,
+          "excerpt": "Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz."
+        },
+        {
+          "tokenStart": 269,
+          "tokenCount": 46,
+          "excerpt": "Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir."
+        },
+        {
+          "tokenStart": 290,
+          "tokenCount": 44,
+          "excerpt": "Likidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır."
+        },
+        {
+          "tokenStart": 315,
+          "tokenCount": 47,
+          "excerpt": "Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir."
+        },
+        {
+          "tokenStart": 334,
+          "tokenCount": 45,
+          "excerpt": "Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir."
+        },
+        {
+          "tokenStart": 352,
+          "tokenCount": 43,
+          "excerpt": "Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz."
+        },
+        {
+          "tokenStart": 379,
+          "tokenCount": 47,
+          "excerpt": "Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur."
+        },
+        {
+          "tokenStart": 412,
+          "tokenCount": 34,
+          "excerpt": "Risk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz."
+        },
+        {
+          "tokenStart": 426,
+          "tokenCount": 43,
+          "excerpt": "Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir."
+        },
+        {
+          "tokenStart": 446,
+          "tokenCount": 44,
+          "excerpt": "İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez."
+        },
+        {
+          "tokenStart": 469,
+          "tokenCount": 40,
+          "excerpt": "Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir."
+        },
+        {
+          "tokenStart": 490,
+          "tokenCount": 36,
+          "excerpt": "Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir."
+        },
+        {
+          "tokenStart": 509,
+          "tokenCount": 45,
+          "excerpt": "Teknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez."
+        },
+        {
+          "tokenStart": 526,
+          "tokenCount": 47,
+          "excerpt": "Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir."
+        },
+        {
+          "tokenStart": 545,
+          "tokenCount": 45,
+          "excerpt": "Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür."
+        },
+        {
+          "tokenStart": 573,
+          "tokenCount": 36,
+          "excerpt": "ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir."
+        },
+        {
+          "tokenStart": 590,
+          "tokenCount": 35,
+          "excerpt": "Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez."
+        },
+        {
+          "tokenStart": 609,
+          "tokenCount": 38,
+          "excerpt": "Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer."
+        },
+        {
+          "tokenStart": 647,
+          "tokenCount": 37,
+          "excerpt": "Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir."
+        },
+        {
+          "tokenStart": 684,
+          "tokenCount": 47,
+          "excerpt": "ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz."
+        },
+        {
+          "tokenStart": 710,
+          "tokenCount": 35,
+          "excerpt": "Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur."
+        },
+        {
+          "tokenStart": 721,
+          "tokenCount": 40,
+          "excerpt": "Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir."
+        },
+        {
+          "tokenStart": 745,
+          "tokenCount": 46,
+          "excerpt": "Makro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir."
+        },
+        {
+          "tokenStart": 761,
+          "tokenCount": 40,
+          "excerpt": "Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez."
+        },
+        {
+          "tokenStart": 781,
+          "tokenCount": 35,
+          "excerpt": "Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır."
+        },
+        {
+          "tokenStart": 791,
+          "tokenCount": 44,
+          "excerpt": "Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz."
+        },
+        {
+          "tokenStart": 816,
+          "tokenCount": 45,
+          "excerpt": "Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz."
+        },
+        {
+          "tokenStart": 835,
+          "tokenCount": 37,
+          "excerpt": "Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır."
+        },
+        {
+          "tokenStart": 861,
+          "tokenCount": 26,
+          "excerpt": "Doğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir."
+        },
+        {
+          "tokenStart": 872,
+          "tokenCount": 38,
+          "excerpt": "Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur."
+        }
+      ]
+    },
+    {
+      "chunkTokens": 120,
+      "overlapTokens": 20,
+      "chunks": [
+        {
+          "tokenStart": 0,
+          "tokenCount": 104,
+          "excerpt": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı. Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir."
+        },
+        {
+          "tokenStart": 87,
+          "tokenCount": 120,
+          "excerpt": "Fonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez."
+        },
+        {
+          "tokenStart": 190,
+          "tokenCount": 100,
+          "excerpt": "Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz."
+        },
+        {
+          "tokenStart": 290,
+          "tokenCount": 105,
+          "excerpt": "Likidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz."
+        },
+        {
+          "tokenStart": 379,
+          "tokenCount": 111,
+          "excerpt": "Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez."
+        },
+        {
+          "tokenStart": 490,
+          "tokenCount": 119,
+          "excerpt": "Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir."
+        },
+        {
+          "tokenStart": 590,
+          "tokenCount": 120,
+          "excerpt": "Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir."
+        },
+        {
+          "tokenStart": 710,
+          "tokenCount": 106,
+          "excerpt": "Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır."
+        },
+        {
+          "tokenStart": 801,
+          "tokenCount": 109,
+          "excerpt": "Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur."
+        }
+      ]
+    },
+    {
+      "chunkTokens": 240,
+      "overlapTokens": 0,
+      "chunks": [
+        {
+          "tokenStart": 0,
+          "tokenCount": 233,
+          "excerpt": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı. Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir."
+        },
+        {
+          "tokenStart": 233,
+          "tokenCount": 236,
+          "excerpt": "Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir."
+        },
+        {
+          "tokenStart": 469,
+          "tokenCount": 215,
+          "excerpt": "Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir."
+        },
+        {
+          "tokenStart": 684,
+          "tokenCount": 226,
+          "excerpt": "ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur."
+        }
+      ]
+    },
+    {
+      "chunkTokens": 240,
+      "overlapTokens": 40,
+      "chunks": [
+        {
+          "tokenStart": 0,
+          "tokenCount": 233,
+          "excerpt": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı. Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir."
+        },
+        {
+          "tokenStart": 207,
+          "tokenCount": 239,
+          "excerpt": "Açık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz."
+        },
+        {
+          "tokenStart": 412,
+          "tokenCount": 235,
+          "excerpt": "Risk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer."
+        },
+        {
+          "tokenStart": 609,
+          "tokenCount": 226,
+          "excerpt": "Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz."
+        },
+        {
+          "tokenStart": 801,
+          "tokenCount": 109,
+          "excerpt": "Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur."
+        }
+      ]
+    },
+    {
+      "chunkTokens": 240,
+      "overlapTokens": 58,
+      "chunks": [
+        {
+          "tokenStart": 0,
+          "tokenCount": 233,
+          "excerpt": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı. Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir."
+        },
+        {
+          "tokenStart": 182,
+          "tokenCount": 230,
+          "excerpt": "Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz."
+        },
+        {
+          "tokenStart": 362,
+          "tokenCount": 228,
+          "excerpt": "Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür."
+        },
+        {
+          "tokenStart": 545,
+          "tokenCount": 236,
+          "excerpt": "Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez."
+        },
+        {
+          "tokenStart": 731,
+          "tokenCount": 179,
+          "excerpt": "Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur."
+        }
+      ]
+    },
+    {
+      "chunkTokens": 240,
+      "overlapTokens": 80,
+      "chunks": [
+        {
+          "tokenStart": 0,
+          "tokenCount": 233,
+          "excerpt": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı. Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir."
+        },
+        {
+          "tokenStart": 159,
+          "tokenCount": 236,
+          "excerpt": "Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz."
+        },
+        {
+          "tokenStart": 315,
+          "tokenCount": 239,
+          "excerpt": "Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez."
+        },
+        {
+          "tokenStart": 490,
+          "tokenCount": 231,
+          "excerpt": "Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır."
+        },
+        {
+          "tokenStart": 647,
+          "tokenCount": 240,
+          "excerpt": "Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir."
+        },
+        {
+          "tokenStart": 816,
+          "tokenCount": 94,
+          "excerpt": "Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur."
+        }
+      ]
+    },
+    {
+      "chunkTokens": 240,
+      "overlapTokens": 239,
+      "chunks": [
+        {
+          "tokenStart": 0,
+          "tokenCount": 233,
+          "excerpt": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı. Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir."
+        },
+        {
+          "tokenStart": 36,
+          "tokenCount": 233,
+          "excerpt": "Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır."
+        },
+        {
+          "tokenStart": 50,
+          "tokenCount": 240,
+          "excerpt": "Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz."
+        },
+        {
+          "tokenStart": 87,
+          "tokenCount": 228,
+          "excerpt": "Fonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir."
+        },
+        {
+          "tokenStart": 104,
+          "tokenCount": 230,
+          "excerpt": "Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır."
+        },
+        {
+          "tokenStart": 125,
+          "tokenCount": 237,
+          "excerpt": "Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir."
+        },
+        {
+          "tokenStart": 140,
+          "tokenCount": 239,
+          "excerpt": "Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir."
+        },
+        {
+          "tokenStart": 159,
+          "tokenCount": 236,
+          "excerpt": "Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz."
+        },
+        {
+          "tokenStart": 182,
+          "tokenCount": 230,
+          "excerpt": "Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz."
+        },
+        {
+          "tokenStart": 190,
+          "tokenCount": 236,
+          "excerpt": "Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur."
+        },
+        {
+          "tokenStart": 207,
+          "tokenCount": 239,
+          "excerpt": "Açık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz."
+        },
+        {
+          "tokenStart": 233,
+          "tokenCount": 236,
+          "excerpt": "Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir."
+        },
+        {
+          "tokenStart": 257,
+          "tokenCount": 233,
+          "excerpt": "Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez."
+        },
+        {
+          "tokenStart": 269,
+          "tokenCount": 240,
+          "excerpt": "Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir."
+        },
+        {
+          "tokenStart": 290,
+          "tokenCount": 236,
+          "excerpt": "Likidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir."
+        },
+        {
+          "tokenStart": 315,
+          "tokenCount": 239,
+          "excerpt": "Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez."
+        },
+        {
+          "tokenStart": 334,
+          "tokenCount": 239,
+          "excerpt": "Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir."
+        },
+        {
+          "tokenStart": 352,
+          "tokenCount": 238,
+          "excerpt": "Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür."
+        },
+        {
+          "tokenStart": 379,
+          "tokenCount": 230,
+          "excerpt": "Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir."
+        },
+        {
+          "tokenStart": 395,
+          "tokenCount": 230,
+          "excerpt": "Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez."
+        },
+        {
+          "tokenStart": 412,
+          "tokenCount": 235,
+          "excerpt": "Risk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer."
+        },
+        {
+          "tokenStart": 446,
+          "tokenCount": 238,
+          "excerpt": "İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir."
+        },
+        {
+          "tokenStart": 490,
+          "tokenCount": 231,
+          "excerpt": "Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır."
+        },
+        {
+          "tokenStart": 509,
+          "tokenCount": 236,
+          "excerpt": "Teknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur."
+        },
+        {
+          "tokenStart": 526,
+          "tokenCount": 235,
+          "excerpt": "Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir."
+        },
+        {
+          "tokenStart": 545,
+          "tokenCount": 236,
+          "excerpt": "Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez."
+        },
+        {
+          "tokenStart": 554,
+          "tokenCount": 237,
+          "excerpt": "Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir."
+        },
+        {
+          "tokenStart": 573,
+          "tokenCount": 228,
+          "excerpt": "ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez."
+        },
+        {
+          "tokenStart": 590,
+          "tokenCount": 226,
+          "excerpt": "Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır."
+        },
+        {
+          "tokenStart": 609,
+          "tokenCount": 226,
+          "excerpt": "Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz."
+        },
+        {
+          "tokenStart": 625,
+          "tokenCount": 236,
+          "excerpt": "Haber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz."
+        },
+        {
+          "tokenStart": 647,
+          "tokenCount": 240,
+          "excerpt": "Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir."
+        },
+        {
+          "tokenStart": 684,
+          "tokenCount": 226,
+          "excerpt": "ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur."
+        }
+      ]
+    }
+  ],
+  "sentenceRetrieval": {
+    "query": "Bitcoin’de fonlama yükselirken likidasyon riskini nasıl yorumlamalıyım?",
+    "documents": [
+      {
+        "id": "C1",
+        "title": "Pasaj 1 · Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’d",
+        "excerpt": "Kurgu belge · RAG mekanizması için öğretim örneği\n\nBitcoin’de fonlama ve likidasyon riski\nBu belge yalnızca aramanın nasıl çalıştığını göstermek için yazıldı. Gerçek piyasa ölçümü, güncel araştırma sonucu veya işlem önerisi değildir. Sayılar, isimler ve olaylar örnektir. Aynı soru farklı kaynak parçalarıyla karşılaştırılır; cevap, yalnızca seçilen pasajların açıkça desteklediği bilgiyi kullanır.\n\nFonlama, sürekli vadeli sözleşmelerde taraflar arasında yapılan dönemsel ödemedir. Bu kurgu notta pozitif fonlama, long tarafının ödeme yaptığı bir örneği temsil eder. Fonlamanın yüksek olması tek başına fiyatın düşeceğini kanıtlamaz. Değerlendirmede açık pozisyon büyüklüğü, fiyat hareketi ve işlem hacmi birlikte incelenir. Yüksek fonlama ile açık pozisyon artışının beraber görülmesi, aynı yönde kalabalıklaşan pozisyonların araştırılmasını gerektirebilir. Sinyal bir garantiye çevrilmez. Yalnız fonlama değerine bakılarak otomatik alım veya satım kararı verilmez.\n\nAçık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir.",
+        "source": "Kurgu araştırma notu",
+        "parentId": "demo-btc-risk-note",
+        "tokenStart": 0,
+        "tokenCount": 233,
+        "vectorPreview": [
+          0.8188651870856893,
+          -0.4002549982209878,
+          -0.8625154249687144,
+          -0.7503371427350856,
+          0.7374215001755572,
+          -0.6382748455284758,
+          -0.4333528627047038,
+          1.567275064739775
+        ],
+        "vectorDimension": 1024,
+        "denseScore": 0.004611599281182725,
+        "bm25Score": -2.0761050731822053
+      },
+      {
+        "id": "C2",
+        "title": "Pasaj 2 · Açık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anl",
+        "excerpt": "Açık pozisyon, kapanmamış vadeli sözleşmelerin toplamını anlatır. Örnekte fiyat yatayken açık pozisyon yükselir. Bu durum, kaldıraç kullanımının arttığını düşündürebilir; hangi tarafın baskın olduğunu tek başına göstermez. Spot hacim ve vadeli hacim ayrılır. Tek bir kaynağın rakamı, başka bir borsanın tüm piyasasını temsil ediyormuş gibi kullanılmaz.\n\nLikidasyon ve teminat\nKaldıraçlı bir pozisyonun teminatı yetersiz kaldığında likidasyon gerçekleşebilir. Likidasyon riski; kaldıraç oranına, teminata ve pozisyon büyüklüğüne bağlıdır. Aynı fiyat hareketi, farklı kaldıraç kullanan iki yatırımcı için farklı sonuç doğurur. Burada gösterilen eşikler tahmini örneklerdir. Borsaların bakım teminatı kuralları, marj türü ve ücretleri aynı değildir. Tahmini seviyeler gerçek likidasyon haritası olarak sunulmaz. Kayıtlı kaynak bunu açıklamıyorsa yanıt da kesin bir seviye uydurmaz.\n\nRisk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz.",
+        "source": "Kurgu araştırma notu",
+        "parentId": "demo-btc-risk-note",
+        "tokenStart": 207,
+        "tokenCount": 239,
+        "vectorPreview": [
+          0.8159560197461937,
+          -0.04316896712021029,
+          -0.7111013583603211,
+          -1.0689291987429022,
+          0.8868016646363428,
+          -0.03761542300791267,
+          -0.2682183037426987,
+          2.246728124212922
+        ],
+        "vectorDimension": 1024,
+        "denseScore": 0.00400006738394763,
+        "bm25Score": -2.6244417863853576e-06
+      },
+      {
+        "id": "C3",
+        "title": "Pasaj 3 · Risk yorumunda fiyat ile fonlama aynı zaman aralığında okunu",
+        "excerpt": "Risk yorumunda fiyat ile fonlama aynı zaman aralığında okunur. Veri saatleri korunur; daha eski bir ölçüm yeniymiş gibi sunulmaz. İlgili kaynak, kaldıraç ve teminat ilişkisini açıkça anlatıyorsa cevap bu parçaya atıf verir. Kaynakta bulunmayan bir olasılık, yüzde veya gelecekteki fiyat tahmini cevaba eklenmez. Bir iddiaya bağlanan atıfın gerçekten o iddiayı desteklemesi kontrol edilir.\n\nTeknik görünüm\nDestek ve direnç, geçmiş fiyat davranışını özetleyen seviyelerdir. Bu öğretim belgesinde destek, fiyatın daha önce tepki verdiği bir bölgeyi anlatır. Bölgenin tekrar çalışacağı garanti edilmez. Oynaklık arttığında aynı büyüklükte bir fiyat hareketi daha sık görülebilir. ATR, geçmiş mumlardan türetilen bir oynaklık ölçüsüdür. Bu ölçü tek başına likidasyon hesabı yapmaz; teminat ve kaldıraç bilgisi gerekir. Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer.",
+        "source": "Kurgu araştırma notu",
+        "parentId": "demo-btc-risk-note",
+        "tokenStart": 412,
+        "tokenCount": 235,
+        "vectorPreview": [
+          0.9533389190090074,
+          -0.6032147319822372,
+          -0.6405596128657052,
+          -1.0583035029030803,
+          1.0332364075333824,
+          -0.6653400959116937,
+          -0.7013111983559522,
+          2.0085382345859513
+        ],
+        "vectorDimension": 1024,
+        "denseScore": 0.0042661517288212734,
+        "bm25Score": -1.9023846668152439e-06
+      },
+      {
+        "id": "C4",
+        "title": "Pasaj 4 · Gösterilen teknik örnekler, kullanıcının kendi risk koşullar",
+        "excerpt": "Gösterilen teknik örnekler, kullanıcının kendi risk koşullarını temsil etmez.\n\nHaber ve ETF akışları\nKurgu haber akışında Bitcoin ETF ifadesi birkaç kez geçer. Bu bölüm sözcüksel aramanın neden bazen soruyla aynı kelimeleri içeren, fakat cevabı doğrudan vermeyen bir parçayı üst sıralara taşıyabildiğini göstermek içindir. ETF haberi, fonlama veya teminat mekanizmasını açıklamadığı sürece likidasyon sorusuna tek başına kanıt değildir. Haber başlığı ile haberin gerçek içeriği ayrılır. Eski bir başlık yeni olay gibi yorumlanmaz. Kaynağın tarihi, belge türü ve ilgili pasaj görünür tutulur.\n\nMakro ve veri kapsamı\nMakro göstergeler araştırmaya bağlam sağlayabilir. Bu örnekte faiz ve piyasa oynaklığı yalnız ek başlıklardır; güncel değerler verilmez. Veri eksikse durum açıkça işaretlenir. Eksik veri sıfır risk anlamına gelmez. Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz.",
+        "source": "Kurgu araştırma notu",
+        "parentId": "demo-btc-risk-note",
+        "tokenStart": 609,
+        "tokenCount": 226,
+        "vectorPreview": [
+          0.550233283093436,
+          -0.26456787199468207,
+          -0.7976226003742531,
+          -0.7184398172325209,
+          0.6549862914048789,
+          -0.23029677878022134,
+          -0.2157322968715769,
+          1.7134207725002055
+        ],
+        "vectorDimension": 1024,
+        "denseScore": 0.003845502523552353,
+        "bm25Score": -1.915189589409917e-06
+      },
+      {
+        "id": "C5",
+        "title": "Pasaj 5 · Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden",
+        "excerpt": "Araştırma skoru ile öğrenilmiş modelin olasılığı birbirinden ayrılır. Böylece bir rapordaki sezgisel sayı, doğrulanmış tahminmiş gibi sunulmaz. Her bulgu kaynağı, zamanı ve kapsamıyla okunur; seçilen parçaların dışında kalan ayrıntılar yanıta taşınmaz.\n\nDoğru kaynağı bulmak ile doğru cevap vermek ayrı adımlardır. Arama sonuçları, iddialar ve atıflar ayrı değerlendirilir. Bu metnin tekrarları, konu geçişleri ve sınırları parçalama davranışını görünür kılmak için özellikle korunmuştur.",
+        "source": "Kurgu araştırma notu",
+        "parentId": "demo-btc-risk-note",
+        "tokenStart": 801,
+        "tokenCount": 109,
+        "vectorPreview": [
+          1.1504084140330821,
+          -0.19453389746732674,
+          -0.9875577645258861,
+          -0.4940898749759203,
+          0.5603695072166555,
+          -0.92768702780207,
+          -0.459028432095373,
+          0.8130294061727352
+        ],
+        "vectorDimension": 1024,
+        "denseScore": 0.0025704771040211713,
+        "bm25Score": null
+      }
+    ],
+    "dense": [
+      "C1",
+      "C3",
+      "C2",
+      "C4",
+      "C5"
+    ],
+    "bm25": [
+      "C1",
+      "C2",
+      "C4",
+      "C3"
+    ],
+    "fused": [
+      {
+        "id": "C1",
+        "score": 0.03278688524590164
+      },
+      {
+        "id": "C2",
+        "score": 0.03200204813108039
+      },
+      {
+        "id": "C3",
+        "score": 0.031754032258064516
+      },
+      {
+        "id": "C4",
+        "score": 0.03149801587301587
+      },
+      {
+        "id": "C5",
+        "score": 0.015384615384615385
+      }
+    ],
+    "reranked": [
+      "C2",
+      "C1",
+      "C3",
+      "C4",
+      "C5"
+    ],
+    "queryVectorPreview": [
+      0.33766069673001764,
+      -0.07626890735700727,
+      -0.7247091874480247,
+      -0.7300296813249588,
+      1.285809725522995,
+      -0.14196241069585086,
+      0.03146898227278143,
+      1.5494286268949509
+    ],
+    "vectorDimension": 1024,
+    "provenance": {
+      "computedAt": "2026-10-02T15:54:33.389023+00:00",
+      "model": "intfloat/multilingual-e5-large",
+      "sourceIsFictional": true,
+      "denseIsMeasured": true,
+      "bm25IsMeasured": true,
+      "rrfIsComputed": true,
+      "rerankerIsIllustrative": true,
+      "answerIsIllustrative": true,
+      "chunkTokens": 240,
+      "overlapTokens": 40,
+      "chunkStrategy": "sentence",
+      "rankConstant": 60,
+      "candidateCount": 5,
+      "actualOverlaps": [
+        26,
+        34,
+        38,
+        34
+      ],
+      "method": "Backend split_text + Embedder + temporary VectorStore + temporary Database",
+      "label": "sentence / 240/40 kurgu korpusunda hesaplanan gerçek dense/BM25 sonuçları; canlı arama değildir.",
       "reproduce": "uv run python scripts/generate_rag_walkthrough.py"
     }
   }
