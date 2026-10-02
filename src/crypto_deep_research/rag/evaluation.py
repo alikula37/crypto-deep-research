@@ -49,9 +49,9 @@ def load_cases(path: Path) -> list[EvaluationCase]:
         cases.append(
             EvaluationCase(
                 query=query.strip(),
-                relevant_parent_ids=frozenset(relevant),
-                coin=coin,
-                case_id=case_id,
+                relevant_parent_ids=frozenset(item.strip() for item in relevant),
+                coin=coin.strip() if coin else None,
+                case_id=case_id.strip() if case_id else None,
             )
         )
     if not cases:

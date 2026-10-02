@@ -46,12 +46,13 @@ def test_evaluate_deduplicates_chunks_and_overfetches_sources():
 def test_load_cases_requires_human_relevance_labels(tmp_path):
     dataset = tmp_path / "rag.jsonl"
     dataset.write_text(
-        '{"id":"q1","query":"ETF akışları","coin":"bitcoin",'
-        '"relevant_parent_ids":["news-abc"]}\n',
+        '{"id":"q1","query":" ETF akışları ","coin":" bitcoin ",'
+        '"relevant_parent_ids":[" news-abc "]}\n',
         encoding="utf-8",
     )
     case = load_cases(dataset)[0]
     assert case.case_id == "q1"
+    assert case.query == "ETF akışları" and case.coin == "bitcoin"
     assert case.relevant_parent_ids == frozenset({"news-abc"})
 
     dataset.write_text('{"query":"etiketsiz","relevant_parent_ids":[]}\n', encoding="utf-8")
