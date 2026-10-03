@@ -106,3 +106,63 @@ alan kaynak atıflarının tüm atıflara oranıdır. `answer_relevance` insan p
 Rapor hem cevap başına macro ortalamayı hem tüm iddia/atıfları bir arada değerlendiren micro oranı
 verir. Model yargıçları yerine insan etiketleri kullanılır; bu yüzden benchmark boyutu ve etiketleyenler
 arası tutarlılık sonuçla birlikte raporlanmalıdır.
+
+## Chunk boyutu seçimi (izole dev deneyi)
+
+`rag-chunk-tune`, çalışan indeksleri değiştirmeden aynı tam metin arşiviyle her ayar için
+geçici SQLite + LanceDB kurar. Model/tokenizer bulunamazsa, embedding eksikse veya bağımsız
+olarak sayılan bir chunk modelin giriş sınırını aşıyorsa deneyi durdurur; BM25 fallback'i
+başarılı bir hybrid deneyi gibi raporlamaz. Model girişi sayımında özel tokenlar da vardır.
+
+Boyut seçmek için yalnız belge etiketi yeterli değildir. Her dev sorusuna, cevabı taşıyan
+kaynak pasajını da ekleyin. `evidence` öğeleri gerekli ayrı kanıtlardır; hepsinin bulunması
+`evidence_complete`, bulunanların oranı `evidence_coverage` olur. Aynı kanıt için alternatif
+kaynakları ayrı zorunlu öğeler olarak eklemeyin. Bu ölçüm tam metin eşleşmesidir; anlamsal
+cevap doğruluğu veya insan faithfulness değerlendirmesi değildir.
+
+```jsonl
+{"id":"dev-risk-1","split":"dev","group":"btc-risk","query":"Kaldıraç riski neye bağlı?","coin":"bitcoin","relevant_parent_ids":["report-abc"],"evidence":[{"parent_id":"report-abc","text":"Risk kaldıraç oranına bağlıdır."}],"label_status":"human-reviewed"}
+```
+
+`group`, aynı olayın/sorunun parafrazlarını veya ilişkili örnekleri aynı bootstrap grubunda
+tutar. Eksik grup, soru kimliğiyle doldurulur. Tüm dev etiketleri indeks denemelerinden önce
+hazırlanır. Etiketli pasajın mevcut kaynak sürümünde olmaması bir hatadır; eksik kaynağı
+sessizce atlayıp kolaylaşmış bir benchmark üretmez.
+
+```bash
+uv run cdr rag-chunk-tune data/rag-chunk-dev.jsonl --output data/chunk-selection.json
+# Dondurulmuş tam kaynak JSON'u varsa tüm adaylar aynı snapshot ile yeniden çalışır:
+uv run cdr rag-chunk-tune data/rag-chunk-dev.jsonl --sources data/sources.json --output data/chunk-selection.json --candidates 96/16,160/27,240/40,320/53,448/75,240/0,240/80
+```
+
+Varsayılan seçim kuralı sonuçlar görülmeden belirlenmiştir: en iyi kanıt kapsamının 0,02
+altına kadar adayları tut; sonra kalanlarda kaynak recall ve nDCG için aynı toleransı uygula;
+son kalanlarda ortalama bağlam tokenı, sonra indeks chunk sayısı en düşük olanı seç.
+Bu eşik işletim tercihidir, istatistiksel eşdeğerlik testi değildir. `--quality-tolerance 0`
+ile tam eşitlik istenebilir. Çalışan ayar grid'de yoksa baseline olarak eklenir.
+
+Metrikler **gerçekte prompt'a girecek ilk k chunk** üzerinde hesaplanır. Kaynak kimlikleri
+bu liste içinde tekilleştirilir; `rag-eval` komutundaki kaynak sıralaması için over-fetch
+burada kullanılmaz. Bu iki raporun skorlarını doğrudan karşılaştırmayın. Bağlam miktarı E5
+standalone token sayımıdır; seçilecek LLM tokenizer'ı farklı olabilir, ücret hesabı değildir.
+Gecikme sıcak modelle, query embedding dahil tek geçişte ölçülür; gürültülü gecikme ayar
+seçiminde kullanılmaz. Ayrı bir yük testi ve LLM yanıt değerlendirmesi yapılmış sayılmaz.
+
+JSON raporu korpus/dev etiketi parmak izlerini, modeli, paket sürümlerini, kod parmak izini,
+tüm ayarları, soru başına sonuçları ve baseline'a karşı eşleştirilmiş grup bootstrap aralığını
+saklar. Bootstrap aralığı betimseldir: aynı dev verisiyle aday seçilmiş olduğu için bağımsız
+başarı veya çoklu denemelere karşı düzeltilmiş anlamlılık kanıtı değildir.
+
+Komut yalnız `dev` sorularını kullanır, final test çalıştırmaz ve üretim ayarını otomatik
+uygulamaz. Taslak etiketlerle çıkan seçim bir adaydır. İnsan incelemesi, daha geniş sorgular
+ve ayarları dondurduktan sonra yeni bağımsız test gerekir. Onaylanan ayar kalıcı ortam
+ayarlarıyla uygulanıp tam metinden yeniden indekslenir:
+
+```bash
+CDR_RAG_CHUNK_TOKENS=240 CDR_RAG_CHUNK_OVERLAP_TOKENS=40 CDR_RAG_CHUNK_STRATEGY=sentence uv run cdr rag-reindex
+```
+
+Bu ortam değerleri sadece komutun süresince geçerlidir; gelecekteki ingestion için aynı
+ayarları uygulamanın `.env` dosyasına yazıp sunucuyu yeniden başlatın. Yeniden indeksleme
+sırasında sunucunun araştırma ingestion'ını durdurun. Daha önce ayar seçiminde görülen
+sorulara final test adı vermeyin.

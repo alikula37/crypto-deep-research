@@ -84,10 +84,10 @@ def _get_reranker(model_name: str | None) -> Any | None:
 
 
 class RAGEngine:
-    def __init__(self, db: Database, settings: Settings) -> None:
+    def __init__(self, db: Database, settings: Settings, *, embedder: Embedder | None = None) -> None:
         self.db = db
         self.settings = settings
-        self.embedder = Embedder(settings.embedding_model, settings.embeddings_enabled)
+        self.embedder = embedder or Embedder(settings.embedding_model, settings.embeddings_enabled)
         self.store = VectorStore(settings.vector_dir)
 
     # ------------------------------------------------------------------ indeksleme

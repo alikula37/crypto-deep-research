@@ -32,6 +32,7 @@ from crypto_deep_research.providers.registry import build_providers
 from crypto_deep_research.rag.answer_evaluation import evaluate_answers, load_answer_cases
 from crypto_deep_research.rag.engine import RAGEngine
 from crypto_deep_research.rag.evaluation import evaluate_retrieval, load_cases
+from crypto_deep_research.rag.tuning import ChunkCandidate, run_sweep, snapshot_sources
 from crypto_deep_research.storage.db import Database
 
 app = typer.Typer(
@@ -325,6 +326,34 @@ def rag_eval(
         f"Mod: {retrieval_mode} · dense={'açık' if settings.embeddings_enabled else 'kapalı'} · "
         f"reranker={settings.rag_reranker_model or 'kapalı'} · split={split} · etiketler: {dataset}"
     )
+
+
+@app.command("rag-chunk-tune")
+def rag_chunk_tune(
+    dataset: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
+    output: Path = typer.Option(..., "--output", help="Ölçüm ve dev önerisi JSON dosyası"),
+    sources: Path | None = typer.Option(None, "--sources", help="Dondurulmuş tam kaynak JSON'u"),
+    candidates: str = typer.Option("96/16,160/27,240/40,320/53,448/75,240/0,240/80", "--candidates"),
+    k: int = typer.Option(5, "--k", min=1),
+    retrieval: str = typer.Option("hybrid", "--retrieval"),
+    quality_tolerance: float = typer.Option(0.02, "--quality-tolerance", min=0, max=0.999),
+) -> None:
+    """Dev sorularında chunk bütçelerini izole indekslerle karşılaştırır; ürünü değiştirmez."""
+    settings = get_settings()
+    try:
+        grid = tuple(ChunkCandidate(*(int(value) for value in pair.split("/")))
+                     for pair in candidates.split(","))
+        source_rows = (json.loads(sources.read_text(encoding="utf-8")) if sources
+                       else snapshot_sources(settings.db_path))
+        report = run_sweep(source_rows, dataset, settings, candidates=grid, k=k,
+                           retrieval=retrieval, tolerance=quality_tolerance,
+                           progress=console.print)
+    except (ValueError, OSError, RuntimeError, TypeError) as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    console.print(f"Dev önerisi: {report['selection']['candidate']} · {output}")
+    console.print("Test açılmadı. Ürün ayarları değişmedi. Taslak etiketlerle kesin optimum iddia edilmez.")
 
 
 @app.command("rag-answer-eval")

@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from tokenizers import Tokenizer
 from tokenizers.models import WordLevel
 from tokenizers.pre_tokenizers import Whitespace
+from tokenizers.processors import TemplateProcessing
 
 from crypto_deep_research.rag.chunking import split_text
 from crypto_deep_research.rag.embeddings import Embedder
@@ -39,3 +40,17 @@ def test_full_document_offsets_preserve_embedding_tokenizer_limits():
     assert tokenizer.padding["length"] == 512
     assert len(tokenizer.encode(text).tokens) == 512
     assert len(tokenizer.encode("son").tokens) == 512
+
+
+def test_standalone_input_count_includes_special_tokens_without_truncation():
+    tokenizer = Tokenizer(WordLevel({"[UNK]": 0, "[CLS]": 1, "[SEP]": 2, "risk": 3}, unk_token="[UNK]"))
+    tokenizer.pre_tokenizer = Whitespace()
+    tokenizer.post_processor = TemplateProcessing(single="[CLS] $A [SEP]", special_tokens=[("[CLS]", 1), ("[SEP]", 2)])
+    tokenizer.enable_truncation(max_length=512)
+    embedder = Embedder("unit-test-cached-model")
+    embedder._model = SimpleNamespace(model=SimpleNamespace(tokenizer=tokenizer))
+    text = " ".join(["risk"] * 511)
+    assert len(embedder.token_offsets(text)) == 511
+    assert embedder.input_token_count(text) == 513
+    assert embedder.max_input_tokens == 512
+    assert len(tokenizer.encode(text).ids) == 512

@@ -73,6 +73,21 @@ class Embedder:
         vectors = self.embed([text])
         return vectors[0] if vectors else None
 
+    def input_token_count(self, text: str) -> int | None:
+        """Count standalone inference input, including special tokens, before truncation."""
+        if self.token_offsets(text) is None or self._offset_tokenizer is None:
+            return None
+        with self._lock:
+            return len(self._offset_tokenizer.encode(text).ids)
+
+    @property
+    def max_input_tokens(self) -> int | None:
+        """Read the actual loaded model's inference tokenizer limit."""
+        model = self._load()
+        tokenizer = getattr(getattr(model, "model", None), "tokenizer", None)
+        truncation = getattr(tokenizer, "truncation", None)
+        return int(truncation["max_length"]) if truncation else None
+
     def token_offsets(self, text: str) -> list[tuple[int, int]] | None:
         """Return full-document offsets without changing embedding input limits."""
         model = self._load()
