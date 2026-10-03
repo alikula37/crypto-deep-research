@@ -112,6 +112,7 @@ uv run cdr rag-eval data/rag-evaluation.jsonl                    # tüm etiketli
 uv run cdr rag-eval data/rag-evaluation.jsonl --split dev --retrieval dense  # dense-only ablation
 uv run cdr rag-eval data/rag-evaluation.jsonl --split test --retrieval hybrid # final hibrit ölçüm
 uv run cdr rag-reindex --strategy sentence --chunk-tokens 240 --overlap-tokens 40  # cümle indeksi
+uv run cdr rag-chunk-tune data/rag-chunk-dev.jsonl --output data/chunk-selection.json # izole bütçe seçimi
 uv run cdr ask "BTC likidasyon riski nedir?" --coin bitcoin --json # yanıt + kaynakları dışa aktar
 uv run cdr rag-answer-eval data/rag-answers.jsonl --split test   # yanıt/atıf kalitesi
 uv run cdr items                                                 # 66 kriter ve açıklamaları
@@ -153,6 +154,12 @@ o yeniden indekslemeyi etkiler. Yeni belgelerin aynı ayarla indekslenmesi için
 eşleştirin. Cümle yöntemi kurallı bir sınır bulucudur, semantik model değildir; kalite kazancı
 ayrı dev ölçümü olmadan varsayılmaz. Bütçe tam belgenin tokenizer offsetlerine göre sayılır;
 özellikle küçük bütçede kesilen kelime parçalarının bağımsız yeniden tokenizasyonu farklı sayılabilir.
+
+`rag-chunk-tune`, aynı tam kaynakları geçici indekslerde farklı token bütçesi/overlap ayarlarıyla
+karşılaştırır. İlk k chunk içinde etiketli kanıt metninin bulunmasını, kaynak recall/nDCG ve
+getirilen token miktarını ölçer. Dev önerisini JSON'a kaydeder; final testi veya ürün ayarını
+değiştirmez. Soru başına `evidence` etiketleri gerekir. E5 giriş sınırını aşan parçalar ve eksik
+embedding'ler ölçümü durdurur. [Protokol](docs/rag-benchmark.md#chunk-boyutu-seçimi-izole-dev-deneyi).
 
 `cdr ask --json`, üretilen yanıtı ve kaynak kimliklerini claim/citation etiketi eklemeye uygun JSON
 olarak verir. `cdr rag-answer-eval`, insan etiketleriyle faithfulness, citation coverage, citation
