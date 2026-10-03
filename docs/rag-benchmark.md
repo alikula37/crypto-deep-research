@@ -113,6 +113,9 @@ arası tutarlılık sonuçla birlikte raporlanmalıdır.
 geçici SQLite + LanceDB kurar. Model/tokenizer bulunamazsa, embedding eksikse veya bağımsız
 olarak sayılan bir chunk modelin giriş sınırını aşıyorsa deneyi durdurur; BM25 fallback'i
 başarılı bir hybrid deneyi gibi raporlamaz. Model girişi sayımında özel tokenlar da vardır.
+Aday bütçesi özel token rezerviyle birlikte sınırı aşamaz; gerçek chunk metinleri ayrıca
+yeniden sayılır. Deneyin `--embedding-batch-size` varsayılanı 32'dir: tek model çağrısındaki
+metin sayısını sınırlar, chunk token bütçesini değiştirmez.
 
 Boyut seçmek için yalnız belge etiketi yeterli değildir. Her dev sorusuna, cevabı taşıyan
 kaynak pasajını da ekleyin. `evidence` öğeleri gerekli ayrı kanıtlardır; hepsinin bulunması

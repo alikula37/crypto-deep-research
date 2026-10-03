@@ -284,6 +284,11 @@ def run_sweep(
     limit = embedder.max_input_tokens
     if limit is None:
         raise RuntimeError("Embedding giriş sınırı bilinmiyor; kırpmasız deney doğrulanamaz")
+    overhead = embedder.input_token_count("")
+    if overhead is None:
+        raise RuntimeError("Özel token rezervi hesaplanamadı")
+    if any(candidate.chunk_tokens + overhead > limit for candidate in candidates):
+        raise ValueError("Aday bütçesi özel tokenlarla model sınırını aşıyor")
     for case in cases:
         if embedder.input_token_count(case.query) > limit:
             raise ValueError(f"{case.case_id}: soru embedding sınırını aşıyor")
@@ -363,7 +368,7 @@ def run_sweep(
             "dataset": {"dev_sha256": digest(dev_rows), "label_statuses": sorted({
                 row["label_status"] for row in metadata.values()}), "cases": dev_rows},
             "embedding": {"model": embedder.model_name, "input_limit": limit,
-                          "batch_size": embedding_batch_size},
+                          "special_token_reserve": overhead, "batch_size": embedding_batch_size},
             "retrieval": {"mode": retrieval, "reranker": None,
                           "source_metric_scope": "unique parents in actual top-k chunks; no overfetch",
                           "context_tokens": "E5 standalone counts with special tokens; LLM cost proxy, not billing",

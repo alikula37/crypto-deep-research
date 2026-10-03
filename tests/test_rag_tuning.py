@@ -114,10 +114,10 @@ def test_sweep_aborts_on_retokenized_overflow_before_embedding(tmp_path, monkeyp
     monkeypatch.setattr('crypto_deep_research.rag.tuning.Embedder', Overflow)
     dataset = tmp_path / 'dev.jsonl'
     write_dataset(dataset)
-    settings = Settings(_env_file=None, embedding_model='fake')
+    settings = Settings(_env_file=None, embedding_model='fake', rag_chunk_tokens=6, rag_chunk_overlap_tokens=0)
     sources = [{"id": "a", "coin": "bitcoin", "text": "risk rises"}]
     with pytest.raises(ValueError, match='model sınırını'):
-        run_sweep(sources, dataset, settings)
+        run_sweep(sources, dataset, settings, candidates=(ChunkCandidate(6, 0),))
 
 
 def test_benchmark_store_search_failure_cannot_become_bm25_success(tmp_path, monkeypatch):
@@ -177,3 +177,13 @@ def test_rescore_requires_frozen_query_source_and_chunk_boundaries(tmp_path, mon
     report['runs'][0]['index']['chunk_layout_sha256'] = 'different boundaries'
     with pytest.raises(ValueError, match='sınırları/metinleri'):
         rescore_sweep(report, sources, dataset)
+
+
+def test_unsafe_candidate_budget_rejected_even_when_all_current_sources_are_short(tmp_path, monkeypatch):
+    monkeypatch.setattr('crypto_deep_research.rag.tuning.Embedder', FakeEmbedder)
+    dataset = tmp_path / 'dev.jsonl'
+    write_dataset(dataset)
+    settings = Settings(_env_file=None, embedding_model='fake', rag_chunk_tokens=6, rag_chunk_overlap_tokens=0)
+    sources = [{'id': 'a', 'coin': 'bitcoin', 'text': 'risk rises'}]
+    with pytest.raises(ValueError, match='özel tokenlarla model sınırını'):
+        run_sweep(sources, dataset, settings, candidates=(ChunkCandidate(32, 0),))
