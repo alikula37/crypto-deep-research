@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import RagMechanismScene from "./RagMechanismScene.jsx";
+import ArchitectureExplorer from "./ArchitectureExplorer.jsx";
 import { DEMO_SOURCE, DEMO_QUERY, CHUNK_STRATEGIES, SENTENCE_SPANS, buildChunks, buildSentenceChunks, chunksForStrategy, retrievalForStrategy, claimsForChunks } from "./ragWalkthroughData.js";
 import { fusionRanking } from "./howItWorksData.js";
 import { IconPlay, IconSearch, IconCheck } from "./icons.jsx";
@@ -27,15 +28,6 @@ export function contextCitation(id, selected) {
 
 function Arrow() {
   return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M3 12h17m-6-6 6 6-6 6" /></svg>;
-}
-
-function ArchitectureMap({ onNavigate }) {
-  return <div className="rag-architecture-map" aria-label="Araştırma ve soru-cevap için ayrı çalışma hatları">
-    <div><span className="rag-path-label">RAPOR ÜRETİMİ</span><span>Veri sağlayıcıları</span><Arrow /><button onClick={() => onNavigate("findings")}>10 modül · 66 kriter</button><Arrow /><button onClick={() => onNavigate("report")}>Yerel rapor + prompt</button><Arrow /><b>Bilgi tabanına kayıt ↓</b></div>
-    <div><span className="rag-path-label">YENİ BELGE GELDİĞİNDE</span><span>Tam kaynak metni</span><Arrow /><b>Chunk → embedding → kalıcı indeks</b></div>
-    <div><span className="rag-path-label">HER SORUDA</span><span>Soru → soru embedding'i</span><Arrow /><b>Arama → fusion → bağlam</b><Arrow /><span>Opsiyonel LLM yanıtı</span></div>
-    <p>Araştırma raporu yapılandırılmış analizlerden oluşur. Belgeler kaydedilirken indekslenir; her soruda belge indeksini yeniden kurmayız.</p>
-  </div>;
 }
 
 function SourcePanel() {
@@ -136,6 +128,9 @@ function AnswerPanel({ claims, contexts, evidenceId, setEvidenceId, topK, setTop
 
 export default function RagWalkthrough({ reducedMotion, visible, onNavigate, onSearch }) {
   const [phase, setPhase] = useState(1);
+  const [show3d, setShow3d] = useState(false);
+  const labHeadingRef = useRef(null);
+  const [chunkSelection, setChunkSelection] = useState("C1");
   const [strategy, setStrategy] = useState("sentence");
   const [chunkSize, setChunkSize] = useState(240);
   const [overlap, setOverlap] = useState(40);
@@ -152,38 +147,54 @@ export default function RagWalkthrough({ reducedMotion, visible, onNavigate, onS
   const finalRows = rerank ? demo.reranked.map((id) => rows.find((row) => row.id === id)).filter(Boolean) : rows;
   const contexts = finalRows.slice(0, topK);
   const current = phase === 1 && strategy === "token" ? { ...PHASES[1], title: "Sabit pencere: uzunluk sabit, cümle sınırı değişken.", output: "Örtüşen token pencereleri", why: "Baseline yöntemde overlap sonraki başlangıcı değiştirir. İlk chunk’ın sonu token bütçesinde kalır; cümle tamamlanması garanti edilmez." } : PHASES[phase];
-  const selectedIndex = Math.max(0, chunks.findIndex((chunk) => chunk.id === selectedId));
+  const selectedIndex = Math.max(0, chunks.findIndex((chunk) => chunk.id === (phase === 1 ? chunkSelection : selectedId)));
   const stageChunks = phase < 2 ? chunks.slice(Math.max(0, selectedIndex - 2), Math.max(0, selectedIndex - 2) + 6) : candidates;
   const rankings = { dense: demo.dense, bm25: demo.bm25, fused: rows.map((row) => row.id), reranked: finalRows.map((row) => row.id), selected: contexts.map((row) => row.id) };
   const vectorsById = Object.fromEntries(demo.documents.map((doc) => [doc.id, doc.vectorPreview]));
   const fusionScores = Object.fromEntries(rows.map((row) => [row.id, row.score]));
-  const setSettings = (size, sharedTokens) => { setChunkSize(size); setOverlap(sharedTokens); setSelectedId("C1"); setTouring(false); };
-  const chooseStrategy = (method) => { setStrategy(method); setSelectedId("C1"); setEvidenceId("C1"); setRerank(false); setTouring(false); };
-  const go = (index) => { setPhase(index); setSelectedId("C1"); setTouring(false); };
+  const setSettings = (size, sharedTokens) => { setChunkSize(size); setOverlap(sharedTokens); setChunkSelection("C1"); setTouring(false); };
+  const chooseStrategy = (method) => { setStrategy(method); setChunkSelection("C1"); setSelectedId("C1"); setEvidenceId("C1"); setRerank(false); setTouring(false); };
+  const go = (index) => { setPhase(index); setTouring(false); };
+  const inspect = (index) => {
+    go(index);
+    labHeadingRef.current?.scrollIntoView({ block: "start", behavior: reducedMotion ? "auto" : "smooth" });
+    labHeadingRef.current?.focus({ preventScroll: true });
+  };
+  const inspectValidation = () => {
+    setTouring(false);
+    const heading = document.getElementById("validation-lab-title");
+    heading?.scrollIntoView({ block: "start", behavior: reducedMotion ? "auto" : "smooth" });
+    heading?.focus({ preventScroll: true });
+  };
+  const returnToMap = () => {
+    setTouring(false);
+    const heading = document.getElementById("architecture-explorer-title");
+    heading?.scrollIntoView({ block: "start", behavior: reducedMotion ? "auto" : "smooth" });
+    heading?.focus({ preventScroll: true });
+  };
   useEffect(() => {
     if (!touring || reducedMotion || !visible) return undefined;
     const timer = setTimeout(() => { if (phase === PHASES.length - 1) setTouring(false); else setPhase((value) => value + 1); }, 9000);
     return () => clearTimeout(timer);
   }, [touring, phase, reducedMotion, visible]);
   return <>
-    <details className="rag-system-overview"><summary>Sistemin bütünü: rapor üretimi ve RAG iki ayrı hat <span>Şemayı aç ↓</span></summary><ArchitectureMap onNavigate={onNavigate} /></details>
+    <ArchitectureExplorer model={{ strategy, chunkSize, overlap, chunks, candidates, demo, rows, contexts, rerank }} onInspect={inspect} onNavigate={onNavigate} onValidate={inspectValidation} reducedMotion={reducedMotion} />
     <section className="rag-walkthrough how-surface" aria-labelledby="rag-walkthrough-title" data-phase={phase}>
-      <header className="rag-lab-heading"><div><span className="how-eyebrow">01 / BELGEDEN KANITA · ETKİLEŞİMLİ RAG</span><h2 id="rag-walkthrough-title">Bir sorunun bütün yolculuğu.</h2></div><div><span className="how-demo-tag">Öğretim veri seti</span><button disabled={reducedMotion} onClick={() => { if (touring) setTouring(false); else { setPhase(0); setSelectedId("C1"); setTouring(true); } }}><IconPlay width={12} height={12} />{touring ? "Turu durdur" : "Akışı oynat"}</button></div></header>
+      <header className="rag-lab-heading"><div><span className="how-eyebrow">02 / ADIMI DENE · ETKİLEŞİMLİ RAG</span><h2 id="rag-walkthrough-title" ref={labHeadingRef} tabIndex={-1}>Bir sorunun bütün yolculuğu.</h2></div><div><button onClick={returnToMap}>Haritaya dön ↑</button><button disabled={reducedMotion} onClick={() => { if (touring) setTouring(false); else { setPhase(0); setSelectedId("C1"); setTouring(true); } }}><IconPlay width={12} height={12} />{touring ? "Turu durdur" : "Akışı oynat"}</button></div></header>
       <p className="rag-demo-provenance">{DEMO_SOURCE.tokens.length} gerçek tokenizer tokenı · {CHUNK_STRATEGIES[strategy].label} · 240 / 40 ile {candidates.length} chunk · {demo.vectorDimension} boyutlu gerçek embedding. Bu yöntemin kurgu korpustaki dense / BM25 sonuçları önceden hesaplandı; tur canlı sorgu veya model çağrısı yapmaz.</p>
       <p className="rag-execution-timing"><b>01–03 · yeni belge:</b> chunk ve embedding kalıcı indekslere yazılır. <b>Her soruda:</b> yalnız soru vektörü üretilir, 04–07 çalışır.</p>
       <ol className="rag-phase-tabs" aria-label="RAG mekanizmasının adımları">{PHASES.map((item, index) => <li key={item.label}><button aria-pressed={phase === index} onClick={() => go(index)}><span>0{index + 1}</span><b>{item.label}</b></button></li>)}</ol>
       <div className="rag-phase-frame"><div className="rag-phase-explanation"><div><span className="rag-small-label">{String(phase + 1).padStart(2, "0")} / 07</span><h3>{current.title}</h3></div><div className="rag-input-output"><span>{current.input}</span><Arrow /><b>{current.output}</b></div><p>{current.why}</p></div>
-        {phase !== 1 && <RagMechanismScene phase={phase} chunks={stageChunks} selectedChunkId={selectedId} onSelectChunk={setSelectedId} reducedMotion={reducedMotion} playing={!reducedMotion} rankings={rankings} vectorsById={vectorsById} fusionScores={fusionScores} sourceInfo={{ title: DEMO_SOURCE.title, tokenCount: DEMO_SOURCE.tokens.length, text: DEMO_SOURCE.text }} embeddingDimensions={demo.vectorDimension} />}
         <div className="rag-phase-workspace" key={phase}>
           {phase === 0 && <SourcePanel />}
-          {phase === 1 && <ChunkPanel strategy={strategy} setStrategy={chooseStrategy} chunkSize={chunkSize} overlap={overlap} setSettings={setSettings} chunks={chunks} selectedId={selectedId} setSelectedId={setSelectedId} />}
+          {phase === 1 && <ChunkPanel strategy={strategy} setStrategy={chooseStrategy} chunkSize={chunkSize} overlap={overlap} setSettings={setSettings} chunks={chunks} selectedId={chunkSelection} setSelectedId={setChunkSelection} />}
           {phase === 2 && <EmbeddingPanel demo={demo} candidates={candidates} selectedId={selectedId} setSelectedId={setSelectedId} />}
           {phase === 3 && <RetrievalPanel demo={demo} candidates={candidates} selectedId={selectedId} setSelectedId={setSelectedId} />}
           {phase === 4 && <FusionPanel rows={rows} finalRows={finalRows} rerank={rerank} setRerank={setRerank} selectedId={selectedId} setSelectedId={setSelectedId} />}
           {phase === 5 && <ContextPanel contexts={contexts} topK={topK} setTopK={setTopK} />}
           {phase === 6 && <AnswerPanel claims={claims} contexts={contexts} topK={topK} setTopK={setTopK} evidenceId={evidenceId} setEvidenceId={setEvidenceId} onSearch={onSearch} />}
         </div>
-        {phase === 1 && <details className="rag-chunk-3d"><summary>Chunk’ların 3D dönüşümünü de göster ↓</summary><RagMechanismScene phase={phase} chunks={stageChunks} selectedChunkId={selectedId} onSelectChunk={setSelectedId} reducedMotion={reducedMotion} playing={!reducedMotion} rankings={rankings} vectorsById={vectorsById} fusionScores={fusionScores} sourceInfo={{ title: DEMO_SOURCE.title, tokenCount: DEMO_SOURCE.tokens.length, text: DEMO_SOURCE.text }} embeddingDimensions={demo.vectorDimension} /></details>}
+        <details className="rag-chunk-3d" onToggle={(event) => setShow3d(event.currentTarget.open)}><summary>{phase === 1 ? "Chunk’ların 3D dönüşümünü de göster ↓" : "Bu adımın 3D gösterimini aç ↓"}</summary>{show3d && <RagMechanismScene phase={phase} chunks={stageChunks} selectedChunkId={phase === 1 ? chunkSelection : selectedId} onSelectChunk={phase === 1 ? setChunkSelection : setSelectedId} reducedMotion={reducedMotion} playing={!reducedMotion} rankings={rankings} vectorsById={vectorsById} fusionScores={fusionScores} sourceInfo={{ title: DEMO_SOURCE.title, tokenCount: DEMO_SOURCE.tokens.length, text: DEMO_SOURCE.text }} embeddingDimensions={demo.vectorDimension} />}</details>
       </div>
       <footer className="rag-lab-footer"><a href="https://github.com/alikula37/crypto-deep-research/tree/8dea984/src/crypto_deep_research/rag" target="_blank" rel="noreferrer">Kodda karşılığı: chunking.py · engine.py · store.py ↗</a><div><button disabled={phase === 0} onClick={() => go(phase - 1)}>← Önceki</button><button disabled={phase === 6} onClick={() => go(phase + 1)}>{phase === 1 ? `240 / 40 · ${strategy === "sentence" ? "cümle" : "token"} indeksi ile devam` : "Sonraki adım"} <Arrow /></button></div></footer>
     </section>

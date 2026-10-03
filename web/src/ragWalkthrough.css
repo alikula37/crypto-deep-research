@@ -1,18 +1,7 @@
 .rag-walkthrough { margin-bottom: 32px; --rag-gold: #e0bb55; }
-.rag-system-overview { border: 1px solid #34433a; border-radius: 7px; margin-bottom: 16px; background: #131f17; }
-.rag-system-overview > summary { display: flex; gap: 12px; justify-content: space-between; cursor: pointer; padding: 12px 18px; font-size: 11px; color: #bbd1c2; }
-.rag-system-overview > summary > span { color: #87baa2; white-space: nowrap; }
-.rag-system-overview .rag-architecture-map { border: 0; margin: 0; }
 .rag-chunk-3d { border-top: 1px solid #344b3a; }
 .rag-chunk-3d > summary { cursor: pointer; color: #9fc2ad; font-size: 11px; padding: 14px 24px; }
-.rag-architecture-map { margin-bottom: 24px; padding: 15px 18px; border: 1px solid #34433a; border-radius: 10px; background: #121d16; }
-.rag-architecture-map > div { display: flex; align-items: center; flex-wrap: wrap; gap: 11px; font-size: 12px; padding: 8px 0; }
-.rag-architecture-map .rag-path-label { width: 128px; flex-shrink: 0; font: 10px var(--mono); color: #93beb0; }
-.rag-architecture-map > div:nth-child(2) .rag-path-label { color: #a5b7dd; }
-.rag-architecture-map b { font-weight: 500; color: #c9dccf; }
-.rag-architecture-map button { font-size: 12px; padding: 5px 9px; }
-.rag-architecture-map svg { color: #6b8575; flex-shrink: 0; }
-.rag-architecture-map > p { margin: 9px 0 0; padding-top: 11px; border-top: 1px solid #2a3e30; color: var(--text-muted); font-size: 11px; line-height: 1.7; }
+#rag-walkthrough-title, #validation-lab-title { scroll-margin-top: 78px; }
 .rag-lab-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 22px 24px 10px; }
 .rag-lab-heading h2 { font-size: 28px; letter-spacing: -.035em; font-weight: 550; margin: 8px 0; }
 .rag-lab-heading > div:last-child { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }

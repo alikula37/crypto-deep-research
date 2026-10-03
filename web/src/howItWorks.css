@@ -190,3 +190,7 @@
   .how-experiment-note > a { margin-left: 18px; }
 }
 @media (prefers-reduced-motion: reduce) { .how-page *, .how-page *::before, .how-page *::after { animation: none !important; transition: none !important; } }
+
+.how-page[data-mode=interview] .how-hero { padding-bottom: 20px; }
+.how-page[data-mode=interview] .how-hero h1 { font-size: 36px; margin: 12px 0; }
+.how-page[data-mode=interview] .how-hero > div > p { font-size: 12px; }

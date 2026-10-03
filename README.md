@@ -89,12 +89,13 @@ Klavye kısayolları: `/` arama alanına git · `?` yardım · `⌘/Ctrl + Enter
 
 **Rehber:** sol menüde **Rehber** üzerinden veya `http://127.0.0.1:8000/?tab=how` adresinden açılır. **Mülakat modu** (`?tab=how&mode=interview`), bir kurgu araştırma belgesinin soru-cevap hattındaki bütün dönüşümlerini gösterir:
 
+- **Mimari haritası:** belge indeksleme ve soru-cevap iki ayrı hat; kutular görev, girdi/çıktı ve gerçek örnek değerlerini, ok etiketleri taşınan veriyi açar. Kalıcı LanceDB/SQLite depoları arama dallarına görünür bağlantılarla bağlanır. Seçilen adımdan laboratuvara gidilip ayarlar korunarak haritaya dönülebilir.
 - **Chunking:** 910 gerçek tokenizer tokenı; cümle sınırları ve sabit token baseline arasında geçiş, aynı bütçede chunk sonlarının karşılaştırması, hedef/gerçek overlap, açık önizleme ve tam chunk metinleri.
 - **Embedding ve retrieval:** 1024 boyutlu embedding'in ilk koordinatları; geçici LanceDB/SQLite indekslerinde önceden hesaplanan dense ve BM25 listeleri.
 - **Fusion ve kanıt:** aday bazında RRF katkıları, seçilen top-k ile prompt, değişen atıf numaraları ve iddiayı destekleyen tam kaynak cümlesi. Reranker sırası ve yanıt açıkça işaretlenmiş öğretim örnekleridir; tur model çağrısı yapmaz.
 - **Değerlendirme:** dev/test kilidi ve Recall/RR hesabı; zaman çizgisinde etiket ufku, purge, ayrı kalibrasyon ve final holdout. Bu küçük öğretim örnekleri ile tarihli proje deneyleri ayrı gösterilir.
 
-Aşamalara tıklanabilir; otomatik akış, duraklatma ve destekleyen tarayıcılarda sunum ekranı vardır. Three.js kartlarında pasaj ve sayısal değerler gösterilir. Animasyonlar hareket azaltma tercihini izler; WebGL yokken metin ve kontroller kullanılabilir. Gerçek arşive geçiş düğmesi soruyu Kaynak Arama'ya taşır.
+Aşamalara tıklanabilir; otomatik akış, duraklatma ve destekleyen tarayıcılarda sunum ekranı vardır. İsteğe bağlı açılan Three.js kartlarında pasaj ve sayısal değerler gösterilir. Mobilde harita iki okunabilir akışa ayrılır; kutular ve bağlantılar klavyeyle de seçilebilir. Animasyonlar hareket azaltma tercihini izler; WebGL yokken metin ve kontroller kullanılabilir. Gerçek arşive geçiş düğmesi soruyu Kaynak Arama'ya taşır.
 
 Demo verisini önbellekteki `intfloat/multilingual-e5-large` modeliyle yeniden üretmek için `uv run python scripts/generate_rag_walkthrough.py` çalıştırılır. Script geçici indeks kullanır ve `web/src/fixtures/rag-demo-tokens.json` dosyasını günceller; uygulamanın veritabanına yazmaz. Model önbellekte yoksa hata verir.
 
