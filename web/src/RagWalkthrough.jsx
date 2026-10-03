@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import RagMechanismScene from "./RagMechanismScene.jsx";
 import ArchitectureExplorer from "./ArchitectureExplorer.jsx";
-import { DEMO_SOURCE, DEMO_QUERY, CHUNK_STRATEGIES, SENTENCE_SPANS, buildChunks, buildSentenceChunks, chunksForStrategy, retrievalForStrategy, claimsForChunks } from "./ragWalkthroughData.js";
+import { DEMO_SOURCE, DEMO_QUERY, CHUNK_STRATEGIES, SENTENCE_SPANS, chunksForStrategy, retrievalForStrategy, claimsForChunks } from "./ragWalkthroughData.js";
 import { fusionRanking } from "./howItWorksData.js";
 import { IconPlay, IconSearch, IconCheck } from "./icons.jsx";
 import "./ragWalkthrough.css";
@@ -52,18 +52,13 @@ function ChunkPanel({ strategy, setStrategy, chunkSize, overlap, setSettings, ch
   const leftText = DEMO_SOURCE.text.slice(DEMO_SOURCE.tokens[leftStart].start, repeated ? DEMO_SOURCE.tokens[boundary].start : current.charEnd);
   const rightText = next ? DEMO_SOURCE.text.slice(repeated ? current.charEnd : next.charStart, DEMO_SOURCE.tokens[rightEnd - 1].end) : "";
   const position = (token) => `${token / DEMO_SOURCE.tokens.length * 100}%`;
-  const baseline = buildChunks(DEMO_SOURCE.tokens, chunkSize, overlap)[0];
-  const sentence = buildSentenceChunks(DEMO_SOURCE.tokens, chunkSize, overlap)[0];
   const lengths = chunks.map((chunk) => chunk.tokenCount);
-  const sentenceEnd = (chunk) => SENTENCE_SPANS.some((span) => span.end === chunk.end);
-  const suffix = (chunk) => chunk.text.length > 220 ? `…${chunk.text.slice(-220)}` : chunk.text;
   const overlapSentences = SENTENCE_SPANS.filter((span) => span.start >= boundary && span.end <= current.end).length;
   return <div className="rag-chunk-lab">
     <div className="rag-strategy-control"><div><span className="rag-small-label">CHUNK YÖNTEMİ</span><div role="group" aria-label="Parçalama yöntemi">{Object.entries(CHUNK_STRATEGIES).map(([key, method]) => <button key={key} aria-pressed={strategy === key} onClick={() => setStrategy(key)}><b>{method.label}</b><span>{method.detail}</span></button>)}</div></div><p>{strategy === "sentence" ? "Yeni sistem varsayılanı. Cümle ve paragraf sınırları esas alınır; tek bir cümle bütçeyi aşarsa token parçalarına bölünür." : "Karşılaştırma için korunan baseline. Sabit uzunluk, cümle veya kelime ortasında bitebilir. Overlap ilk chunk’ın sonunu değiştirmez."}</p></div>
     <div className="rag-chunk-controls">
       <div><span className="rag-small-label">TOKEN BÜTÇESİ · BOYUT / OVERLAP</span><div className="rag-preset-buttons">{[[48, 8, "48 / 8 · yakın görünüm"], [120, 20, "120 / 20"], [240, 40, "240 / 40 · sistem varsayılanı"]].map(([size, sharedTokens, label]) => <button key={size} aria-pressed={chunkSize === size && overlap === sharedTokens} onClick={() => setSettings(size, sharedTokens)}>{label}</button>)}</div></div>
     </div>
-    <div className="rag-strategy-comparison"><header><b>Aynı belge · aynı {chunkSize} token bütçesi · ilk sınır</b><span>Yöntem değişince ilk chunk’ın sonu da değişir.</span></header><div><article data-method="token"><span>SABİT TOKEN / BASELINE</span><b>C1 · {baseline.tokenCount} token · [0, {baseline.end})</b><p>{suffix(baseline)}</p><small>{sentenceEnd(baseline) ? "Bu sınır tesadüfen cümle sonuna denk geldi." : "Sabit pencere burada cümleyi bölüyor."}</small></article><article data-method="sentence"><span>CÜMLE SINIRLARINI KORU</span><b>C1 · {sentence.tokenCount} / {chunkSize} token · [0, {sentence.end})</b><p>{suffix(sentence)}</p><small>{sentence.hasFallback ? "Bütçeyi aşan cümle için token bölme kullanıldı." : "Son sığan tam cümlede dur; sıradaki cümleyi sonraki parçaya taşı."}</small></article></div></div>
     <div className="rag-chunk-stats"><span><b>{chunks.length}</b> chunk</span><span><b>{strategy === "token" ? chunkSize - overlap : `${Math.min(...lengths)}–${Math.max(...lengths)}`}</b> {strategy === "token" ? "token ilerleme" : "token / parça"}</span><span><b>{total - DEMO_SOURCE.tokens.length}</b> tekrar edilen token</span><span><b>%100</b> token kapsama</span></div>
     <div className="rag-token-ruler"><span>Token 0</span><span>{DEMO_SOURCE.tokens.length} · belgenin sonu</span></div>
     <div className="rag-window-strip" aria-label="Belge üzerindeki chunk sınırları">{chunks.slice(Math.max(0, selectedIndex - 2), Math.max(0, selectedIndex - 2) + 6).map((chunk) => <button key={chunk.id} aria-pressed={chunk.id === current.id} onClick={() => setSelectedId(chunk.id)} title={`${chunk.id}: [${chunk.start}, ${chunk.end})`}><span className="rag-window-range" style={{ left: position(chunk.start), width: position(chunk.end - chunk.start) }}><i style={{ width: `${Math.min(chunk.overlapCount, chunk.tokenCount) / chunk.tokenCount * 100}%` }} /><b>{chunk.id}</b></span><small>[{chunk.start}, {chunk.end})</small></button>)}</div>
