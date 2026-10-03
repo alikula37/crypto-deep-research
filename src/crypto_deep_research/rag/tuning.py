@@ -247,7 +247,12 @@ def rescore_sweep(report: dict, sources: list[dict], dataset: Path) -> dict:
     result["rescore"] = {"original_report_sha256": digest(report),
                          "created_at": datetime.now(timezone.utc).isoformat(),
                          "retrieval_repeated": False, "timings_reused": True,
-                         "all_chunk_layouts_verified": verified_layouts}
+                         "all_chunk_layouts_verified": verified_layouts,
+                         "implementation_sha256": digest({
+                             name: (Path(__file__).parent / name).read_text(encoding="utf-8")
+                             for name in ("tuning.py", "chunking.py", "embeddings.py", "evaluation.py")}),
+                         "versions": {package: version(package)
+                                      for package in ("fastembed", "lancedb", "tokenizers")}}
     return result
 
 
@@ -255,6 +260,7 @@ def run_sweep(
     sources: list[dict], dataset: Path, settings: Settings, *,
     candidates: tuple[ChunkCandidate, ...] = DEFAULT_CANDIDATES,
     k: int = 5, retrieval: str = "hybrid", tolerance: float = 0.02,
+    embedding_batch_size: int = 32,
     progress=None,
 ) -> dict:
     if k < 1 or retrieval not in {"dense", "bm25", "hybrid"}:
@@ -269,7 +275,8 @@ def run_sweep(
         candidates = (*candidates, baseline)
     cases, metadata = load_tuning_cases(dataset)
     validate_sources(sources, cases, metadata)
-    embedder = StrictEmbedder(Embedder(settings.embedding_model, settings.embeddings_enabled))
+    embedder = StrictEmbedder(Embedder(settings.embedding_model, settings.embeddings_enabled,
+                                     batch_size=embedding_batch_size))
     # Warm load, resolve actual model/tokenizer, reject any model substitution.
     offsets = {row["id"]: embedder.token_offsets(row["text"]) for row in sources}
     if any(value is None for value in offsets.values()) or embedder.model_name != settings.embedding_model:
@@ -355,7 +362,8 @@ def run_sweep(
             "corpus": {"sources": len(sources), "sha256": digest(sources)},
             "dataset": {"dev_sha256": digest(dev_rows), "label_statuses": sorted({
                 row["label_status"] for row in metadata.values()}), "cases": dev_rows},
-            "embedding": {"model": embedder.model_name, "input_limit": limit},
+            "embedding": {"model": embedder.model_name, "input_limit": limit,
+                          "batch_size": embedding_batch_size},
             "retrieval": {"mode": retrieval, "reranker": None,
                           "source_metric_scope": "unique parents in actual top-k chunks; no overfetch",
                           "context_tokens": "E5 standalone counts with special tokens; LLM cost proxy, not billing",

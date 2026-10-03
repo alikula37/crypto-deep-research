@@ -342,6 +342,7 @@ def rag_chunk_tune(
     k: int = typer.Option(5, "--k", min=1),
     retrieval: str = typer.Option("hybrid", "--retrieval"),
     quality_tolerance: float = typer.Option(0.02, "--quality-tolerance", min=0, max=0.999),
+    embedding_batch_size: int = typer.Option(32, "--embedding-batch-size", min=1),
 ) -> None:
     """Dev sorularında chunk bütçelerini izole indekslerle karşılaştırır; ürünü değiştirmez."""
     settings = get_settings()
@@ -352,6 +353,7 @@ def rag_chunk_tune(
                        else snapshot_sources(settings.db_path))
         report = run_sweep(source_rows, dataset, settings, candidates=grid, k=k,
                            retrieval=retrieval, tolerance=quality_tolerance,
+                           embedding_batch_size=embedding_batch_size,
                            progress=console.print)
     except (ValueError, OSError, RuntimeError, TypeError) as exc:
         raise typer.BadParameter(str(exc)) from exc

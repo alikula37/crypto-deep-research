@@ -75,7 +75,7 @@ class FakeEmbedder:
     model_name = 'fake'
     max_input_tokens = 32
 
-    def __init__(self, *_args):
+    def __init__(self, *_args, **_kwargs):
         pass
 
     def token_offsets(self, text):

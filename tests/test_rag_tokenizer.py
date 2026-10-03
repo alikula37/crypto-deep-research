@@ -54,3 +54,14 @@ def test_standalone_input_count_includes_special_tokens_without_truncation():
     assert embedder.input_token_count(text) == 513
     assert embedder.max_input_tokens == 512
     assert len(tokenizer.encode(text).ids) == 512
+
+
+def test_embedding_batch_limit_is_forwarded_without_changing_model_input():
+    calls = []
+    def embed(texts, **kwargs):
+        calls.append((texts, kwargs))
+        return [[1.0, 0.0] for _ in texts]
+    wrapper = Embedder('test', batch_size=32)
+    wrapper._model = SimpleNamespace(embed=embed)
+    assert wrapper.embed(['original passage']) == [[1.0, 0.0]]
+    assert calls == [(['original passage'], {'batch_size': 32})]

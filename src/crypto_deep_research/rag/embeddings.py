@@ -18,9 +18,12 @@ FALLBACK_MODELS = [
 class Embedder:
     """Gec yüklenen (lazy), hata durumunda devre disi kalan embedding sarmalayicisi."""
 
-    def __init__(self, model_name: str, enabled: bool = True) -> None:
+    def __init__(self, model_name: str, enabled: bool = True, *, batch_size: int | None = None) -> None:
+        if batch_size is not None and batch_size < 1:
+            raise ValueError("embedding batch_size pozitif olmalı")
         self.model_name = model_name
         self.enabled = enabled
+        self.batch_size = batch_size
         self._model: Any | None = None
         self._offset_tokenizer: Any | None = None
         self._load_failed = False
@@ -64,7 +67,8 @@ class Embedder:
         if model is None:
             return None
         try:
-            return [list(vector) for vector in model.embed(texts)]
+            kwargs = {"batch_size": self.batch_size} if self.batch_size is not None else {}
+            return [list(vector) for vector in model.embed(texts, **kwargs)]
         except Exception as exc:
             logger.warning("Embedding hatası: %s", exc)
             return None
