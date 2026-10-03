@@ -130,3 +130,13 @@ def test_benchmark_store_search_failure_cannot_become_bm25_success(tmp_path, mon
     monkeypatch.setattr(store, '_table', lambda: BrokenTable())
     with pytest.raises(RuntimeError, match='arama başarısız'):
         store.search([1.0, 0.0])
+
+
+def test_malformed_bootstrap_group_rejected_before_expensive_indexing(tmp_path):
+    dataset = tmp_path / 'dev.jsonl'
+    write_dataset(dataset)
+    row = json.loads(dataset.read_text().splitlines()[0])
+    row['group'] = ['unhashable']
+    dataset.write_text(json.dumps(row))
+    with pytest.raises(ValueError, match='group boş olmayan'):
+        load_tuning_cases(dataset)

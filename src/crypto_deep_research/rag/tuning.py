@@ -76,6 +76,9 @@ def load_tuning_cases(path: Path) -> tuple[list[EvaluationCase], dict[str, dict]
         case_id = row.get("id")
         if not isinstance(case_id, str) or not case_id.strip() or case_id.strip() in metadata:
             raise ValueError("Dev sorgularında benzersiz, boş olmayan id gerekli")
+        for name in ("group", "label_status", "category"):
+            if name in row and (not isinstance(row[name], str) or not row[name].strip()):
+                raise ValueError(f"{case_id}: {name} boş olmayan bir metin olmalı")
         evidence = row.get("evidence")
         if not isinstance(evidence, list) or not evidence:
             raise ValueError(f"{case_id}: en az bir evidence pasajı gerekli")
