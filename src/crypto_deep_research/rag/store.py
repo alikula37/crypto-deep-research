@@ -15,8 +15,9 @@ TABLE_NAME = "documents"
 class VectorStore:
     """LanceDB sarmalayicisi. Başarısızlıkta available False olur ve FTS kullanılır."""
 
-    def __init__(self, directory: Path) -> None:
+    def __init__(self, directory: Path, *, strict: bool = False) -> None:
         self.directory = directory
+        self.strict = strict
         self.available = False
         self._db: Any | None = None
         try:
@@ -26,6 +27,8 @@ class VectorStore:
             self._db = lancedb.connect(str(self.directory))
             self.available = True
         except Exception as exc:
+            if self.strict:
+                raise RuntimeError("LanceDB kullanılamıyor") from exc
             logger.warning("LanceDB kullanılamiyor, FTS'e düşülüyor: %s", exc)
 
     def _table(self) -> Any:
@@ -36,6 +39,8 @@ class VectorStore:
                 return self._db.open_table(TABLE_NAME)
             return None
         except Exception as exc:
+            if self.strict:
+                raise RuntimeError("LanceDB tablo açılamadı") from exc
             logger.warning("LanceDB tablo hatası: %s", exc)
             return None
 
@@ -52,6 +57,8 @@ class VectorStore:
         except Exception as exc:
             logger.warning("LanceDB yazma hatası: %s", exc)
             self.available = False
+            if self.strict:
+                raise RuntimeError("LanceDB indeksi yazılamadı") from exc
             return False
 
     def delete_document(self, doc_id: str) -> bool:
@@ -84,6 +91,8 @@ class VectorStore:
                 row["score"] = 1.0 / (1.0 + distance)
             return rows
         except Exception as exc:
+            if self.strict:
+                raise RuntimeError("LanceDB arama başarısız") from exc
             logger.warning("LanceDB arama hatası: %s", exc)
             return []
 
