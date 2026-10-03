@@ -97,6 +97,6 @@ export default function ArchitectureExplorer({ model, onInspect, onNavigate, onV
         <span className="arch-selection-status" role="status">Seçilen: {detail.title}</span>
       </aside>
     </div>
-    <footer className="arch-validation-path"><div><span>AYRI ÖLÇÜM HATLARI</span><p><b>RAG:</b> kaynak bulma + atıf desteği <i>·</i> <b>Finansal ML:</b> walk-forward → kalibrasyon → final holdout</p></div><button onClick={onValidate}>Ölçüm laboratuvarına git ↓</button></footer>
+    <footer className="arch-validation-path"><div><span>AYRI ÖLÇÜM HATLARI</span><p><b>RAG:</b> kaynak bulma + atıf desteği <i>·</i> <b>Finansal ML:</b> walk-forward → kalibrasyon → final holdout</p></div><button onClick={onValidate}>Ölçüm notları ↓</button></footer>
   </section>;
 }

@@ -93,7 +93,7 @@ Klavye kısayolları: `/` arama alanına git · `?` yardım · `⌘/Ctrl + Enter
 - **Chunking:** 910 gerçek tokenizer tokenı; cümle sınırları ve sabit token baseline arasında geçiş, token bütçesi ve overlap ayarları, hedef/gerçek overlap, açık önizleme ve tam chunk metinleri.
 - **Embedding ve retrieval:** 1024 boyutlu embedding'in ilk koordinatları; geçici LanceDB/SQLite indekslerinde önceden hesaplanan dense ve BM25 listeleri.
 - **Fusion ve kanıt:** aday bazında RRF katkıları, seçilen top-k ile prompt, değişen atıf numaraları ve iddiayı destekleyen tam kaynak cümlesi. Reranker sırası ve yanıt açıkça işaretlenmiş öğretim örnekleridir; tur model çağrısı yapmaz.
-- **Değerlendirme:** dev/test kilidi ve Recall/RR hesabı; zaman çizgisinde etiket ufku, purge, ayrı kalibrasyon ve final holdout. Bu küçük öğretim örnekleri ile tarihli proje deneyleri ayrı gösterilir.
+- **Ölçüm notları:** kaynak bulma, yanıt desteği ve finansal tahmin için üç kısa not; pilotun sınırlamaları ve model kalite kapıları korunur. Geliştirme/test ayrımı, kalibrasyon ve final holdout protokolü isteğe bağlı açılan iki kısa paragrafta anlatılır.
 
 Aşamalara tıklanabilir; otomatik akış, duraklatma ve destekleyen tarayıcılarda sunum ekranı vardır. İsteğe bağlı açılan Three.js kartlarında pasaj ve sayısal değerler gösterilir. Mobilde harita iki okunabilir akışa ayrılır; kutular ve bağlantılar klavyeyle de seçilebilir. Animasyonlar hareket azaltma tercihini izler; WebGL yokken metin ve kontroller kullanılabilir. Gerçek arşive geçiş düğmesi soruyu Kaynak Arama'ya taşır.
 

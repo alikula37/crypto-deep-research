@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import PipelineScene from "./PipelineScene.jsx";
 import RagWalkthrough from "./RagWalkthrough.jsx";
-import ValidationLab from "./ValidationLab.jsx";
-import { FUSION_EXAMPLES, fusionRanking, INTERVIEW_SCRIPT, STAGES } from "./howItWorksData.js";
-import { IconChart, IconCheck, IconCopy, IconDoc, IconPlay, IconSearch, IconSparkles } from "./icons.jsx";
+import { FUSION_EXAMPLES, fusionRanking, STAGES } from "./howItWorksData.js";
+import { IconChart, IconCheck, IconDoc, IconPlay, IconSearch, IconSparkles } from "./icons.jsx";
 import "./howItWorks.css";
 
 function Arrow({ back = false }) {
@@ -79,14 +78,18 @@ function FusionExplorer({ onSearch }) {
   );
 }
 
-function ValidationPanel() {
-  return <section className="how-validation" aria-labelledby="validation-title">
-    <div className="how-section-heading"><div><span className="how-eyebrow">03 / UYGULANMIŞ DENEYLER</span><h2 id="validation-title">Öğretim şemasından, gerçek ölçüme.</h2></div></div>
-    <div className="how-metric-grid" style={{ marginTop: 20 }}>
-      <article className="how-metric-card"><span className="how-small-label how-cyan">RAG PİLOTU · 2 EKİM 2026</span><h3>107 kaynak · 5 test sorusu</h3><p className="how-section-copy">Hibrit arama, ilgili kaynağı 4/5 soruda ilk beşte buldu. HitRate@5 = 0,80. Etiketler asistan taslağıdır ve insan incelemesi bekler; bu küçük pilot genel başarı kanıtı değildir. İnsan etiketleriyle yanıt kalitesi sonucu henüz yok.</p></article>
-      <article className="how-metric-card"><span className="how-small-label how-gold">FİNANSAL MODEL · 2 EKİM 2026</span><h3>7.400 satır · üç model reddedildi</h3><p className="how-section-copy">1 / 7 / 30 günlük modeller ayrı final holdout'ta baseline Brier skorunu geçemedi. Kalite kapıları üç modeli de reddetti; hiçbiri aktifleştirilmedi. AUC / Brier / ECE, RAG kalitesi olarak sunulmaz.</p></article>
-    </div>
-    <div className="how-experiment-note"><span className="how-status-dot" /><div><b>Kaynaklar ve deney protokolü açık.</b><p>Öğretim sahnesindeki örnekler ile bu ölçümler farklı veri setleridir. Deney notları yöntem, kapsam ve sınırlamaları kaydeder.</p></div><a href="https://github.com/alikula37/crypto-deep-research/tree/main/docs/experiments" target="_blank" rel="noreferrer">Deney notları <Arrow /></a></div>
+function MeasurementNotes() {
+  return <section className="how-measurement-notes" aria-labelledby="measurement-notes-title">
+    <header><div><span className="how-eyebrow">03 / ÖLÇÜM NOTLARI</span><h2 id="measurement-notes-title" tabIndex={-1}>Sonuçlara nasıl güveniyorum?</h2></div><a href="https://github.com/alikula37/crypto-deep-research/tree/main/docs/experiments" target="_blank" rel="noreferrer">Deney notları ↗</a></header>
+    <dl>
+      <div><dt>Ayrı ölçüm</dt><dd>Kaynak bulma, yanıt desteği ve finansal tahmin ayrı değerlendirilir.</dd></div>
+      <div><dt>RAG pilotu</dt><dd>5 sorunun 4’ünde ilgili kaynak ilk beşte. Etiketler asistan taslağı; insan incelemesi bekliyor.</dd></div>
+      <div><dt>Finansal ML</dt><dd>Üç model baseline’ı geçemedi; hiçbiri aktifleştirilmedi.</dd></div>
+    </dl>
+    <details><summary>Teknik protokolü göster</summary>
+      <p><b>RAG:</b> Ayarlar geliştirme sorularında seçilir; bağımsız testte ölçülür. 2 Ekim 2026 pilotu 107 kaynak ve 5 soruyla sınırlı; genel başarı kanıtı değildir. İnsan etiketleriyle yanıt kalitesi sonucu henüz yok.</p>
+      <p><b>Finansal ML:</b> Purged walk-forward ile model seçimi, ayrı kalibrasyon ve final holdout kullanılır. 2 Ekim 2026 deneyinde 7.400 satırla 1 / 7 / 30 günlük modeller holdout Brier baseline’ını geçemedi. Bu ölçüm RAG başarısı değildir.</p>
+    </details>
   </section>;
 }
 
@@ -97,8 +100,6 @@ export default function HowItWorks({ onNavigate, onSearch, health }) {
   const [activeStep, setActiveStep] = useState(0);
   const [playing, setPlaying] = useState(true);
   const [touring, setTouring] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [copyError, setCopyError] = useState(false);
   const pageRef = useRef(null);
   const [fullscreen, setFullscreen] = useState(false);
   const stage = STAGES[activeStep];
@@ -123,18 +124,8 @@ export default function HowItWorks({ onNavigate, onSearch, health }) {
     document.addEventListener("fullscreenchange", update);
     return () => document.removeEventListener("fullscreenchange", update);
   }, []);
-  useEffect(() => {
-    if (!copied) return undefined;
-    const timer = setTimeout(() => setCopied(false), 2500);
-    return () => clearTimeout(timer);
-  }, [copied]);
-
   const selectStep = (index) => { setActiveStep(index); setTouring(false); };
   const startTour = () => { setActiveStep(0); setPlaying(true); setTouring(true); };
-  const copyScript = async () => {
-    try { await navigator.clipboard.writeText(INTERVIEW_SCRIPT); setCopied(true); setCopyError(false); }
-    catch { setCopyError(true); }
-  };
   const toggleFullscreen = async () => {
     try {
       if (document.fullscreenElement === pageRef.current) await document.exitFullscreen();
@@ -170,9 +161,9 @@ export default function HowItWorks({ onNavigate, onSearch, health }) {
       <FusionExplorer onSearch={onSearch} />
       </>}
 
-      {interview ? <><ValidationLab reducedMotion={reducedMotion} /><ValidationPanel /><section className="how-interview-script how-surface"><div className="how-section-heading"><div><span className="how-eyebrow">04 / 90 SANİYEDE PROJE</span><h2>“Nasıl yaptım?” kadar “Nasıl ölçtüm?”</h2></div><button onClick={copyScript}><IconCopy width={14} height={14} />{copied ? "Kopyalandı" : "Anlatımı kopyala"}</button></div><blockquote>{INTERVIEW_SCRIPT}</blockquote>{copyError && <p role="status">Panoya erişilemedi. Anlatım metnini seçerek kopyalayabilirsin.</p>}</section></> : <section className="how-quickstart" aria-labelledby="quickstart-title"><div className="how-section-heading"><div><span className="how-eyebrow">03 / ŞİMDİ SEN DENE</span><h2 id="quickstart-title">İlk araştırman, üç adımda.</h2></div></div><div className="how-quickstart-grid">{[["01", "Bir varlık seç", "Üstte varlığı ve profili seç. Derin Araştırma ile kaynaklı raporunu oluştur.", "overview", "Araştırmaya git", IconChart], ["02", "Kanıtları oku", "Bulgular’da Tam / Kısmi / Veri yok durumlarına, güvene ve kaynaklara bak.", "findings", "Bulguları aç", IconDoc], ["03", "Bir soru sor", "Kaynak Arama’da geçmiş araştırmalarına soru sor; bulunan pasajları incele.", "rag", "Kaynak aramayı aç", IconSearch]].map(([number, title, text, tab, action, Icon]) => <article key={number}><div><span>{number}</span><Icon width={20} height={20} /></div><h3>{title}</h3><p>{text}</p><button className="how-text-link" onClick={() => onNavigate(tab)}>{action}<Arrow /></button></article>)}</div></section>}
+      {interview ? <MeasurementNotes /> : <section className="how-quickstart" aria-labelledby="quickstart-title"><div className="how-section-heading"><div><span className="how-eyebrow">03 / ŞİMDİ SEN DENE</span><h2 id="quickstart-title">İlk araştırman, üç adımda.</h2></div></div><div className="how-quickstart-grid">{[["01", "Bir varlık seç", "Üstte varlığı ve profili seç. Derin Araştırma ile kaynaklı raporunu oluştur.", "overview", "Araştırmaya git", IconChart], ["02", "Kanıtları oku", "Bulgular’da Tam / Kısmi / Veri yok durumlarına, güvene ve kaynaklara bak.", "findings", "Bulguları aç", IconDoc], ["03", "Bir soru sor", "Kaynak Arama’da geçmiş araştırmalarına soru sor; bulunan pasajları incele.", "rag", "Kaynak aramayı aç", IconSearch]].map(([number, title, text, tab, action, Icon]) => <article key={number}><div><span>{number}</span><Icon width={20} height={20} /></div><h3>{title}</h3><p>{text}</p><button className="how-text-link" onClick={() => onNavigate(tab)}>{action}<Arrow /></button></article>)}</div></section>}
 
-      <footer className="how-page-footer"><span><span className="how-status-dot" />Yerel metin ve vektör depolama · Dış veri sağlayıcıları · Opsiyonel model yanıtı</span><span>{health ? health.openrouter ? "OpenRouter yanıt üretimi yapılandırılmış" : "Bu kurulumda OpenRouter anahtarı yok; arama ve prompt kullanılabilir" : "Model yanıtı için OpenRouter yapılandırılır"}</span></footer>
+      {!interview && <footer className="how-page-footer"><span><span className="how-status-dot" />Yerel metin ve vektör depolama · Dış veri sağlayıcıları · Opsiyonel model yanıtı</span><span>{health ? health.openrouter ? "OpenRouter yanıt üretimi yapılandırılmış" : "Bu kurulumda OpenRouter anahtarı yok; arama ve prompt kullanılabilir" : "Model yanıtı için OpenRouter yapılandırılır"}</span></footer>}
     </div>
   );
 }

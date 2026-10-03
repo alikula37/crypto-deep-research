@@ -1,7 +1,7 @@
 .rag-walkthrough { margin-bottom: 32px; --rag-gold: #e0bb55; }
 .rag-chunk-3d { border-top: 1px solid #344b3a; }
 .rag-chunk-3d > summary { cursor: pointer; color: #9fc2ad; font-size: 11px; padding: 14px 24px; }
-#rag-walkthrough-title, #validation-lab-title { scroll-margin-top: 78px; }
+#rag-walkthrough-title, #measurement-notes-title { scroll-margin-top: 78px; }
 .rag-lab-heading { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 22px 24px 10px; }
 .rag-lab-heading h2 { font-size: 28px; letter-spacing: -.035em; font-weight: 550; margin: 8px 0; }
 .rag-lab-heading > div:last-child { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }

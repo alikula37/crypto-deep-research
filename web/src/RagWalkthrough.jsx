@@ -157,7 +157,7 @@ export default function RagWalkthrough({ reducedMotion, visible, onNavigate, onS
   };
   const inspectValidation = () => {
     setTouring(false);
-    const heading = document.getElementById("validation-lab-title");
+    const heading = document.getElementById("measurement-notes-title");
     heading?.scrollIntoView({ block: "start", behavior: reducedMotion ? "auto" : "smooth" });
     heading?.focus({ preventScroll: true });
   };
