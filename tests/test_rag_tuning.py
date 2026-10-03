@@ -140,3 +140,40 @@ def test_malformed_bootstrap_group_rejected_before_expensive_indexing(tmp_path):
     dataset.write_text(json.dumps(row))
     with pytest.raises(ValueError, match='group boş olmayan'):
         load_tuning_cases(dataset)
+
+
+def test_alternative_support_is_not_counted_as_an_extra_required_fact(tmp_path):
+    labels = [{'alternatives': [{'parent_id': 'a', 'text': 'risk rises'},
+                                {'parent_id': 'b', 'text': 'higher risk'}]}]
+    result = [SimpleNamespace(parent_id='b', key='b1', content='higher risk here')]
+    assert context_metrics(result, labels, 1) == {'evidence_coverage': 1, 'evidence_complete': 1}
+    dataset = tmp_path / 'dev.jsonl'
+    row = {'id': 'q1', 'split': 'dev', 'query': 'risk?', 'relevant_parent_ids': ['a', 'b'],
+           'evidence': labels}
+    dataset.write_text(json.dumps(row))
+    cases, metadata = load_tuning_cases(dataset)
+    validate_sources([{'id': 'a', 'coin': None, 'text': 'risk rises'},
+                      {'id': 'b', 'coin': None, 'text': 'higher risk'}], cases, metadata)
+
+
+def test_rescore_requires_frozen_query_source_and_chunk_boundaries(tmp_path, monkeypatch):
+    from crypto_deep_research.rag.tuning import rescore_sweep
+    monkeypatch.setattr('crypto_deep_research.rag.tuning.Embedder', FakeEmbedder)
+    dataset = tmp_path / 'dev.jsonl'
+    write_dataset(dataset)
+    settings = Settings(_env_file=None, embedding_model='fake', rag_chunk_tokens=6, rag_chunk_overlap_tokens=0)
+    sources = [{'id': 'a', 'coin': 'bitcoin', 'text': 'risk rises. price falls.',
+                'kind': 'report', 'source': 'test', 'url': '', 'ts': 1}]
+    report = run_sweep(sources, dataset, settings, candidates=(ChunkCandidate(6, 0),), k=1)
+    revised = rescore_sweep(report, sources, dataset)
+    assert revised['runs'] == report['runs']
+    assert revised['rescore']['all_chunk_layouts_verified'] is True
+    row = json.loads(dataset.read_text().splitlines()[0])
+    row['query'] = 'different question'
+    dataset.write_text(json.dumps(row))
+    with pytest.raises(ValueError, match='Soru/coin/kimlik'):
+        rescore_sweep(report, sources, dataset)
+    write_dataset(dataset)
+    report['runs'][0]['index']['chunk_layout_sha256'] = 'different boundaries'
+    with pytest.raises(ValueError, match='sınırları/metinleri'):
+        rescore_sweep(report, sources, dataset)

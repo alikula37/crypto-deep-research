@@ -10,6 +10,7 @@ import statistics
 import tempfile
 import time
 from collections import defaultdict
+from copy import deepcopy
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from importlib.metadata import version
@@ -17,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from crypto_deep_research.config import Settings
+from crypto_deep_research.models import RetrievedContext
 from crypto_deep_research.rag.chunking import split_text
 from crypto_deep_research.rag.embeddings import Embedder
 from crypto_deep_research.rag.engine import RAGEngine
@@ -64,6 +66,11 @@ def normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def evidence_alternatives(item: dict) -> list[dict]:
+    """One required fact may have several valid source/text alternatives."""
+    return item.get("alternatives", [item])
+
+
 def load_tuning_cases(path: Path) -> tuple[list[EvaluationCase], dict[str, dict]]:
     cases = load_cases(path, split="dev")
     metadata = {}
@@ -83,10 +90,16 @@ def load_tuning_cases(path: Path) -> tuple[list[EvaluationCase], dict[str, dict]
         if not isinstance(evidence, list) or not evidence:
             raise ValueError(f"{case_id}: en az bir evidence pasajı gerekli")
         for item in evidence:
-            if not isinstance(item, dict) or item.get("parent_id") not in row["relevant_parent_ids"]:
-                raise ValueError(f"{case_id}: evidence parent_id ilgili kaynaklar içinde olmalı")
-            if not isinstance(item.get("text"), str) or not normalize(item["text"]):
-                raise ValueError(f"{case_id}: evidence text boş olamaz")
+            if not isinstance(item, dict):
+                raise ValueError(f"{case_id}: evidence nesne olmalı")
+            alternatives = evidence_alternatives(item)
+            if not isinstance(alternatives, list) or not alternatives:
+                raise ValueError(f"{case_id}: alternatives boş olmayan liste olmalı")
+            for variant in alternatives:
+                if not isinstance(variant, dict) or variant.get("parent_id") not in row["relevant_parent_ids"]:
+                    raise ValueError(f"{case_id}: evidence parent_id ilgili kaynaklar içinde olmalı")
+                if not isinstance(variant.get("text"), str) or not normalize(variant["text"]):
+                    raise ValueError(f"{case_id}: evidence text boş olamaz")
         metadata[case_id.strip()] = {
             "evidence": evidence,
             "label_status": row.get("label_status", "unreviewed"),
@@ -106,17 +119,18 @@ def validate_sources(sources: list[dict], cases: list[EvaluationCase], metadata:
             if row is None or (case.coin and row["coin"] != case.coin):
                 raise ValueError(f"{case.case_id}: kaynak yok veya coin filtresine uymuyor: {parent}")
         for item in metadata[case.case_id]["evidence"]:
-            if normalize(item["text"]) not in normalize(by_id[item["parent_id"]]["text"]):
-                raise ValueError(f"{case.case_id}: evidence metni kaynak sürümünde bulunamadı")
+            for variant in evidence_alternatives(item):
+                if normalize(variant["text"]) not in normalize(by_id[variant["parent_id"]]["text"]):
+                    raise ValueError(f"{case.case_id}: evidence metni kaynak sürümünde bulunamadı")
 
 
 def context_metrics(results: list, evidence: list[dict], k: int) -> dict:
     """Exact evidence spans must survive inside one of the actual top-k chunks."""
     selected = results[:k]
     hits = [any(
-        (item.parent_id or item.key) == label["parent_id"]
-        and normalize(label["text"]) in normalize(item.content)
-        for item in selected
+        (item.parent_id or item.key) == variant["parent_id"]
+        and normalize(variant["text"]) in normalize(item.content)
+        for variant in evidence_alternatives(label) for item in selected
     ) for label in evidence]
     return {"evidence_coverage": sum(hits) / len(hits), "evidence_complete": float(all(hits))}
 
@@ -176,6 +190,65 @@ class StrictEmbedder:
 
     def embed_one(self, text):
         return self.embed([text])[0]
+
+
+def rescore_sweep(report: dict, sources: list[dict], dataset: Path) -> dict:
+    """Rejudge frozen top-k rankings after label review, without rerunning retrieval."""
+    if digest(sources) != report["corpus"]["sha256"]:
+        raise ValueError("Yeniden puanlama için aynı kaynak snapshot'ı gerekli")
+    cases, metadata = load_tuning_cases(dataset)
+    validate_sources(sources, cases, metadata)
+    frozen_cases = {row["id"]: row for row in report["dataset"]["cases"]}
+    if {case.case_id for case in cases} != set(frozen_cases) or any(
+        (case.query, case.coin) != (frozen_cases[case.case_id]["query"], frozen_cases[case.case_id]["coin"])
+        for case in cases
+    ):
+        raise ValueError("Soru/coin/kimlik değişmiş: yeni sorgular için yeniden sweep gerekli")
+    embedder = Embedder(report["embedding"]["model"])
+    offsets = {row["id"]: embedder.token_offsets(row["text"]) for row in sources}
+    if any(value is None for value in offsets.values()) or embedder.model_name != report["embedding"]["model"]:
+        raise RuntimeError("Aynı tokenizer kullanılamadı")
+    result = deepcopy(report)
+    by_case = {case.case_id: case for case in cases}
+    verified_layouts = True
+    for run in result["runs"]:
+        by_chunk = {}
+        layout = []
+        for row in sources:
+            chunks = split_text(row["text"], offsets[row["id"]], **run["settings"])
+            layout.extend(asdict(chunk) for chunk in chunks)
+            for index, chunk in enumerate(chunks):
+                key = row["id"] if len(chunks) == 1 else f"{row['id']}#chunk-{index:06d}"
+                by_chunk[key] = RetrievedContext(key=key, parent_id=row["id"], content=chunk.text, score=0)
+        recorded_layout = run["index"].get("chunk_layout_sha256")
+        if recorded_layout and recorded_layout != digest(layout):
+            raise ValueError("Chunk sınırları/metinleri değişmiş: eski sıralama yeniden puanlanamaz")
+        if len(layout) != run["index"]["chunks"]:
+            raise ValueError("Chunk sayısı değişmiş: eski sıralama yeniden puanlanamaz")
+        verified_layouts &= bool(recorded_layout)
+        for query in run["queries"]:
+            case = by_case[query["id"]]
+            try:
+                contexts = [by_chunk[key] for key in query["retrieved_chunk_ids"]]
+            except KeyError as exc:
+                raise ValueError("Chunk sınırları değişmiş: eski sıralama yeniden puanlanamaz") from exc
+            query.update(retrieval_metrics(query["retrieved_parent_ids"], case.relevant_parent_ids, report["k"]))
+            query.update(context_metrics(contexts, metadata[case.case_id]["evidence"], report["k"]))
+            query["group"] = metadata[case.case_id]["group"]
+        run["metrics"] = {name: round(statistics.mean(row[name] for row in run["queries"]), 6)
+                          for name in run["metrics"]}
+    dev_rows = [{"id": case.case_id, "query": case.query, "coin": case.coin,
+                 "relevant_parent_ids": sorted(case.relevant_parent_ids), **metadata[case.case_id]}
+                for case in cases]
+    result["dataset"] = {"dev_sha256": digest(dev_rows), "label_statuses": sorted({
+        row["label_status"] for row in metadata.values()}), "cases": dev_rows}
+    result["selection"] = select_candidate(result["runs"], report["selection"]["baseline"],
+                                            report["selection"]["quality_tolerance"])
+    result["rescore"] = {"original_report_sha256": digest(report),
+                         "created_at": datetime.now(timezone.utc).isoformat(),
+                         "retrieval_repeated": False, "timings_reused": True,
+                         "all_chunk_layouts_verified": verified_layouts}
+    return result
 
 
 def run_sweep(
@@ -253,6 +326,7 @@ def run_sweep(
                     raise RuntimeError("LanceDB deney sırasında kullanılamadı")
                 runs.append({"key": candidate.key, "settings": asdict(candidate),
                              "index": {"chunks": indexed, "vectors": engine.store.count(),
+                                       "chunk_layout_sha256": digest([asdict(chunk) for chunk in chunks]),
                                        "max_input_tokens": max(counts),
                                        "indexed_source_tokens": sum(chunk.token_count for chunk in chunks),
                                        "build_seconds": round(build_seconds, 3)},

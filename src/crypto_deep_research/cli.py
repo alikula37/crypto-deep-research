@@ -32,7 +32,12 @@ from crypto_deep_research.providers.registry import build_providers
 from crypto_deep_research.rag.answer_evaluation import evaluate_answers, load_answer_cases
 from crypto_deep_research.rag.engine import RAGEngine
 from crypto_deep_research.rag.evaluation import evaluate_retrieval, load_cases
-from crypto_deep_research.rag.tuning import ChunkCandidate, run_sweep, snapshot_sources
+from crypto_deep_research.rag.tuning import (
+    ChunkCandidate,
+    rescore_sweep,
+    run_sweep,
+    snapshot_sources,
+)
 from crypto_deep_research.storage.db import Database
 
 app = typer.Typer(
@@ -354,6 +359,24 @@ def rag_chunk_tune(
     output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     console.print(f"Dev önerisi: {report['selection']['candidate']} · {output}")
     console.print("Test açılmadı. Ürün ayarları değişmedi. Taslak etiketlerle kesin optimum iddia edilmez.")
+
+
+@app.command("rag-chunk-rescore")
+def rag_chunk_rescore(
+    dataset: Path = typer.Argument(..., exists=True, dir_okay=False, readable=True),
+    report: Path = typer.Option(..., "--report", exists=True, dir_okay=False),
+    sources: Path = typer.Option(..., "--sources", exists=True, dir_okay=False),
+    output: Path = typer.Option(..., "--output"),
+) -> None:
+    """Etiket incelemesinden sonra aynı dev sıralamalarını embedding üretmeden yeniden puanlar."""
+    try:
+        result = rescore_sweep(json.loads(report.read_text(encoding="utf-8")),
+                              json.loads(sources.read_text(encoding="utf-8")), dataset)
+    except (ValueError, RuntimeError, OSError) as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    console.print(f"Dev önerisi: {result['selection']['candidate']} · {output}")
 
 
 @app.command("rag-answer-eval")

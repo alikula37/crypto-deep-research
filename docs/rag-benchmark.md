@@ -117,12 +117,17 @@ başarılı bir hybrid deneyi gibi raporlamaz. Model girişi sayımında özel t
 Boyut seçmek için yalnız belge etiketi yeterli değildir. Her dev sorusuna, cevabı taşıyan
 kaynak pasajını da ekleyin. `evidence` öğeleri gerekli ayrı kanıtlardır; hepsinin bulunması
 `evidence_complete`, bulunanların oranı `evidence_coverage` olur. Aynı kanıt için alternatif
-kaynakları ayrı zorunlu öğeler olarak eklemeyin. Bu ölçüm tam metin eşleşmesidir; anlamsal
+kaynakları ayrı zorunlu öğeler olarak eklemeyin; tek öğede `alternatives` listesi kullanın.
+Bu ölçüm tam metin eşleşmesidir; anlamsal
 cevap doğruluğu veya insan faithfulness değerlendirmesi değildir.
 
 ```jsonl
 {"id":"dev-risk-1","split":"dev","group":"btc-risk","query":"Kaldıraç riski neye bağlı?","coin":"bitcoin","relevant_parent_ids":["report-abc"],"evidence":[{"parent_id":"report-abc","text":"Risk kaldıraç oranına bağlıdır."}],"label_status":"human-reviewed"}
 ```
+
+Örneğin aynı gerekli iddia iki kaynaktan desteklenebiliyorsa:
+`{"alternatives":[{"parent_id":"a","text":"Risk yükseldi."},{"parent_id":"b","text":"Risk arttı."}]}`.
+İki kaynak da `relevant_parent_ids` içinde olmalı; tek alternatifin bulunması o iddia için yeterlidir.
 
 `group`, aynı olayın/sorunun parafrazlarını veya ilişkili örnekleri aynı bootstrap grubunda
 tutar. Eksik grup, soru kimliğiyle doldurulur. Tüm dev etiketleri indeks denemelerinden önce
@@ -166,3 +171,16 @@ Bu ortam değerleri sadece komutun süresince geçerlidir; gelecekteki ingestion
 ayarları uygulamanın `.env` dosyasına yazıp sunucuyu yeniden başlatın. Yeniden indeksleme
 sırasında sunucunun araştırma ingestion'ını durdurun. Daha önce ayar seçiminde görülen
 sorulara final test adı vermeyin.
+
+Varsayılan tuning kesimi `k=5`'tir; ürünün varsayılan soru-cevap bağlamı `k=8`.
+Ürüne uygulanacak seçim için aynı deneyi `--k 8` ile de yapın ve bağımsız sorularda doğrulayın.
+
+İnsan etiket incelemesi arama sırasını değiştirmez. Aynı sorular ve aynı kaynak snapshot'ı ile
+`rag-chunk-rescore` kaydedilmiş ilk k sıralamaları yeniden puanlar; embedding/index üretimini
+tekrarlamaz. Soru, coin veya kaynak metni değişirse hata verir. Yeni raporlarda tüm chunk
+metin/sınırlarının parmak izi de doğrulanır; eski prototip raporunda bu alan yoksa yalnız
+chunk sayısı doğrulanabilir ve `all_chunk_layouts_verified=false` açıkça yazılır.
+
+```bash
+uv run cdr rag-chunk-rescore data/reviewed-dev.jsonl --report data/chunk-selection.json --sources data/sources.json --output data/reviewed-selection.json
+```
