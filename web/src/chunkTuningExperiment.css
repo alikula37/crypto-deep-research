@@ -1,0 +1,27 @@
+.chunk-tuning-experiment { margin: 20px 0; border: 1px solid #3d5746; border-radius: 8px; background: #14231a; font-size: 12px; }
+.chunk-tuning-experiment > summary { padding: 14px 18px; cursor: pointer; color: #bcd7c6; }
+.chunk-tuning-experiment > summary span { font-weight: 600; margin-right: 14px; }
+.chunk-tuning-experiment > summary small { color: #96ae9f; font-size: 10px; }
+.chunk-tuning-content { padding: 0 18px 18px; }
+.chunk-tuning-content p { font-size: 12px; line-height: 1.8; color: #a7c2b2; }
+.chunk-tuning-table-wrap { overflow-x: auto; }
+.chunk-tuning-content table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.chunk-tuning-content caption { text-align: left; padding: 12px 0; color: #92ad9c; font-size: 10px; }
+.chunk-tuning-content th, .chunk-tuning-content td { text-align: right; padding: 8px; border-bottom: 1px solid #344b3c; white-space: nowrap; }
+.chunk-tuning-content th:first-child { text-align: left; }
+.chunk-tuning-content thead th { color: #abc7b6; font-weight: 500; }
+.chunk-tuning-content tr[data-selected=true] { background: #253e2e; }
+.chunk-tuning-content th button { font-size: 11px; padding: 5px 8px; }
+.chunk-tuning-content th button span { display: inline-block; margin-left: 8px; color: #d8c889; font-size: 9px; }
+.chunk-tuning-selection { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 16px 0; }
+.chunk-tuning-selection > div { display: grid; gap: 6px; }
+.chunk-tuning-selection b { font: 17px var(--mono); color: #c5decc; }
+.chunk-tuning-selection span { font-size: 11px; color: #a7c2b2; }
+.chunk-tuning-selection button { font-size: 11px; }
+.chunk-tuning-content p.chunk-tuning-caveat { padding: 12px; background: #302d20; border-left: 2px solid #b7a76b; color: #c9bf9e; font-size: 11px; }
+.chunk-tuning-content p.chunk-tuning-definitions { font-size: 10px; }
+.chunk-tuning-content > a { font-size: 11px; color: #b6d3c1; }
+@media(max-width:700px) { .chunk-tuning-selection { flex-direction: column; align-items: flex-start; } .chunk-tuning-experiment > summary small { display: block; margin-top: 6px; } }
+.rag-chunk-stats { scroll-margin-top: 100px; }
+.rag-active-budget { display: block; margin: 7px 0 10px; font: 11px var(--mono); color: #b6d3c1; }
+.rag-chunk-stats:focus { outline: 1px solid #729e7d; outline-offset: 5px; }

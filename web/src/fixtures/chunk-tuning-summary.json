@@ -1,0 +1,241 @@
+{
+  "created_at": "2026-10-03T14:52:57.647763+00:00",
+  "n_queries": 24,
+  "k": 5,
+  "corpus": {
+    "sources": 252,
+    "sha256": "c29477f5a6d63af350cc9d24d75766d4bb8f378994765f36ac314a7f039f3834"
+  },
+  "embedding": {
+    "model": "intfloat/multilingual-e5-large",
+    "input_limit": 512
+  },
+  "selection": {
+    "candidate": "sentence-240-80",
+    "settings": {
+      "chunk_tokens": 240,
+      "overlap_tokens": 80,
+      "strategy": "sentence"
+    },
+    "baseline": "sentence-240-40",
+    "quality_tolerance": 0.02,
+    "eligible_candidates": [
+      "sentence-240-80"
+    ],
+    "paired_evidence_vs_baseline": {
+      "mean_delta": 0.041667,
+      "ci95": [
+        0.0,
+        0.125
+      ],
+      "clusters": 16,
+      "resamples": 2000,
+      "seed": 37
+    },
+    "rule": "evidence coverage → source recall → nDCG (within tolerance); then context tokens, chunks",
+    "status": "dev-recommendation-not-final",
+    "production_changed": false
+  },
+  "test_evaluated": false,
+  "label_statuses": [
+    "agent-drafted-needs-human-review"
+  ],
+  "runs": [
+    {
+      "key": "sentence-96-16",
+      "settings": {
+        "chunk_tokens": 96,
+        "overlap_tokens": 16,
+        "strategy": "sentence"
+      },
+      "metrics": {
+        "precision": 0.241667,
+        "recall": 0.9375,
+        "hit_rate": 1.0,
+        "mrr": 0.951389,
+        "ndcg": 0.918036,
+        "evidence_coverage": 0.875,
+        "evidence_complete": 0.875
+      },
+      "index": {
+        "chunks": 2281,
+        "vectors": 2281,
+        "max_input_tokens": 100,
+        "indexed_source_tokens": 171083,
+        "build_seconds": 458.454
+      },
+      "cost": {
+        "mean_context_tokens": 366.417,
+        "median_latency_ms": 62.672
+      }
+    },
+    {
+      "key": "sentence-160-27",
+      "settings": {
+        "chunk_tokens": 160,
+        "overlap_tokens": 27,
+        "strategy": "sentence"
+      },
+      "metrics": {
+        "precision": 0.25,
+        "recall": 0.958333,
+        "hit_rate": 1.0,
+        "mrr": 0.930556,
+        "ndcg": 0.918036,
+        "evidence_coverage": 0.958333,
+        "evidence_complete": 0.958333
+      },
+      "index": {
+        "chunks": 1398,
+        "vectors": 1398,
+        "max_input_tokens": 163,
+        "indexed_source_tokens": 172480,
+        "build_seconds": 557.082
+      },
+      "cost": {
+        "mean_context_tokens": 631.958,
+        "median_latency_ms": 65.865
+      }
+    },
+    {
+      "key": "sentence-240-40",
+      "settings": {
+        "chunk_tokens": 240,
+        "overlap_tokens": 40,
+        "strategy": "sentence"
+      },
+      "metrics": {
+        "precision": 0.25,
+        "recall": 0.958333,
+        "hit_rate": 1.0,
+        "mrr": 0.930556,
+        "ndcg": 0.921381,
+        "evidence_coverage": 0.958333,
+        "evidence_complete": 0.958333
+      },
+      "index": {
+        "chunks": 990,
+        "vectors": 990,
+        "max_input_tokens": 243,
+        "indexed_source_tokens": 172137,
+        "build_seconds": 530.747
+      },
+      "cost": {
+        "mean_context_tokens": 857.333,
+        "median_latency_ms": 64.259
+      }
+    },
+    {
+      "key": "sentence-320-53",
+      "settings": {
+        "chunk_tokens": 320,
+        "overlap_tokens": 53,
+        "strategy": "sentence"
+      },
+      "metrics": {
+        "precision": 0.25,
+        "recall": 0.958333,
+        "hit_rate": 1.0,
+        "mrr": 0.930556,
+        "ndcg": 0.921381,
+        "evidence_coverage": 0.916667,
+        "evidence_complete": 0.916667
+      },
+      "index": {
+        "chunks": 816,
+        "vectors": 816,
+        "max_input_tokens": 322,
+        "indexed_source_tokens": 178717,
+        "build_seconds": 678.64
+      },
+      "cost": {
+        "mean_context_tokens": 1221.208,
+        "median_latency_ms": 71.725
+      }
+    },
+    {
+      "key": "sentence-448-75",
+      "settings": {
+        "chunk_tokens": 448,
+        "overlap_tokens": 75,
+        "strategy": "sentence"
+      },
+      "metrics": {
+        "precision": 0.25,
+        "recall": 0.958333,
+        "hit_rate": 1.0,
+        "mrr": 0.951389,
+        "ndcg": 0.927465,
+        "evidence_coverage": 0.958333,
+        "evidence_complete": 0.958333
+      },
+      "index": {
+        "chunks": 642,
+        "vectors": 642,
+        "max_input_tokens": 450,
+        "indexed_source_tokens": 180215,
+        "build_seconds": 2362.455
+      },
+      "cost": {
+        "mean_context_tokens": 1658.708,
+        "median_latency_ms": 56.297
+      }
+    },
+    {
+      "key": "sentence-240-0",
+      "settings": {
+        "chunk_tokens": 240,
+        "overlap_tokens": 0,
+        "strategy": "sentence"
+      },
+      "metrics": {
+        "precision": 0.25,
+        "recall": 0.958333,
+        "hit_rate": 1.0,
+        "mrr": 0.951389,
+        "ndcg": 0.921516,
+        "evidence_coverage": 1.0,
+        "evidence_complete": 1.0
+      },
+      "index": {
+        "chunks": 959,
+        "vectors": 959,
+        "max_input_tokens": 243,
+        "indexed_source_tokens": 163822,
+        "build_seconds": 486.393
+      },
+      "cost": {
+        "mean_context_tokens": 864.042,
+        "median_latency_ms": 52.659
+      }
+    },
+    {
+      "key": "sentence-240-80",
+      "settings": {
+        "chunk_tokens": 240,
+        "overlap_tokens": 80,
+        "strategy": "sentence"
+      },
+      "metrics": {
+        "precision": 0.25,
+        "recall": 0.958333,
+        "hit_rate": 1.0,
+        "mrr": 0.972222,
+        "ndcg": 0.943584,
+        "evidence_coverage": 1.0,
+        "evidence_complete": 1.0
+      },
+      "index": {
+        "chunks": 1139,
+        "vectors": 1139,
+        "max_input_tokens": 243,
+        "indexed_source_tokens": 204603,
+        "build_seconds": 572.687
+      },
+      "cost": {
+        "mean_context_tokens": 870.583,
+        "median_latency_ms": 52.758
+      }
+    }
+  ]
+}

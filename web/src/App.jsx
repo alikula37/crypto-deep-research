@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { api } from "./api.js";
@@ -36,6 +36,8 @@ import {
 import CarryPanel from "./CarryPanel.jsx";
 import { DASH, formatDateTime, formatDuration, money, pct, price, priceRange, score } from "./format.js";
 
+const HowItWorks = lazy(() => import("./HowItWorks.jsx"));
+
 const TIMEFRAMES = ["15m", "30m", "1h", "4h", "1d", "1w"];
 const TABS = [
   { id: "overview", label: "Genel Bakış", icon: IconChart },
@@ -49,6 +51,7 @@ const TABS = [
   { id: "prompt", label: "Prompt Çıktısı", icon: IconWand },
   { id: "rag", label: "Kaynak Arama", icon: IconSearch },
   { id: "history", label: "Rapor Arşivi", icon: IconHistory },
+  { id: "how", label: "Nasıl Çalışır?", icon: IconInfo },
 ];
 
 const STATUS_META = {
@@ -1334,6 +1337,15 @@ export default function App() {
         )}
 
         <section className="content">
+          {tab === "how" && (
+            <Suspense fallback={<div className="empty-state">Etkileşimli rehber hazırlanıyor…</div>}>
+              <HowItWorks
+                health={health}
+                onNavigate={setTab}
+                onSearch={(query) => { setRagQuery(query); setTab("rag"); }}
+              />
+            </Suspense>
+          )}
           {tab === "overview" && (
             <>
               <PageIntro id="overview" />

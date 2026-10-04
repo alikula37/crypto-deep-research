@@ -18,10 +18,14 @@ FALLBACK_MODELS = [
 class Embedder:
     """Gec yüklenen (lazy), hata durumunda devre disi kalan embedding sarmalayicisi."""
 
-    def __init__(self, model_name: str, enabled: bool = True) -> None:
+    def __init__(self, model_name: str, enabled: bool = True, *, batch_size: int | None = None) -> None:
+        if batch_size is not None and batch_size < 1:
+            raise ValueError("embedding batch_size pozitif olmalı")
         self.model_name = model_name
         self.enabled = enabled
+        self.batch_size = batch_size
         self._model: Any | None = None
+        self._offset_tokenizer: Any | None = None
         self._load_failed = False
         self._lock = threading.Lock()
 
@@ -63,7 +67,8 @@ class Embedder:
         if model is None:
             return None
         try:
-            return [list(vector) for vector in model.embed(texts)]
+            kwargs = {"batch_size": self.batch_size} if self.batch_size is not None else {}
+            return [list(vector) for vector in model.embed(texts, **kwargs)]
         except Exception as exc:
             logger.warning("Embedding hatası: %s", exc)
             return None
@@ -72,22 +77,50 @@ class Embedder:
         vectors = self.embed([text])
         return vectors[0] if vectors else None
 
+    def input_token_count(self, text: str) -> int | None:
+        """Count standalone inference input, including special tokens, before truncation."""
+        if self.token_offsets(text) is None or self._offset_tokenizer is None:
+            return None
+        with self._lock:
+            return len(self._offset_tokenizer.encode(text).ids)
+
+    @property
+    def max_input_tokens(self) -> int | None:
+        """Read the actual loaded model's inference tokenizer limit."""
+        model = self._load()
+        tokenizer = getattr(getattr(model, "model", None), "tokenizer", None)
+        truncation = getattr(tokenizer, "truncation", None)
+        return int(truncation["max_length"]) if truncation else None
+
     def token_offsets(self, text: str) -> list[tuple[int, int]] | None:
-        """Return character offsets from the active embedding model tokenizer."""
+        """Return full-document offsets without changing embedding input limits."""
         model = self._load()
         if model is None:
             return None
         try:
-            underlying = getattr(model, "model", None)
-            tokenizer = getattr(underlying, "tokenizer", None)
-            if tokenizer is None:
-                model.token_count([text])
-                tokenizer = getattr(underlying, "tokenizer", None)
-            if tokenizer is None:
-                return None
-            encoding = tokenizer.encode(text)
+            # _load acquires this lock itself, so load before entering it. Cache
+            # a separate tokenizer: FastEmbed truncates its inference tokenizer
+            # to the model limit, which would silently drop long-document tails.
+            with self._lock:
+                if self._offset_tokenizer is None:
+                    underlying = getattr(model, "model", None)
+                    tokenizer = getattr(underlying, "tokenizer", None)
+                    if tokenizer is None:
+                        model.token_count([text])
+                        tokenizer = getattr(underlying, "tokenizer", None)
+                    if tokenizer is None:
+                        return None
+                    from tokenizers import Tokenizer
+
+                    offset_tokenizer = Tokenizer.from_str(tokenizer.to_str())
+                    offset_tokenizer.no_truncation()
+                    offset_tokenizer.no_padding()
+                    self._offset_tokenizer = offset_tokenizer
+                encoding = self._offset_tokenizer.encode(text)
             offsets = [(int(start), int(end)) for start, end in encoding.offsets]
             return [(start, end) for start, end in offsets if start < end]
         except Exception as exc:
-            logger.warning("Tokenizer offsetları alınamadı; kelime tabanlı parçalara düşülüyor: %s", exc)
+            logger.warning(
+                "Tokenizer offsetları alınamadı; kelime tabanlı parçalara düşülüyor: %s", exc
+            )
             return None

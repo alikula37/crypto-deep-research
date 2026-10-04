@@ -3,6 +3,7 @@ import {
   IconChart,
   IconDoc,
   IconHistory,
+  IconInfo,
   IconTarget,
   IconWallet,
 } from "./icons.jsx";
@@ -13,6 +14,7 @@ export const GROUPS = [
   { id: "tracking", label: "Takip", icon: IconWallet, tabs: ["watchlist", "portfolio", "carry"] },
   { id: "output", label: "Üretim", icon: IconDoc, tabs: ["report", "prompt"] },
   { id: "archive", label: "Arşiv", icon: IconHistory, tabs: ["rag", "history"] },
+  { id: "learn", label: "Rehber", icon: IconInfo, tabs: ["how"] },
 ];
 
 export const TAB_LABELS = {
@@ -27,6 +29,7 @@ export const TAB_LABELS = {
   prompt: "Prompt Çıktısı",
   rag: "Kaynak Arama",
   history: "Rapor Arşivi",
+  how: "Nasıl Çalışır?",
 };
 
 export function groupOfTab(tab) {

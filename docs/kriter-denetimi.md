@@ -3,6 +3,11 @@
 Bu doküman, 66 kriterin bağımsız denetimler sonucunda nasıl yeniden değerlendirildiğini ve
 skorlama modelinin neden değiştiğini özetler.
 
+Bu bir denetim geçmişidir; aşağıdaki eski test sayısı o denetim turuna aittir.
+Güncel kurulum ve kontroller için [README](../README.md) ve
+[katkı rehberine](../CONTRIBUTING.md), sonraki kalite ölçümleri için
+[deney dizinine](experiments/README.md) bakın.
+
 ## Neden yeniden değerlendirildi?
 
 Dört bağımsız denetimde şu yapısal sorunlar bulundu:
