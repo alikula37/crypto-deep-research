@@ -160,3 +160,13 @@ iletir. `make check` tüm yerel kontrolleri çalıştırır.
 | Port kullanımda | Çalışan servisi kullanın veya `cdr serve --port 8001`; Vite proxy'si varsayılan olarak 8000'i kullanır |
 
 Tam CLI listesi `uv run cdr --help`; komut seçenekleri `uv run cdr <komut> --help`.
+
+## Son temiz kurulum kontrolü
+
+4 Ekim 2026'da GitHub `main` dalındaki `071fab8` commit'i yeni bir geçici dizine
+klonlandı; mevcut kullanıcı `.env`/DB'si kullanılmadı. Python 3.10.9 ve Node 24.20.0 ile
+`uv sync --frozen`, şablon `.env`, `npm ci` ve production build başarılı oldu.
+Yüklenen Python modül yolu yeni checkout'un `src/` dizinindeydi; `rag-chunk-tune --help`
+mevcuttu. İzole test sunucusunda API sağlık kontrolü `ok`, derlenmiş web HTML'i HTTP 200 verdi.
+Bu açılış kontrolünde otomatik araştırma/öğrenme ve embedding kapatıldı; canlı veri,
+model indirme veya RAG kalite benchmark'ı yeniden çalıştırılmış sayılmaz.
