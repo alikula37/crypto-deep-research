@@ -61,6 +61,10 @@ Komutlar:
 uv run cdr rag-eval docs/experiments/datasets/2026-10-rag-pilot.jsonl --split dev --retrieval dense --json
 uv run cdr rag-eval docs/experiments/datasets/2026-10-rag-pilot.jsonl --split dev --retrieval bm25 --json
 uv run cdr rag-eval docs/experiments/datasets/2026-10-rag-pilot.jsonl --split dev --retrieval hybrid --json
-uv run cdr rag-reindex --chunk-tokens 240 --overlap-tokens 40
+uv run cdr rag-reindex --strategy token --chunk-tokens 240 --overlap-tokens 40
 uv run cdr rag-eval docs/experiments/datasets/2026-10-rag-pilot.jsonl --split test --retrieval hybrid --json
 ```
+
+Bu tarihsel pilot sabit token penceresiyle çalıştı; artık varsayılan `sentence` olduğu
+için yeniden üretim komutunda `--strategy token` açıkça yazılır. Yerel korpus aynı değilse
+skorlar değişir. Sonraki çalışmalar için [deney dizinine](README.md) bakın.

@@ -6,6 +6,10 @@ belgeleriniz), ardından her sorguya ilgili kaynakların `parent_id` değerlerin
 yalnızca benzer kelimelere göre değil, belgenin soruyu yanıtlamak için yeterli kanıt taşıyıp
 taşımadığına göre koyun.
 
+Kaydedilmiş pilotlar, chunk ablasyonu ve bütçe çalışması [deney dizinindedir](experiments/README.md).
+Bu notlardaki asistan taslağı etiketler insan anotasyonu yerine geçmez. Yeni kurulum,
+yerel korpus/DB snapshot'ını otomatik indirmez; kendi kaynaklarınıza uygun etiket gerekir.
+
 ## Veri biçimi ve etiketleme
 
 Her JSONL satırında benzersiz bir `id`, sorgu, isteğe bağlı coin filtresi, `dev` ya da `test` ayrımı
